@@ -59,3 +59,4 @@ alias delremote="git push origin --delete"
 # custom commands
 alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"
 alias lock-screen="xscreensaver-command --lock"
+alias neo4j-db="sudo -u neo4j /home/neo4j/db/bin/neo4j"
