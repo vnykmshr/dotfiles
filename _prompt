@@ -1,4 +1,8 @@
-source /usr/share/git/git-prompt.sh
+# my arch was using git-prompt.sh for bash completion
+if [ -f /usr/share/git/git-prompt.sh ]; then
+    . /usr/share/git/git-prompt.sh
+fi
+
 export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWSTASHSTATE=1
 export GIT_PS1_SHOWUNTRACKEDFILES=1
