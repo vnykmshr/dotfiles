@@ -38,6 +38,5 @@
   "undef": true,
   "sub": true,
   "strict": false,
-  "white": false,
-  "indent": 2
+  "white": false
 }
