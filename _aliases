@@ -18,6 +18,10 @@ alias lz="ll -rS"                   # sort by size
 alias lt="ll -rt"                   # sort by date
 alias lm="la | more"
 
+alias Ls="LS -alFe"
+alias lS="LS -alFe"
+alias SL="LS -alFe"
+
 alias sduo="sudo"
 alias shh="echo NOPE!!"
 
@@ -55,8 +59,22 @@ alias extdiff="git difftool -t meld"
 alias files="git diff --name-only"
 alias delbranch="git branch -D"
 alias delremote="git push origin --delete"
+alias gsl='git shortlog -nsw -e'
+alias gitsearch='git rev-list --all | xargs git grep -F'
 
 # custom commands
 alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"
 alias lock-screen="xscreensaver-command --lock"
 alias neo4j-db="sudo -u neo4j /home/neo4j/db/bin/neo4j"
+
+alias ssh-paytmdev="ssh bmishra@10.0.3.38"
+
+alias conncount="netstat -tan | awk '{print $6}' | sort | uniq -c"
+
+alias upgrade='sudo apt-get update && sudo apt-get upgrade && sudo apt-get clean'
+
+alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k 6 | tail -15'
+
+#spy () { lsof -i -P +c 0 +M | grep -i "$1" }
+
+alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
