@@ -78,3 +78,5 @@ alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k
 #spy () { lsof -i -P +c 0 +M | grep -i "$1" }
 
 alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
+
+function gi() { curl http://gitignore.io/api/$@ ;}
