@@ -61,7 +61,7 @@ alias delbranch="git branch -D"
 alias delremote="git push origin --delete"
 alias gsl='git shortlog -nsw -e'
 alias gitsearch='git rev-list --all | xargs git grep -F'
-
+alias mergenocommit="git merge --no-commit --no-ff"
 # custom commands
 alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"
 alias lock-screen="xscreensaver-command --lock"
@@ -80,3 +80,5 @@ alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k
 alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
 
 function gi() { curl http://gitignore.io/api/$@ ;}
+alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
+alias android-disconnect="fusermount -u /media/samsung/P3100"
