@@ -56,18 +56,19 @@ alias gst="git status"
 alias co="git checkout"
 alias lg="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
 alias extdiff="git difftool -t meld"
+alias extdifflast="extdiff HEAD^"
 alias files="git diff --name-only"
 alias delbranch="git branch -D"
 alias delremote="git push origin --delete"
 alias gsl='git shortlog -nsw -e'
 alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
+alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' | xargs jshint | less"
+
 # custom commands
 alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"
 alias lock-screen="xscreensaver-command --lock"
 alias neo4j-db="sudo -u neo4j /home/neo4j/db/bin/neo4j"
-
-alias ssh-paytmdev="ssh bmishra@10.0.3.38"
 
 alias conncount="netstat -tan | awk '{print $6}' | sort | uniq -c"
 
@@ -82,3 +83,10 @@ alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
 function gi() { curl http://gitignore.io/api/$@ ;}
 alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
 alias android-disconnect="fusermount -u /media/samsung/P3100"
+
+alias ssh-amiapp="ssh -i $HOME/.ami_app.pem ubuntu@ec2-54-254-8-155.ap-southeast-1.compute.amazonaws.com"
+
+alias vm-netstat="netstat -an | awk '/tcp/ {print $6}' | sort | uniq -c"
+
+alias utserver="utserver -settingspath /opt/utorrent-server-v3_0/ &> ~/tmp/utorrent.log &"
+
