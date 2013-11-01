@@ -1,5 +1,4 @@
 alias grep='grep -n --color=auto'
-alias ls='ls --color=auto -al'
 alias nodeprod='NODE_ENV=production `which node`'
 alias dotfiles=$HOME/workspace/github/dotfiles
 alias vi="vim"
@@ -8,7 +7,9 @@ alias ..="cd .."
 alias ...="cd ../.."
 
 #ls
-alias ls="ls -hF --color=auto"
+# --color options not working in iterm
+#alias ls="ls -hF --color=auto"
+alias ls="ls -hFG"
 alias sl="ls"
 alias lr="ls -R"                    # recursive ls
 alias ll="ls -l"
@@ -55,7 +56,7 @@ alias pacm="makepkg -fci"  # '[m]ake'           - make package from PKGBUILD fil
 alias gst="git status"
 alias co="git checkout"
 alias lg="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-alias extdiff="git difftool -t meld"
+alias extdiff="git difftool -t opendiff"
 alias extdifflast="extdiff HEAD^"
 alias files="git diff --name-only"
 alias delbranch="git branch -D"
@@ -63,7 +64,7 @@ alias delremote="git push origin --delete"
 alias gsl='git shortlog -nsw -e'
 alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
-alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' | xargs jshint | less"
+alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' | xargs jshint | less"
 
 # custom commands
 alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"

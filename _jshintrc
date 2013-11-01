@@ -13,7 +13,6 @@
     "process"
   ],
   "node": true,
-  "es5": true,
   "strict": true,
   "globalstrict": false,
   "browser": true,
