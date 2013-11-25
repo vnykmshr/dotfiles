@@ -56,7 +56,7 @@ alias pacm="makepkg -fci"  # '[m]ake'           - make package from PKGBUILD fil
 alias gst="git status"
 alias co="git checkout"
 alias lg="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
-alias extdiff="git difftool -t meld"
+alias extdiff="git difftool -t opendiff"
 alias extdifflast="extdiff HEAD^"
 alias files="git diff --name-only"
 alias delbranch="git branch -D"
