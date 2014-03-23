@@ -10,4 +10,4 @@ fi
 export PATH=$HOME/local/phabricator/arcanist/bin:$PATH
 
 # prepend usr binaries to system binaries
-export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/vm/.rvm/bin:/Users/vm/.rvm/bin:$PATH

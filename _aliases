@@ -81,7 +81,7 @@ alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k
 
 alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
 
-function gi() { curl http://gitignore.io/api/$@ ;}
+function gi() { curl http://www.gitignore.io/api/$@ ;}
 alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
 alias android-disconnect="fusermount -u /media/samsung/P3100"
 
@@ -91,4 +91,4 @@ alias vm-netstat="netstat -an | awk '/tcp/ {print $6}' | sort | uniq -c"
 
 alias utserver="utserver -settingspath /opt/utorrent-server-v3_0/ &> ~/tmp/utorrent.log &"
 
-alias ssh-omsnat="ssh -i ~/.aws_oms.pem ec2-user@54.251.151.39"
+alias proxy="ssh -D 5555 -f -C -q -N $1"
