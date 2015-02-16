@@ -1,13 +1,21 @@
-if [ -f /usr/local/etc/bash_completion.d/git-completion.bash ]; then
-    . /usr/local/etc/bash_completion.d/git-completion.bash
+
+# Source all bash completion files
+if [ -d /usr/local/etc/bash_completion.d ]; then
+  source /usr/local/etc/bash_completion.d/*
 fi
 
-if [ -f /usr/local/etc/bash_completion.d/git-prompt.sh ]; then
-    . /usr/local/etc/bash_completion.d/git-prompt.sh
+if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh ]; then
+  source /Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh
 fi
 
 # Add arcanist to path;
 export PATH=$HOME/local/phabricator/arcanist/bin:$PATH
+source $HOME/local/phabricator/arcanist/resources/shell/bash-completion
 
 # prepend usr binaries to system binaries
 export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/vm/.rvm/bin:/Users/vm/.rvm/bin:$PATH
+
+# Byobu 
+export BYOBU_PREFIX=$(brew --prefix)
+
+GOPATH=$HOME/gocode

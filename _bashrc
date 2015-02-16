@@ -126,6 +126,6 @@ if [ -f ~/.bash_prompt ]; then
     . ~/.bash_prompt
 fi
 
-
-PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-alias ssholdmpaytm="ssh bmishra@old.m.paytm.com -p 22491"
+if [ -f ~/.sshrc ]; then
+    . ~/.sshrc
+fi
