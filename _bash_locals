@@ -1,7 +1,12 @@
 
 # Source all bash completion files
 if [ -d /usr/local/etc/bash_completion.d ]; then
-  source /usr/local/etc/bash_completion.d/*
+  for f in /usr/local/etc/bash_completion.d/*; do source $f; done
+fi
+
+# Source from privates
+if [ -d $HOME/local/bash ]; then
+  for f in $HOME/local/bash/*; do source $f; done
 fi
 
 if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh ]; then
