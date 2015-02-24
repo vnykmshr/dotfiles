@@ -13,14 +13,18 @@ if [ -f /Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh ]; 
   source /Library/Developer/CommandLineTools/usr/share/git-core/git-prompt.sh
 fi
 
+source $HOME/local/phabricator/arcanist/resources/shell/bash-completion
+
+# Byobu
+export BYOBU_PREFIX=$(brew --prefix)
+
+export GOPATH=$HOME/gocode
+export KIRIN_HOME=/Users/vm/android/node_modules/kirin/
+
 # Add arcanist to path;
 export PATH=$HOME/local/phabricator/arcanist/bin:$PATH
-source $HOME/local/phabricator/arcanist/resources/shell/bash-completion
 
 # prepend usr binaries to system binaries
 export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/vm/.rvm/bin:/Users/vm/.rvm/bin:$PATH
 
-# Byobu 
-export BYOBU_PREFIX=$(brew --prefix)
-
-GOPATH=$HOME/gocode
+export PATH=/Users/vm/workspace/android-sdk-macosx/tools:/Users/vm/workspace/android-sdk-macosx/platform-tools:$PATH

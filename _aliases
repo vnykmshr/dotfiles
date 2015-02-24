@@ -81,6 +81,7 @@ alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k
 #spy () { lsof -i -P +c 0 +M | grep -i "$1" }
 
 alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
+alias ducks='du -cks * | sort -rn | head'
 
 ## create a directory and cd into it
 md() { mkdir -p "$@" && cd "$@"; }
@@ -96,7 +97,10 @@ function .. () {
     cd $dir #>&/dev/null
 }
 
-function gi() { curl https://www.gitignore.io/api/$@ ;}
+function gi() {
+    curl https://www.gitignore.io/api/$@;
+}
+
 alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
 alias android-disconnect="fusermount -u /media/samsung/P3100"
 
