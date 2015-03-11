@@ -63,7 +63,7 @@ alias delremote="git push origin --delete"
 alias gsl='git shortlog -nsw -e'
 alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
-alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' | xargs jshint | less"
+alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' -and -not -path './spec/*' | xargs jshint | less"
 alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' | xargs grep -nir $@"
 
 
@@ -73,10 +73,9 @@ alias lock-screen="xscreensaver-command --lock"
 alias neo4j-db="sudo -u neo4j /home/neo4j/db/bin/neo4j"
 
 alias conncount="netstat -tan | awk '{print $6}' | sort | uniq -c"
-
 alias upgrade='sudo apt-get update && sudo apt-get upgrade && sudo apt-get clean'
-
 alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k 6 | tail -15'
+alias memfree="free -m | sed -n -e '3p' | grep -Po '\d+$'"
 
 #spy () { lsof -i -P +c 0 +M | grep -i "$1" }
 
