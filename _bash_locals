@@ -28,3 +28,6 @@ export PATH=$HOME/local/phabricator/arcanist/bin:$PATH
 export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/Users/vm/.rvm/bin:/Users/vm/.rvm/bin:$PATH
 
 export PATH=/Users/vm/workspace/android-sdk-macosx/tools:/Users/vm/workspace/android-sdk-macosx/platform-tools:$PATH
+
+# Add go code bin to the path
+export PATH=$GOPATH/bin:$PATH

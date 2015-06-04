@@ -52,6 +52,8 @@ alias pacc="pacman -Sc"    # '[c]lean cache'    - delete all not currently insta
 alias pacm="makepkg -fci"  # '[m]ake'           - make package from PKGBUILD file in current directory
 
 # git aliases
+alias gti="echo Git Happens!; git"
+alias got="echo Got Milk?; git"
 alias gst="git status"
 alias co="git checkout"
 alias lg="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
@@ -63,8 +65,9 @@ alias delremote="git push origin --delete"
 alias gsl='git shortlog -nsw -e'
 alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
+
 alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' -and -not -path './spec/*' | xargs jshint | less"
-alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' | xargs grep -nir $@"
+alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' | xargs grep -nir $@"
 
 
 # custom commands
@@ -109,6 +112,8 @@ alias utserver="utserver -settingspath /opt/utorrent-server-v3_0/ &> ~/tmp/utorr
 
 alias proxy="ssh -D 5555 -f -C -q -N $1"
 
+alias gource="gource --hide filenames --seconds-per-day 0.50 --auto-skip-seconds 1"
+
 extract () {
     if [ -f $1 ] ; then
         case $1 in
@@ -127,4 +132,8 @@ extract () {
     else
         echo "'$1' is not a valid file"
     fi
+}
+
+function perf {
+  curl -o /dev/null  -s -w "%{time_connect} + %{time_starttransfer} = %{time_total}\n" "$1"
 }
