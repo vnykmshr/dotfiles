@@ -15,6 +15,10 @@ fi
 
 source $HOME/local/phabricator/arcanist/resources/shell/bash-completion
 
+if [ -f /etc/known_hosts_complete.sh ] && ! shopt -oq posix; then
+  source /etc/known_hosts_complete.sh
+fi
+
 # Byobu
 export BYOBU_PREFIX=$(brew --prefix)
 

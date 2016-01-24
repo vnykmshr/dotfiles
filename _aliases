@@ -67,7 +67,7 @@ alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
 
 alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' -and -not -path './spec/*' | xargs jshint | less"
-alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' | xargs grep -nir $@"
+alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' | xargs grep -nir $@"
 
 
 # custom commands
@@ -137,3 +137,5 @@ extract () {
 function perf {
   curl -o /dev/null  -s -w "%{time_connect} + %{time_starttransfer} = %{time_total}\n" "$1"
 }
+
+alias youtube-dl-audio="youtube-dl -f bestaudio"
