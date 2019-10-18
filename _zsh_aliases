@@ -1,0 +1,81 @@
+alias vi="vim"
+alias sduo="sudo"
+alias shh="echo NOPE!!"
+alias grep='grep -n --color=auto'
+alias ping="ping -c 5"
+alias less="less -FSRX"
+alias more="less"
+alias df="df -h"
+alias du="du -ch"
+alias du1="du --max-depth=1"
+alias da='date "+%A, %B %d, %Y [%T]"'
+alias hist="history | grep $1"
+
+# git aliases
+alias gti="echo Git Happens!; git"
+alias got="echo Got Milk?; git"
+alias gst="git status"
+alias co="git checkout"
+alias lg="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative"
+alias extdiff="git difftool -t meld"
+alias extdifflast="extdiff HEAD^"
+alias files="git diff --name-only"
+alias delbranch="git branch -D"
+alias delremote="git push origin --delete"
+alias gsl='git shortlog -nsw -e'
+alias gitsearch='git rev-list --all | xargs git grep -F'
+alias mergenocommit="git merge --no-commit --no-ff"
+
+alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' -and -not -path './spec/*' | xargs jshint | less"
+alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' -and -not -path './vendor/*' -and -not -path './dist/*' -and -not -path './webpack/*' -and -not -path './static/*' -print0 | xargs -0 grep -nir $@"
+
+# custom commands
+alias setpy2="mkdir -p /tmp/bin; ln -s `which python2.7` /tmp/bin/python; export PATH=/tmp/bin:$PATH"
+alias lock-screen="xscreensaver-command --lock"
+alias neo4j-db="sudo -u neo4j /home/neo4j/db/bin/neo4j"
+
+alias conncount="netstat -tan | awk '{print $6}' | sort | uniq -c"
+alias upgrade='sudo apt-get update && sudo apt-get upgrade && sudo apt-get clean'
+alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k 6 | tail -15'
+alias memfree="free -m | sed -n -e '3p' | grep -Po '\d+$'"
+
+alias dskload="ps faux|awk '\$8 ~ /D/{print}'"
+alias ducks='du -cks * | sort -rn | head'
+
+alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
+alias android-disconnect="fusermount -u /media/samsung/P3100"
+alias utserver="utserver -settingspath /opt/utorrent-server-v3_0/ &> ~/tmp/utorrent.log &"
+alias proxy="ssh -D 5555 -f -C -q -N $1"
+
+alias bmishra="cd ~/gocode/src/github.com/bmishra"
+alias toped="cd ~/gocode/src/github.com/tokopedia"
+
+alias youtube-dl-audio="youtube-dl -f bestaudio"
+alias brewski='brew update && brew upgrade && brew cleanup; brew doctor'
+alias openski="lsof | awk '{ print $2; }' | uniq -c | sort -rn | head"
+alias gource="gource --hide filenames --seconds-per-day 0.50 --auto-skip-seconds 1"
+alias nodeprod='NODE_ENV=production `which node`'
+
+alias prettyjson="python -m json.tool | bat -p -l json"
+alias vm-netstat="netstat -an | awk '/tcp/ {print $6}' | sort | uniq -c"
+
+# restart en0 interface, flush routes
+alias restart-en0-flush-route="sudo ifconfig en0 down && sudo route flush && sudo ifconfig en0 up"
+
+# toko
+function sshtoko() { ssh -i ~/.toko-prod.pem ubuntu@$@; }
+function scptoko() { scp -i ~/.toko-prod.pem ubuntu@$@; }
+function sshaliyun() { ssh -i ~/.toko-prod.pem root@$@; }
+function scpaliyun() { scp -i ~/.toko-prod.pem root@$@; }
+function sshgcpstaging() { ssh -i ~/.kodak.pem root@10.157.0.137; }
+function sshgcpprod() { ssh -i ~/.kodak.pem root@10.186.0.113; }
+function sshstagingali() { ssh -i ~/.toko-staging-aliyun.pem root@$@; }
+function ssh-scrooge-pcidss-staging() { ssh -i ~/.bastian-devel.pem ubuntu@54.254.229.230; }
+
+function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
+function curly { curl -Is "$@" && curl -o /dev/null -s -w " time_namelookup:     %{time_namelookup}\n time_connect:        %{time_connect}\n time_appconnect:     %{time_appconnect}\n time_pretransfer:    %{time_pretransfer}\n time_redirect:       %{time_redirect}\n time_starttransfer:  %{time_starttransfer}\n -------------------------\n time_total:          %{time_total}\n" "$@" }
+function kubectl() { echo "+ kubectl $@"; command kubectl $@; }
+
+alias google='googler -x'
+alias jfgit='googler -j'
+alias define='googler -n 2 define'
