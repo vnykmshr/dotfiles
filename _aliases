@@ -67,7 +67,7 @@ alias gitsearch='git rev-list --all | xargs git grep -F'
 alias mergenocommit="git merge --no-commit --no-ff"
 
 alias jshintall="find . -type f -name '*.js' -and -not -path './node_modules/*' -and -not -path './public/*' -and -not -path './doc/*' -and -not -path './spec/*' | xargs jshint | less"
-alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' | xargs grep -nir $@"
+alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' -and -not -path './vendor/*' -and -not -path './dist/*' -and -not -path './webpack/*' -and -not -path './static/*' -print0 | xargs -0 grep -nir $@"
 
 
 # custom commands
@@ -99,9 +99,7 @@ function .. () {
     cd $dir #>&/dev/null
 }
 
-function gi() {
-    curl https://www.gitignore.io/api/$@;
-}
+function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
 alias android-connect="mtpfs -o allow_other /media/samsung/P3100"
 alias android-disconnect="fusermount -u /media/samsung/P3100"
@@ -134,8 +132,40 @@ extract () {
     fi
 }
 
-function perf {
-  curl -o /dev/null  -s -w "%{time_connect} + %{time_starttransfer} = %{time_total}\n" "$1"
+function curly {
+  curl -Is "$@" && curl -o /dev/null -s -w " time_namelookup:     %{time_namelookup}\n time_connect:        %{time_connect}\n time_appconnect:     %{time_appconnect}\n time_pretransfer:    %{time_pretransfer}\n time_redirect:       %{time_redirect}\n time_starttransfer:  %{time_starttransfer}\n -------------------------\n time_total:          %{time_total}\n" "$@"
 }
 
+alias bmishra="cd ~/gocode/src/github.com/bmishra"
+alias toped="cd ~/gocode/src/github.com/tokopedia"
 alias youtube-dl-audio="youtube-dl -f bestaudio"
+
+alias brewski='brew update && brew upgrade && brew cleanup; brew doctor'
+alias openski="lsof | awk '{ print $2; }' | uniq -c | sort -rn | head"
+
+alias prettyjson="python -m json.tool | bat -p -l json"
+
+# restart en0 interface, flush routes
+alias restart-en0-flush-route="sudo ifconfig en0 down && sudo route flush && sudo ifconfig en0 up"
+
+# ssh toko
+function sshtoko() { ssh -i ~/.toko-prod.pem ubuntu@$@; }
+function scptoko() { scp -i ~/.toko-prod.pem ubuntu@$@; }
+
+# ssh toko aliyun
+function sshaliyun() { ssh -i ~/.toko-prod.pem root@$@; }
+function scpaliyun() { scp -i ~/.toko-prod.pem root@$@; }
+function sshgcpstaging() { ssh -i ~/.kodak.pem root@10.157.0.137; }
+function sshgcpprod() { ssh -i ~/.kodak.pem root@10.186.0.113; }
+function sshstagingali() { ssh -i ~/.toko-staging-aliyun.pem root@$@; }
+
+# ssh scrooge-pcidss staging gateway
+function ssh-scrooge-pcidss-staging() { ssh -i ~/.bastian-devel.pem ubuntu@54.254.229.230; }
+
+# Print the full command before running it
+function kubectl() { echo "+ kubectl $@"; command kubectl $@; }
+
+# Googler
+alias google='googler -x'
+alias jfgit='googler -j'
+alias define='googler -n 2 define'

@@ -48,4 +48,4 @@ else
   usrcol="${txtblu}"
 fi
 
-PS1="\n\[${txtwht}\]┌─[${usrcol}\u\[${txtwht}\]][\[${txtcyn}\]\h\[${txtwht}\]][\[${txtgrn}\]\w\[${txtwht}\]][\[${txtylw}\$(__git_ps1 "%s")\]\[${txtwht}\]]\n\[${txtwht}\]└──╼ \[${txtrst}\]"
+PS1="\n\[${txtwht}\]┌─[${usrcol}\u\[${txtwht}\]][\[${txtcyn}\]\h\[${txtwht}\]][\[${txtgrn}\]\w\[${txtwht}\]][\[${txtylw}\$(__git_ps1 "%s")\]\[${txtwht}\]${txtwht}]\n\[${txtwht}\]└──╼ \[${txtrst}\]"

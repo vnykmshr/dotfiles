@@ -23,6 +23,7 @@ fi
 export BYOBU_PREFIX=$(brew --prefix)
 
 export GOPATH=$HOME/gocode
+export GOROOT=/usr/local/opt/go/libexec
 export KIRIN_HOME=/Users/vm/android/node_modules/kirin/
 
 # Add arcanist to path;
@@ -34,4 +35,5 @@ export PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/lo
 export PATH=/Users/vm/workspace/android-sdk-macosx/tools:/Users/vm/workspace/android-sdk-macosx/platform-tools:$PATH
 
 # Add go code bin to the path
-export PATH=$GOPATH/bin:$PATH
+export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+
