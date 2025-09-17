@@ -12,12 +12,17 @@ DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
-# Colors for output
+# Colors for output (used by logging functions)
+# shellcheck disable=SC2034
 RED='\033[0;31m'
+# shellcheck disable=SC2034
 GREEN='\033[0;32m'
+# shellcheck disable=SC2034
 YELLOW='\033[1;33m'
+# shellcheck disable=SC2034
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# shellcheck disable=SC2034
+NC='\033[0m'
 
 # Source utilities
 source "$DOTFILES_DIR/lib/utils.sh"
@@ -26,7 +31,7 @@ source "$DOTFILES_DIR/lib/logging.sh"
 
 # Usage information
 usage() {
-    cat << EOF
+    cat <<EOF
 Usage: $0 [OPTIONS]
 
 Professional dotfiles setup with modern best practices.
@@ -55,19 +60,19 @@ EOF
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -d|--dry-run)
+            -d | --dry-run)
                 DRY_RUN=true
                 shift
                 ;;
-            -v|--verbose)
+            -v | --verbose)
                 VERBOSE=true
                 shift
                 ;;
-            -f|--force)
+            -f | --force)
                 FORCE=true
                 shift
                 ;;
-            -h|--help)
+            -h | --help)
                 usage
                 exit 0
                 ;;
@@ -125,10 +130,10 @@ install_dependencies() {
         macos)
             install_homebrew
             ;;
-        ubuntu|debian)
+        ubuntu | debian)
             run_cmd "sudo apt update && sudo apt install -y curl git zsh"
             ;;
-        fedora|centos|rhel)
+        fedora | centos | rhel)
             run_cmd "sudo dnf install -y curl git zsh"
             ;;
         arch)
@@ -152,8 +157,9 @@ install_homebrew() {
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         # Add Homebrew to PATH for Apple Silicon Macs
-        if [[ "$OS_ARCH" == "arm64" ]]; then
-            eval "$(/opt/homebrew/bin/brew shellenv)"
+        # Initialize brew environment if installed
+        if command -v brew >/dev/null 2>&1; then
+            eval "$(brew shellenv)"
         fi
     else
         log_info "Would install Homebrew"
@@ -198,7 +204,9 @@ link_config() {
     # Backup existing file if it exists and is not a symlink
     if [[ -e "$target_path" && ! -L "$target_path" ]]; then
         if [[ "$FORCE" == "true" || "$DRY_RUN" == "true" ]]; then
-            run_cmd "mv \"$target_path\" \"$BACKUP_DIR/$(basename \"$target_path\")\""
+            local backup_file
+            backup_file="$(basename "$target_path")"
+            run_cmd "mv \"$target_path\" \"$BACKUP_DIR/$backup_file\""
         else
             log_warn "File exists: $target_path. Use --force to overwrite."
             return
@@ -221,6 +229,7 @@ install_packages() {
 
     local package_file="$DOTFILES_DIR/install/install-packages"
     if [[ -f "$package_file" ]]; then
+        # shellcheck disable=SC1090
         source "$package_file"
     else
         log_warn "Package installation file not found: $package_file"

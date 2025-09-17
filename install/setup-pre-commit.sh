@@ -93,7 +93,8 @@ install_hook_dependencies() {
                         # Install shfmt manually for Ubuntu
                         wget -O shfmt https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.7.0_linux_amd64
                         chmod +x shfmt
-                        sudo mv shfmt /usr/local/bin/
+                        mkdir -p "$HOME/.local/bin"
+                        mv shfmt "$HOME/.local/bin/"
                         ;;
                 esac
             done
@@ -191,7 +192,7 @@ main() {
                 skip_test=true
                 shift
                 ;;
-            --help|-h)
+            --help | -h)
                 echo "Usage: $0 [--skip-test] [--help|-h]"
                 echo "  --skip-test  Skip running hooks test at the end"
                 echo "  --help, -h   Show this help message"

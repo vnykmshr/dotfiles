@@ -27,18 +27,18 @@ install_core_tools() {
                 tmux
 
                 # Modern CLI tools
-                bat          # Better cat
-                eza          # Better ls
-                fd           # Better find
-                ripgrep      # Better grep
-                fzf          # Fuzzy finder
-                zoxide       # Smart cd
+                bat     # Better cat
+                eza     # Better ls
+                fd      # Better find
+                ripgrep # Better grep
+                fzf     # Fuzzy finder
+                zoxide  # Smart cd
 
                 # Development tools
-                neovim       # Modern vim
-                mise         # Version manager
-                gh           # GitHub CLI
-                jq           # JSON processor
+                neovim # Modern vim
+                mise   # Version manager
+                gh     # GitHub CLI
+                jq     # JSON processor
 
                 # System monitoring
                 htop
@@ -59,7 +59,7 @@ install_core_tools() {
             done
             ;;
 
-        ubuntu|debian)
+        ubuntu | debian)
             # Update package list
             run_cmd "sudo apt update"
 
@@ -94,7 +94,7 @@ install_core_tools() {
             install_modern_cli_tools_linux
             ;;
 
-        fedora|centos|rhel)
+        fedora | centos | rhel)
             # Essential Fedora/RHEL packages
             local packages=(
                 # Core utilities
@@ -171,11 +171,13 @@ install_modern_cli_tools_linux() {
     # bat (better cat)
     if ! command_exists bat; then
         case "$OS_NAME" in
-            ubuntu|debian)
+            ubuntu | debian)
                 run_cmd "sudo apt install -y bat"
-                # Ubuntu installs as 'batcat'
+                # Ubuntu installs as 'batcat' - create portable symlink
                 if command_exists batcat && ! command_exists bat; then
-                    run_cmd "sudo ln -sf /usr/bin/batcat /usr/local/bin/bat"
+                    local link_dir="$HOME/.local/bin"
+                    mkdir -p "$link_dir"
+                    run_cmd "ln -sf /usr/bin/batcat \"$link_dir/bat\""
                 fi
                 ;;
         esac
@@ -194,11 +196,13 @@ install_modern_cli_tools_linux() {
     # fd (better find)
     if ! command_exists fd; then
         case "$OS_NAME" in
-            ubuntu|debian)
+            ubuntu | debian)
                 run_cmd "sudo apt install -y fd-find"
-                # Ubuntu installs as 'fdfind'
+                # Ubuntu installs as 'fdfind' - create portable symlink
                 if command_exists fdfind && ! command_exists fd; then
-                    run_cmd "sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd"
+                    local link_dir="$HOME/.local/bin"
+                    mkdir -p "$link_dir"
+                    run_cmd "ln -sf /usr/bin/fdfind \"$link_dir/fd\""
                 fi
                 ;;
         esac
@@ -207,7 +211,7 @@ install_modern_cli_tools_linux() {
     # ripgrep (better grep)
     if ! command_exists rg; then
         case "$OS_NAME" in
-            ubuntu|debian)
+            ubuntu | debian)
                 run_cmd "sudo apt install -y ripgrep"
                 ;;
         esac

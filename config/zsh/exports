@@ -99,14 +99,10 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 # AWS
 export AWS_PAGER=""
 
-# Homebrew (if installed)
-if [[ -d "/opt/homebrew" ]]; then
-    export HOMEBREW_PREFIX="/opt/homebrew"
-    export HOMEBREW_NO_ANALYTICS=1
-    export HOMEBREW_NO_INSECURE_REDIRECT=1
-    export HOMEBREW_CASK_OPTS="--require-sha"
-elif [[ -d "/usr/local/Homebrew" ]]; then
-    export HOMEBREW_PREFIX="/usr/local"
+# Homebrew (if installed) - dynamically detect installation
+if command -v brew >/dev/null 2>&1; then
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    export HOMEBREW_PREFIX
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_INSECURE_REDIRECT=1
     export HOMEBREW_CASK_OPTS="--require-sha"

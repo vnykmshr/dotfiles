@@ -71,7 +71,7 @@ alias dotfiles='cd ~/workspace/github/vnykmshr/dotfiles'
 
 # Node.js shortcuts (you run node app.js frequently)
 alias nodemon='npx nodemon'
-alias serve='node app.js'
+alias nodeserve='node app.js'  # Renamed to avoid conflict with serve alias
 alias nodedev='NODE_ENV=development node app.js'
 alias nodeprod='NODE_ENV=production node app.js'
 
