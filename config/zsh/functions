@@ -1,0 +1,297 @@
+#!/usr/bin/env zsh
+
+# Custom utility functions for enhanced productivity
+
+# =============================================================================
+# File and Directory Operations
+# =============================================================================
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Extract various archive formats
+extract() {
+    if [[ -f "$1" ]]; then
+        case "$1" in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar x "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# Find files by name
+ff() {
+    find . -type f -name "*$1*" 2>/dev/null
+}
+
+# Find directories by name
+fd() {
+    find . -type d -name "*$1*" 2>/dev/null
+}
+
+# =============================================================================
+# Git Functions
+# =============================================================================
+
+# Git clone and cd into directory
+gclone() {
+    git clone "$1" && cd "$(basename "$1" .git)"
+}
+
+# Git branch cleanup - delete merged branches
+git-cleanup() {
+    git branch --merged | grep -v "\*\|main\|master\|develop" | xargs -n 1 git branch -d
+}
+
+# Git log with graph
+glog() {
+    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
+}
+
+# =============================================================================
+# Development Functions
+# =============================================================================
+
+# Start a simple HTTP server
+serve() {
+    local port="${1:-8000}"
+    echo "Starting HTTP server on port $port..."
+    python3 -m http.server "$port"
+}
+
+# Find and kill process by name
+killp() {
+    local process="$1"
+    if [[ -z "$process" ]]; then
+        echo "Usage: killp <process-name>"
+        return 1
+    fi
+
+    local pids
+    pids=$(pgrep -f "$process")
+
+    if [[ -n "$pids" ]]; then
+        echo "Found processes:"
+        ps -p "$pids"
+        echo -n "Kill these processes? (y/N): "
+        read -r answer
+        if [[ "$answer" =~ ^[Yy]$ ]]; then
+            kill "$pids"
+            echo "Processes killed."
+        fi
+    else
+        echo "No processes found matching '$process'"
+    fi
+}
+
+# Get external IP address
+myip() {
+    curl -s https://ipinfo.io/ip
+}
+
+# Get local IP address
+localip() {
+    if command -v ip >/dev/null 2>&1; then
+        ip route get 1.1.1.1 | grep -oP 'src \K\S+'
+    elif command -v ifconfig >/dev/null 2>&1; then
+        ifconfig | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1
+    else
+        echo "Unable to determine local IP"
+    fi
+}
+
+# =============================================================================
+# System Information
+# =============================================================================
+
+# System information
+sysinfo() {
+    echo "System Information:"
+    echo "=================="
+    echo "Hostname: $(hostname)"
+    echo "OS: $(uname -s) $(uname -r)"
+    echo "Architecture: $(uname -m)"
+    echo "Uptime: $(uptime)"
+    echo "Shell: $SHELL"
+    echo "Terminal: $TERM"
+    if command -v lsb_release >/dev/null 2>&1; then
+        echo "Distribution: $(lsb_release -d | cut -f2-)"
+    fi
+}
+
+# Disk usage in current directory
+duh() {
+    du -h --max-depth=1 2>/dev/null | sort -hr
+}
+
+# Memory usage
+meminfo() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        vm_stat | perl -ne '/page size of (\d+)/ and $size=$1; /Pages\s+([^:]+):\s+(\d+)/ and printf("%-16s % 16.2f MB\\n", "$1:", $2 * $size / 1048576);'
+    else
+        free -h
+    fi
+}
+
+# =============================================================================
+# Text Processing
+# =============================================================================
+
+# Convert to lowercase
+lower() {
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+# Convert to uppercase
+upper() {
+    echo "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+# Generate random password
+genpass() {
+    local length="${1:-16}"
+    LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+=' < /dev/urandom | head -c "$length"
+    echo
+}
+
+# =============================================================================
+# Docker Functions
+# =============================================================================
+
+# Docker cleanup
+docker-cleanup() {
+    echo "Cleaning up Docker..."
+    docker system prune -af
+    docker volume prune -f
+}
+
+# Docker shell into container
+dsh() {
+    local container="$1"
+    if [[ -z "$container" ]]; then
+        echo "Usage: dsh <container-name-or-id>"
+        return 1
+    fi
+    docker exec -it "$container" /bin/bash
+}
+
+# =============================================================================
+# Kubernetes Functions
+# =============================================================================
+
+# Kubernetes context switching
+kctx() {
+    if [[ -z "$1" ]]; then
+        kubectl config get-contexts
+    else
+        kubectl config use-context "$1"
+    fi
+}
+
+# Kubernetes namespace switching
+kns() {
+    if [[ -z "$1" ]]; then
+        kubectl get namespaces
+    else
+        kubectl config set-context --current --namespace="$1"
+    fi
+}
+
+# =============================================================================
+# Tmux Functions
+# =============================================================================
+
+# Tmux session manager
+tm() {
+    local session="$1"
+    if [[ -z "$session" ]]; then
+        tmux list-sessions
+    elif tmux has-session -t "$session" 2>/dev/null; then
+        tmux attach-session -t "$session"
+    else
+        tmux new-session -s "$session"
+    fi
+}
+
+# =============================================================================
+# Web Development
+# =============================================================================
+
+# JSON pretty print
+json() {
+    if [[ -t 0 ]]; then
+        # Read from argument
+        echo "$1" | jq .
+    else
+        # Read from pipe
+        jq .
+    fi
+}
+
+# URL encode
+urlencode() {
+    python3 -c "import urllib.parse; print(urllib.parse.quote('$1'))"
+}
+
+# URL decode
+urldecode() {
+    python3 -c "import urllib.parse; print(urllib.parse.unquote('$1'))"
+}
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+
+# Weather report
+weather() {
+    local location="${1:-}"
+    curl -s "https://wttr.in/$location?format=3"
+}
+
+# QR code generator
+qr() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: qr <text>"
+        return 1
+    fi
+    curl -s "https://qr-server.com/api/v1/create-qr-code/?size=200x200&data=$1"
+}
+
+# Calculator
+calc() {
+    python3 -c "print($*)"
+}
+
+# Benchmark command execution time
+timecmd() {
+    time ( "$@" )
+}
+
+# =============================================================================
+# Dotfiles Management
+# =============================================================================
+
+# Edit dotfiles
+dotfiles-edit() {
+    cd "$DOTFILES" && "$EDITOR" .
+}
+
+# Reload zsh configuration
+reload() {
+    source "$HOME/.zshrc"
+    echo "Zsh configuration reloaded!"
+}
