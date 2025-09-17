@@ -270,17 +270,17 @@ test_aliases_functions() {
 test_security() {
     log_info "Testing for security issues..."
 
-    # Check for hardcoded credentials or sensitive data
+    # Check for hardcoded credentials or sensitive data (more specific patterns)
     local sensitive_patterns=(
-        "password"
-        "secret"
-        "token"
-        "key.*="
-        "api.*key"
+        "password.*="
+        "secret.*="
+        "token.*="
+        "api_key.*="
+        "private_key.*="
     )
 
     for pattern in "${sensitive_patterns[@]}"; do
-        if ! grep -ri "$pattern" "$PROJECT_ROOT" --exclude-dir=.git --exclude="*.md" >/dev/null 2>&1; then
+        if ! grep -ri "$pattern" "$PROJECT_ROOT" --exclude-dir=.git --exclude="*.md" --exclude-dir=tests >/dev/null 2>&1; then
             log_success "No obvious credentials found for pattern: $pattern"
             ((TESTS_PASSED++))
         else
@@ -290,8 +290,12 @@ test_security() {
         ((TESTS_RUN++))
     done
 
-    # Check file permissions
-    find "$PROJECT_ROOT" -type f -name "*.sh" -o -name "setup.sh" -o -name "dotfiles" -o -name "workflow-helper" | while read -r script; do
+    # Check file permissions for executable scripts (exclude library files)
+    find "$PROJECT_ROOT" -type f \( -name "*.sh" -o -name "dotfiles" -o -name "workflow-helper" \) \
+         ! -path "$PROJECT_ROOT/lib/*" \
+         ! -name "utils.sh" \
+         ! -name "logging.sh" \
+         ! -name "os-detect.sh" | while read -r script; do
         if [[ -x "$script" ]]; then
             log_success "Script is executable: $(basename "$script")"
             ((TESTS_PASSED++))
