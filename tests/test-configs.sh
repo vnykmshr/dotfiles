@@ -332,6 +332,15 @@ main() {
     log_info "Configuration Validation Tests"
     log_info "============================="
 
+    # Debug info for CI
+    if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
+        log_info "CI Environment Debug Info:"
+        log_info "Working directory: $(pwd)"
+        log_info "Files in current dir: $(ls -la | head -5 | tail -4)"
+        log_info "Zsh location: $(command -v zsh || echo 'zsh not found')"
+        log_info "Shell: $SHELL"
+    fi
+
     # Run all tests
     test_config_structure
     test_zsh_configs
