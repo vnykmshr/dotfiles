@@ -79,7 +79,7 @@ compdef _ccusage ccusage
 # Directory Completion Enhancements
 # =============================================================================
 
-# Smart cd completion for your workspace structure
+# Smart cd completion for common workspace structure
 _workspace_dirs() {
     local -a dirs
     if [[ -d ~/workspace ]]; then

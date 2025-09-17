@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-# Personal aliases based on vnykmshr's shell usage patterns
+# Personal aliases based on actual shell usage patterns
 
 # =============================================================================
 # Your Most Used Git Workflows (Based on History Analysis)
@@ -62,8 +62,8 @@ alias brewdeps='brew deps --tree'
 alias workspace='cd ~/workspace'
 alias github='cd ~/workspace/github'
 alias bitbucket='cd ~/workspace/bitbucket'
-alias vmx='cd ~/workspace/github/vnykmshr'
-alias dotfiles='cd ~/workspace/github/vnykmshr/dotfiles'
+alias projects='cd ~/workspace/projects'
+alias dotfiles='cd ~/.dotfiles'
 
 # =============================================================================
 # Development Server Patterns
@@ -134,12 +134,12 @@ alias p8='ping 8.8.8.8'
 alias pf='ping -c 5'  # Fast ping
 
 # =============================================================================
-# Quick Navigation Shortcuts (Based on your workspace structure)
+# Quick Navigation Shortcuts
 # =============================================================================
 
 # Super quick shortcuts for frequently used paths
 alias ws='workspace'
-alias gh='cd ~/workspace/github/vnykmshr'
+alias proj='cd ~/workspace/projects'
 alias wh='workflow-helper'
 
 # Environment shortcuts (you switch environments often)

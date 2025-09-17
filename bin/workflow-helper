@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Workflow Helper - Automate common development workflows
-# Based on vnykmshr's shell usage patterns
+# Based on common shell usage patterns
 
 set -euo pipefail
 

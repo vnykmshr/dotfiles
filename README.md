@@ -50,7 +50,7 @@ gst                 # git status --short --branch
 
 # Navigation
 ws                  # cd ~/workspace
-gh                  # cd ~/workspace/github/vnykmshr
+proj                # cd ~/workspace/projects
 
 # Workflow
 dev                 # smart project dev server

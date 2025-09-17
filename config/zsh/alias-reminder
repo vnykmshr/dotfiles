@@ -20,7 +20,7 @@ ALIASES=(
     "acp"   "git add -u && git commit && git push"
     "gst"   "git status --short --branch (you use this 558 times!)"
     "ws"    "cd ~/workspace"
-    "gh"    "cd ~/workspace/github/vnykmshr"
+    "proj"  "cd ~/workspace/projects"
     "ll"    "ls -la"
     "reload" "source ~/.zshrc"
 
