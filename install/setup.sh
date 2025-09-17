@@ -194,6 +194,7 @@ init_config() {
         if [[ -f "$example_file" ]]; then
             if [[ "$DRY_RUN" == "true" ]]; then
                 log_info "[DRY RUN] Would copy config.json.example to config.json"
+                return 0  # In dry-run, continue without creating file
             else
                 cp "$example_file" "$config_file"
                 log_success "Created config.json from example template"

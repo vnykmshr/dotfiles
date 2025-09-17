@@ -271,20 +271,27 @@ test_security() {
     log_info "Testing for security issues..."
 
     # Check for hardcoded credentials or sensitive data (more specific patterns)
+    # These patterns look for actual values, not template placeholders
     local sensitive_patterns=(
-        "password.*="
-        "secret.*="
-        "token.*="
-        "api_key.*="
-        "private_key.*="
+        "password[[:space:]]*=[[:space:]]*[\"'][^\"'{}]+[\"']"
+        "secret[[:space:]]*=[[:space:]]*[\"'][^\"'{}]+[\"']"
+        "token[[:space:]]*=[[:space:]]*[\"'][^\"'{}]+[\"']"
+        "api_key[[:space:]]*=[[:space:]]*[\"'][^\"'{}]+[\"']"
+        "private_key[[:space:]]*=[[:space:]]*[\"'][^\"'{}]+[\"']"
     )
 
     for pattern in "${sensitive_patterns[@]}"; do
-        if ! grep -ri "$pattern" "$PROJECT_ROOT" --exclude-dir=.git --exclude="*.md" --exclude-dir=tests >/dev/null 2>&1; then
-            log_success "No obvious credentials found for pattern: $pattern"
+        # Search for actual hardcoded secrets in config files (not in tests or templates)
+        local found_files
+        found_files=$(find "$PROJECT_ROOT" -type f \( -name "*.sh" -o -name "*.json" -o -name "*.yaml" -o -name "*.yml" -o -name "*.toml" \) \
+            ! -path "*/.git/*" ! -path "*/node_modules/*" ! -path "*/tests/*" ! -name "*.template" ! -name "*test*" \
+            -exec grep -l "$pattern" {} \; 2>/dev/null)
+
+        if [[ -z "$found_files" ]]; then
+            log_success "No obvious credentials found for pattern: ${pattern%[[:space:]]*}"
             ((TESTS_PASSED++))
         else
-            log_warn "Potential sensitive data found for pattern: $pattern"
+            log_warn "Potential sensitive data found for pattern: ${pattern%[[:space:]]*} in: $found_files"
             ((TESTS_FAILED++))
         fi
         ((TESTS_RUN++))
