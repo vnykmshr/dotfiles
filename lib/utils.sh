@@ -14,9 +14,7 @@ run_cmd() {
     fi
 }
 
-# OS detection
-is_macos() { [[ "$OSTYPE" == "darwin"* ]]; }
-is_linux() { [[ "$OSTYPE" == "linux-gnu"* ]]; }
+# OS detection functions available in lib/os-detect.sh
 
 # Backup file with timestamp
 backup_file() {

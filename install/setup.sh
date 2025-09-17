@@ -122,13 +122,13 @@ install_dependencies() {
             install_homebrew
             ;;
         ubuntu | debian)
-            run_cmd "sudo apt update && sudo apt install -y curl git zsh"
+            run_cmd "sudo apt update && sudo apt install -y curl git zsh jq"
             ;;
         fedora | centos | rhel)
-            run_cmd "sudo dnf install -y curl git zsh"
+            run_cmd "sudo dnf install -y curl git zsh jq"
             ;;
         arch)
-            run_cmd "sudo pacman -S --needed curl git zsh"
+            run_cmd "sudo pacman -S --needed curl git zsh jq"
             ;;
         *)
             log_warn "Unknown OS: $OS_NAME. Skipping package installation."
@@ -185,9 +185,91 @@ setup_symlinks() {
     link_config "config/mise/config.toml" ".config/mise/config.toml"
 }
 
+# Create initial config.json from example if it doesn't exist
+init_config() {
+    local config_file="$DOTFILES_DIR/config.json"
+    local example_file="$DOTFILES_DIR/config.json.example"
+
+    if [[ ! -f "$config_file" ]]; then
+        if [[ -f "$example_file" ]]; then
+            if [[ "$DRY_RUN" == "true" ]]; then
+                log_info "[DRY RUN] Would copy config.json.example to config.json"
+            else
+                cp "$example_file" "$config_file"
+                log_success "Created config.json from example template"
+                echo
+                log_info "📝 Next steps:"
+                log_info "   1. Edit config.json with your personal settings (name, email, SSH keys, etc.)"
+                if command -v code >/dev/null 2>&1; then
+                    log_info "      Example: code config.json"
+                elif command -v nvim >/dev/null 2>&1; then
+                    log_info "      Example: nvim config.json"
+                elif command -v vim >/dev/null 2>&1; then
+                    log_info "      Example: vim config.json"
+                else
+                    log_info "      Example: nano config.json"
+                fi
+                log_info "   2. Run the setup script again: ./install/setup.sh"
+                echo
+                log_info "💡 Key settings to update in config.json:"
+                log_info "   • user.name and user.email (for Git commits)"
+                log_info "   • ssh.keys.* paths (if different from defaults)"
+                log_info "   • environment.workspace_dir (your preferred workspace location)"
+                echo
+                return 1
+            fi
+        else
+            log_error "Neither config.json nor config.json.example found"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Load configuration from JSON file
+load_config() {
+    local config_file="$DOTFILES_DIR/config.json"
+
+    if [[ -f "$config_file" ]]; then
+        log_info "Loading configuration from config.json"
+        return 0
+    else
+        log_warn "No config.json found, will use defaults or prompts"
+        return 1
+    fi
+}
+
+# Get value from JSON config with fallback
+get_config_value() {
+    local key="$1"
+    local default="$2"
+    local config_file="$DOTFILES_DIR/config.json"
+
+    if [[ -f "$config_file" ]] && command -v jq >/dev/null 2>&1; then
+        local value
+        value=$(jq -r "$key // \"$default\"" "$config_file" 2>/dev/null)
+        if [[ "$value" != "null" && -n "$value" ]]; then
+            echo "$value"
+        else
+            echo "$default"
+        fi
+    else
+        echo "$default"
+    fi
+}
+
 # Process template files to generate personalized configs
 process_templates() {
     log_step "Processing configuration templates"
+
+    # Initialize config file if needed
+    if ! init_config; then
+        log_error "Config initialization failed or config.json needs to be edited"
+        return 1
+    fi
+
+    # Load configuration
+    load_config
 
     # Process gitconfig template
     process_gitconfig_template
@@ -201,39 +283,66 @@ process_templates() {
     log_info "Template processing complete"
 }
 
+# Generic template processor
+process_template_generic() {
+    local template_file="$1"
+    local output_file="$2"
+    local description="$3"
+    shift 3
+
+    if [[ ! -f "$template_file" ]]; then
+        log_warn "$description template not found, skipping"
+        return 0
+    fi
+
+    log_info "Processing $description..."
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate $description from template"
+        return 0
+    fi
+
+    # Build sed command with all placeholder replacements
+    local sed_cmd=""
+    while (( $# >= 2 )); do
+        local placeholder="$1"
+        local value="$2"
+        sed_cmd+="-e 's|{{${placeholder}}}|${value}|g' "
+        shift 2
+    done
+
+    # Create output directory if needed
+    mkdir -p "$(dirname "$output_file")"
+
+    # Process template
+    eval "sed $sed_cmd '$template_file' > '$output_file'"
+    log_success "Generated $description"
+}
+
 # Process gitconfig template with user input
 process_gitconfig_template() {
     local template_file="$DOTFILES_DIR/config/git/gitconfig.template"
     local output_file="$DOTFILES_DIR/config/git/gitconfig"
 
-    if [[ ! -f "$template_file" ]]; then
-        log_warn "Git config template not found, skipping"
-        return 0
-    fi
+    # Load values from JSON config with fallbacks
+    local git_user_name=$(get_config_value '.user.name' 'Your Name')
+    local git_user_email=$(get_config_value '.user.email' 'your.email@example.com')
+    local git_signing_key=$(get_config_value '.git.signing_key' '~/.ssh/id_ed25519.pub')
+    local editor=$(get_config_value '.user.editor' 'nvim')
+    local git_gpg_sign=$(get_config_value '.git.gpg_sign' 'false')
 
-    log_info "Configuring Git settings..."
-
-    # Default values
-    local git_user_name="${GIT_USER_NAME:-}"
-    local git_user_email="${GIT_USER_EMAIL:-}"
-    local git_signing_key="${GIT_SIGNING_KEY:-~/.ssh/id_ed25519.pub}"
-    local editor="${EDITOR:-nvim}"
-    local git_gpg_sign="${GIT_GPG_SIGN:-false}"
-
-    # Prompt for user details if not provided via environment
-    if [[ -z "$git_user_name" ]] && [[ "$DRY_RUN" != "true" ]]; then
+    # Prompt for user details if using defaults and not in dry run
+    if [[ "$git_user_name" == "Your Name" ]] && [[ "$DRY_RUN" != "true" ]]; then
         read -rp "Enter your name for Git commits: " git_user_name
+        git_user_name="${git_user_name:-Your Name}"
     fi
 
-    if [[ -z "$git_user_email" ]] && [[ "$DRY_RUN" != "true" ]]; then
+    if [[ "$git_user_email" == "your.email@example.com" ]] && [[ "$DRY_RUN" != "true" ]]; then
         read -rp "Enter your email for Git commits: " git_user_email
+        git_user_email="${git_user_email:-your.email@example.com}"
     fi
 
-    # Use fallback values if still empty
-    git_user_name="${git_user_name:-Your Name}"
-    git_user_email="${git_user_email:-your.email@example.com}"
-
-    # Process the template
+    # Show preview in dry run mode
     if [[ "$DRY_RUN" == "true" ]]; then
         log_info "[DRY RUN] Would generate gitconfig with:"
         log_info "  Name: $git_user_name"
@@ -241,17 +350,16 @@ process_gitconfig_template() {
         log_info "  Signing key: $git_signing_key"
         log_info "  Editor: $editor"
         log_info "  GPG sign: $git_gpg_sign"
-    else
-        # Generate the config file
-        sed -e "s|{{GIT_USER_NAME}}|$git_user_name|g" \
-            -e "s|{{GIT_USER_EMAIL}}|$git_user_email|g" \
-            -e "s|{{GIT_SIGNING_KEY}}|$git_signing_key|g" \
-            -e "s|{{EDITOR}}|$editor|g" \
-            -e "s|{{GIT_GPG_SIGN}}|$git_gpg_sign|g" \
-            "$template_file" > "$output_file"
-
-        log_success "Generated personalized gitconfig"
+        return 0
     fi
+
+    # Process template using generic processor
+    process_template_generic "$template_file" "$output_file" "personalized gitconfig" \
+        "GIT_USER_NAME" "$git_user_name" \
+        "GIT_USER_EMAIL" "$git_user_email" \
+        "GIT_SIGNING_KEY" "$git_signing_key" \
+        "EDITOR" "$editor" \
+        "GIT_GPG_SIGN" "$git_gpg_sign"
 }
 
 # Process SSH config template
@@ -259,58 +367,49 @@ process_ssh_template() {
     local template_file="$DOTFILES_DIR/config/ssh/config.template"
     local output_file="$DOTFILES_DIR/config/ssh/config"
 
-    if [[ ! -f "$template_file" ]]; then
-        log_warn "SSH config template not found, skipping"
+    # Load values from JSON config with fallbacks
+    local ssh_github_key=$(get_config_value '.ssh.keys.github' '~/.ssh/id_ed25519')
+    local ssh_gitlab_key=$(get_config_value '.ssh.keys.gitlab' '~/.ssh/id_ed25519')
+    local ssh_personal_key=$(get_config_value '.ssh.keys.personal' '~/.ssh/id_ed25519')
+    local ssh_work_key=$(get_config_value '.ssh.keys.work' '~/.ssh/id_rsa')
+    local ssh_local_key=$(get_config_value '.ssh.keys.local' '~/.ssh/id_ed25519')
+
+    local personal_server_alias=$(get_config_value '.ssh.servers.personal.alias' 'my-server')
+    local personal_server_host=$(get_config_value '.ssh.servers.personal.host' 'example.com')
+    local personal_server_user=$(get_config_value '.ssh.servers.personal.user' "$USER")
+    local personal_server_port=$(get_config_value '.ssh.servers.personal.port' '22')
+
+    local work_server_alias=$(get_config_value '.ssh.servers.work.alias' 'work-server')
+    local work_server_host=$(get_config_value '.ssh.servers.work.host' 'work.example.com')
+    local work_server_user=$(get_config_value '.ssh.servers.work.user' "$USER")
+    local work_server_port=$(get_config_value '.ssh.servers.work.port' '22')
+
+    local local_dev_host=$(get_config_value '.ssh.servers.local_dev.host' 'localhost')
+    local local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "$USER")
+
+    # Show preview in dry run mode
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate SSH config with standard keys and server templates"
         return 0
     fi
 
-    log_info "Configuring SSH settings..."
-
-    # Default values
-    local ssh_github_key="${SSH_GITHUB_KEY:-~/.ssh/id_ed25519}"
-    local ssh_gitlab_key="${SSH_GITLAB_KEY:-~/.ssh/id_ed25519}"
-    local ssh_personal_key="${SSH_PERSONAL_KEY:-~/.ssh/id_ed25519}"
-    local ssh_work_key="${SSH_WORK_KEY:-~/.ssh/id_rsa}"
-    local ssh_local_key="${SSH_LOCAL_KEY:-~/.ssh/id_ed25519}"
-
-    local personal_server_alias="${PERSONAL_SERVER_ALIAS:-my-server}"
-    local personal_server_host="${PERSONAL_SERVER_HOST:-example.com}"
-    local personal_server_user="${PERSONAL_SERVER_USER:-$USER}"
-    local personal_server_port="${PERSONAL_SERVER_PORT:-22}"
-
-    local work_server_alias="${WORK_SERVER_ALIAS:-work-server}"
-    local work_server_host="${WORK_SERVER_HOST:-work.example.com}"
-    local work_server_user="${WORK_SERVER_USER:-$USER}"
-    local work_server_port="${WORK_SERVER_PORT:-22}"
-
-    local local_dev_host="${LOCAL_DEV_HOST:-localhost}"
-    local local_dev_user="${LOCAL_DEV_USER:-$USER}"
-
-    # Process the template
-    if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY RUN] Would generate SSH config with standard keys and server templates"
-    else
-        # Generate the config file
-        mkdir -p "$(dirname "$output_file")"
-        sed -e "s|{{SSH_GITHUB_KEY}}|$ssh_github_key|g" \
-            -e "s|{{SSH_GITLAB_KEY}}|$ssh_gitlab_key|g" \
-            -e "s|{{SSH_PERSONAL_KEY}}|$ssh_personal_key|g" \
-            -e "s|{{SSH_WORK_KEY}}|$ssh_work_key|g" \
-            -e "s|{{SSH_LOCAL_KEY}}|$ssh_local_key|g" \
-            -e "s|{{PERSONAL_SERVER_ALIAS}}|$personal_server_alias|g" \
-            -e "s|{{PERSONAL_SERVER_HOST}}|$personal_server_host|g" \
-            -e "s|{{PERSONAL_SERVER_USER}}|$personal_server_user|g" \
-            -e "s|{{PERSONAL_SERVER_PORT}}|$personal_server_port|g" \
-            -e "s|{{WORK_SERVER_ALIAS}}|$work_server_alias|g" \
-            -e "s|{{WORK_SERVER_HOST}}|$work_server_host|g" \
-            -e "s|{{WORK_SERVER_USER}}|$work_server_user|g" \
-            -e "s|{{WORK_SERVER_PORT}}|$work_server_port|g" \
-            -e "s|{{LOCAL_DEV_HOST}}|$local_dev_host|g" \
-            -e "s|{{LOCAL_DEV_USER}}|$local_dev_user|g" \
-            "$template_file" > "$output_file"
-
-        log_success "Generated personalized SSH config"
-    fi
+    # Process template using generic processor
+    process_template_generic "$template_file" "$output_file" "personalized SSH config" \
+        "SSH_GITHUB_KEY" "$ssh_github_key" \
+        "SSH_GITLAB_KEY" "$ssh_gitlab_key" \
+        "SSH_PERSONAL_KEY" "$ssh_personal_key" \
+        "SSH_WORK_KEY" "$ssh_work_key" \
+        "SSH_LOCAL_KEY" "$ssh_local_key" \
+        "PERSONAL_SERVER_ALIAS" "$personal_server_alias" \
+        "PERSONAL_SERVER_HOST" "$personal_server_host" \
+        "PERSONAL_SERVER_USER" "$personal_server_user" \
+        "PERSONAL_SERVER_PORT" "$personal_server_port" \
+        "WORK_SERVER_ALIAS" "$work_server_alias" \
+        "WORK_SERVER_HOST" "$work_server_host" \
+        "WORK_SERVER_USER" "$work_server_user" \
+        "WORK_SERVER_PORT" "$work_server_port" \
+        "LOCAL_DEV_HOST" "$local_dev_host" \
+        "LOCAL_DEV_USER" "$local_dev_user"
 }
 
 # Process zsh exports template
@@ -318,50 +417,42 @@ process_zsh_exports_template() {
     local template_file="$DOTFILES_DIR/config/zsh/exports.local.template"
     local output_file="$DOTFILES_DIR/config/zsh/exports.local"
 
-    if [[ ! -f "$template_file" ]]; then
-        log_warn "Zsh exports template not found, skipping"
+    # Load values from JSON config with fallbacks
+    local workspace_dir=$(get_config_value '.environment.workspace_dir' '~/workspace')
+    local projects_dir=$(get_config_value '.environment.projects_dir' '~/projects')
+    local personal_bin_dir=$(get_config_value '.environment.personal_bin_dir' '~/.local/bin')
+    local browser=$(get_config_value '.user.browser' 'open')
+    local terminal=$(get_config_value '.user.terminal' 'Terminal')
+    local pager=$(get_config_value '.environment.pager' 'less')
+    local npm_prefix=$(get_config_value '.development.node.npm_prefix' '~/.npm-global')
+    local python_path=$(get_config_value '.development.python.path' '')
+    local go_path=$(get_config_value '.development.go.path' '~/go')
+    local cargo_home=$(get_config_value '.development.rust.cargo_home' '~/.cargo')
+    local preferred_editor=$(get_config_value '.user.editor' 'nvim')
+    local preferred_lang="en_US.UTF-8"
+    local code_editor="code"
+
+    # Show preview in dry run mode
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate local exports with workspace: $workspace_dir"
         return 0
     fi
 
-    log_info "Configuring local environment variables..."
-
-    # Default values
-    local workspace_dir="${WORKSPACE_DIR:-$HOME/workspace}"
-    local projects_dir="${PROJECTS_DIR:-$HOME/projects}"
-    local personal_bin_dir="${PERSONAL_BIN_DIR:-$HOME/.local/bin}"
-    local browser="${BROWSER:-open}"
-    local terminal="${TERMINAL:-Terminal}"
-    local pager="${PAGER:-less}"
-    local npm_prefix="${NPM_PREFIX:-$HOME/.npm-global}"
-    local python_path="${PYTHON_PATH:-}"
-    local go_path="${GO_PATH:-$HOME/go}"
-    local cargo_home="${CARGO_HOME:-$HOME/.cargo}"
-    local preferred_editor="${PREFERRED_EDITOR:-nvim}"
-    local preferred_lang="${PREFERRED_LANG:-en_US.UTF-8}"
-    local code_editor="${CODE_EDITOR:-code}"
-
-    # Process the template
-    if [[ "$DRY_RUN" == "true" ]]; then
-        log_info "[DRY RUN] Would generate local exports with workspace: $workspace_dir"
-    else
-        # Generate the config file
-        sed -e "s|{{WORKSPACE_DIR}}|$workspace_dir|g" \
-            -e "s|{{PROJECTS_DIR}}|$projects_dir|g" \
-            -e "s|{{PERSONAL_BIN_DIR}}|$personal_bin_dir|g" \
-            -e "s|{{BROWSER}}|$browser|g" \
-            -e "s|{{TERMINAL}}|$terminal|g" \
-            -e "s|{{PAGER}}|$pager|g" \
-            -e "s|{{NPM_PREFIX}}|$npm_prefix|g" \
-            -e "s|{{PYTHON_PATH}}|$python_path|g" \
-            -e "s|{{GO_PATH}}|$go_path|g" \
-            -e "s|{{CARGO_HOME}}|$cargo_home|g" \
-            -e "s|{{PREFERRED_EDITOR}}|$preferred_editor|g" \
-            -e "s|{{PREFERRED_LANG}}|$preferred_lang|g" \
-            -e "s|{{CODE_EDITOR}}|$code_editor|g" \
-            "$template_file" > "$output_file"
-
-        log_success "Generated local environment exports"
-    fi
+    # Process template using generic processor
+    process_template_generic "$template_file" "$output_file" "local environment exports" \
+        "WORKSPACE_DIR" "$workspace_dir" \
+        "PROJECTS_DIR" "$projects_dir" \
+        "PERSONAL_BIN_DIR" "$personal_bin_dir" \
+        "BROWSER" "$browser" \
+        "TERMINAL" "$terminal" \
+        "PAGER" "$pager" \
+        "NPM_PREFIX" "$npm_prefix" \
+        "PYTHON_PATH" "$python_path" \
+        "GO_PATH" "$go_path" \
+        "CARGO_HOME" "$cargo_home" \
+        "PREFERRED_EDITOR" "$preferred_editor" \
+        "PREFERRED_LANG" "$preferred_lang" \
+        "CODE_EDITOR" "$code_editor"
 }
 
 # Link a config file/directory

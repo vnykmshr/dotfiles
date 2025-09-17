@@ -63,3 +63,6 @@ todos/
 config/git/gitconfig
 config/ssh/config
 config/zsh/exports.local
+
+# User configuration
+config.json

@@ -1,0 +1,60 @@
+{
+  "user": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "editor": "nvim",
+    "browser": "open",
+    "terminal": "Terminal"
+  },
+  "git": {
+    "signing_key": "~/.ssh/id_ed25519.pub",
+    "gpg_sign": false
+  },
+  "ssh": {
+    "keys": {
+      "github": "~/.ssh/id_ed25519",
+      "gitlab": "~/.ssh/id_ed25519",
+      "personal": "~/.ssh/id_ed25519",
+      "work": "~/.ssh/id_rsa",
+      "local": "~/.ssh/id_ed25519"
+    },
+    "servers": {
+      "personal": {
+        "alias": "my-server",
+        "host": "example.com",
+        "user": "user",
+        "port": 22
+      },
+      "work": {
+        "alias": "work-server",
+        "host": "work.example.com",
+        "user": "user",
+        "port": 22
+      },
+      "local_dev": {
+        "host": "localhost",
+        "user": "user"
+      }
+    }
+  },
+  "environment": {
+    "workspace_dir": "~/workspace",
+    "projects_dir": "~/projects",
+    "personal_bin_dir": "~/.local/bin",
+    "pager": "less"
+  },
+  "development": {
+    "node": {
+      "npm_prefix": "~/.npm-global"
+    },
+    "python": {
+      "path": ""
+    },
+    "go": {
+      "path": "~/go"
+    },
+    "rust": {
+      "cargo_home": "~/.cargo"
+    }
+  }
+}

@@ -6,12 +6,17 @@
 set -euo pipefail
 
 # Configuration
-TEST_USER="test-dotfiles"
+# TEST_USER="test-dotfiles" # Reserved for future use
 TEST_HOME="/tmp/dotfiles-test-$$"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Colors
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+# Source logging utilities for colors and functions
+if [[ -f "$DOTFILES_DIR/lib/logging.sh" ]]; then
+    source "$DOTFILES_DIR/lib/logging.sh"
+else
+    # Minimal fallback for testing
+    RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+fi
 
 # Test counters
 TESTS_RUN=0

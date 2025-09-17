@@ -220,8 +220,8 @@ install_modern_cli_tools_linux() {
     # fzf (fuzzy finder)
     if ! command_exists fzf; then
         log_info "Installing fzf..."
-        run_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf"
-        run_cmd "~/.fzf/install --all"
+        run_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
+        run_cmd "$HOME/.fzf/install --all"
     fi
 
     # zoxide (smart cd)

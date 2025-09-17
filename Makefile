@@ -86,6 +86,5 @@ reset: ## Reset to clean state
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
 	@FORCE=true $(MAKE) install
 
-uninstall: ## Uninstall dotfiles
-	@echo "Creating backup before uninstall..."
-	@./install/setup.sh --uninstall
+# Note: Uninstall functionality not yet implemented
+# To manually uninstall, remove symlinks and restore from ~/.dotfiles-backup-*

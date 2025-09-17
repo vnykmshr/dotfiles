@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Dotfiles Configuration",
+  "description": "Personalization settings for dotfiles setup",
+  "type": "object",
+  "properties": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Your full name for Git commits",
+          "default": "Your Name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Your email for Git commits",
+          "format": "email",
+          "default": "your.email@example.com"
+        },
+        "editor": {
+          "type": "string",
+          "description": "Preferred editor",
+          "default": "nvim"
+        },
+        "browser": {
+          "type": "string",
+          "description": "Preferred browser command",
+          "default": "open"
+        },
+        "terminal": {
+          "type": "string",
+          "description": "Preferred terminal",
+          "default": "Terminal"
+        }
+      }
+    },
+    "git": {
+      "type": "object",
+      "properties": {
+        "signing_key": {
+          "type": "string",
+          "description": "Path to GPG/SSH signing key",
+          "default": "~/.ssh/id_ed25519.pub"
+        },
+        "gpg_sign": {
+          "type": "boolean",
+          "description": "Enable GPG signing for commits and tags",
+          "default": false
+        }
+      }
+    },
+    "ssh": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "object",
+          "properties": {
+            "github": {
+              "type": "string",
+              "description": "SSH key for GitHub",
+              "default": "~/.ssh/id_ed25519"
+            },
+            "gitlab": {
+              "type": "string",
+              "description": "SSH key for GitLab",
+              "default": "~/.ssh/id_ed25519"
+            },
+            "personal": {
+              "type": "string",
+              "description": "SSH key for personal servers",
+              "default": "~/.ssh/id_ed25519"
+            },
+            "work": {
+              "type": "string",
+              "description": "SSH key for work servers",
+              "default": "~/.ssh/id_rsa"
+            },
+            "local": {
+              "type": "string",
+              "description": "SSH key for local development",
+              "default": "~/.ssh/id_ed25519"
+            }
+          }
+        },
+        "servers": {
+          "type": "object",
+          "properties": {
+            "personal": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "default": "my-server"
+                },
+                "host": {
+                  "type": "string",
+                  "default": "example.com"
+                },
+                "user": {
+                  "type": "string",
+                  "default": "user"
+                },
+                "port": {
+                  "type": "integer",
+                  "default": 22
+                }
+              }
+            },
+            "work": {
+              "type": "object",
+              "properties": {
+                "alias": {
+                  "type": "string",
+                  "default": "work-server"
+                },
+                "host": {
+                  "type": "string",
+                  "default": "work.example.com"
+                },
+                "user": {
+                  "type": "string",
+                  "default": "user"
+                },
+                "port": {
+                  "type": "integer",
+                  "default": 22
+                }
+              }
+            },
+            "local_dev": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "default": "localhost"
+                },
+                "user": {
+                  "type": "string",
+                  "default": "user"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "workspace_dir": {
+          "type": "string",
+          "description": "Main workspace directory",
+          "default": "~/workspace"
+        },
+        "projects_dir": {
+          "type": "string",
+          "description": "Projects directory",
+          "default": "~/projects"
+        },
+        "personal_bin_dir": {
+          "type": "string",
+          "description": "Personal scripts directory",
+          "default": "~/.local/bin"
+        },
+        "pager": {
+          "type": "string",
+          "description": "Preferred pager",
+          "default": "less"
+        }
+      }
+    },
+    "development": {
+      "type": "object",
+      "properties": {
+        "node": {
+          "type": "object",
+          "properties": {
+            "npm_prefix": {
+              "type": "string",
+              "description": "NPM global install prefix",
+              "default": "~/.npm-global"
+            }
+          }
+        },
+        "python": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Additional Python path",
+              "default": ""
+            }
+          }
+        },
+        "go": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "GOPATH directory",
+              "default": "~/go"
+            }
+          }
+        },
+        "rust": {
+          "type": "object",
+          "properties": {
+            "cargo_home": {
+              "type": "string",
+              "description": "Cargo home directory",
+              "default": "~/.cargo"
+            }
+          }
+        }
+      }
+    }
+  }
+}

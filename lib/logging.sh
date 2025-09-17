@@ -7,9 +7,9 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
+PURPLE='\033[0;35m'  # Used in some contexts
 CYAN='\033[0;36m'
-WHITE='\033[1;37m'
+WHITE='\033[1;37m'   # Reserved for future use
 GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
@@ -19,7 +19,7 @@ LOG_LEVEL="${LOG_LEVEL:-INFO}"
 # Icons/symbols
 CHECKMARK="✓"
 CROSS="✗"
-ARROW="→"
+# ARROW="→" # Unused - can be removed
 WARNING="⚠"
 INFO="ℹ"
 GEAR="⚙"
@@ -93,7 +93,7 @@ log_step() {
         printf "${GRAY}%*s${NC}\n" "${#message}" | tr ' ' '-' >&2
     else
         printf "\n[%s] STEP %s\n" "$(timestamp)" "$message" >&2
-        printf "%*s\n" "${#message}" | tr ' ' '-' >&2
+        printf "%*s\n" "${#message}" "" | tr ' ' '-' >&2
     fi
 }
 
@@ -157,9 +157,9 @@ with_spinner() {
     local exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
-        printf "\b${GREEN}${CHECKMARK}${NC}\n" >&2
+        printf "\b%s%s%s\n" "$GREEN" "$CHECKMARK" "$NC" >&2
     else
-        printf "\b${RED}${CROSS}${NC}\n" >&2
+        printf "\b%s%s%s\n" "$RED" "$CROSS" "$NC" >&2
     fi
 
     return $exit_code
@@ -177,8 +177,8 @@ progress_bar() {
     local empty=$((width - filled))
 
     printf "\r%s [" "$message" >&2
-    printf "%*s" "$filled" | tr ' ' '█' >&2
-    printf "%*s" "$empty" | tr ' ' '░' >&2
+    printf "%*s" "$filled" "" | tr ' ' '█' >&2
+    printf "%*s" "$empty" "" | tr ' ' '░' >&2
     printf "] %d%% (%d/%d)" "$percentage" "$current" "$total" >&2
 
     if [[ $current -eq $total ]]; then
@@ -192,8 +192,8 @@ separator() {
     local width="${2:-80}"
 
     if [[ -t 1 ]]; then
-        printf "${GRAY}%*s${NC}\n" "$width" | tr ' ' "$char" >&2
+        printf "${GRAY}%*s${NC}\n" "$width" "" | tr ' ' "$char" >&2
     else
-        printf "%*s\n" "$width" | tr ' ' "$char" >&2
+        printf "%*s\n" "$width" "" | tr ' ' "$char" >&2
     fi
 }
