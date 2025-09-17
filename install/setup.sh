@@ -12,17 +12,7 @@ DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
-# Colors for output (used by logging functions)
-# shellcheck disable=SC2034
-RED='\033[0;31m'
-# shellcheck disable=SC2034
-GREEN='\033[0;32m'
-# shellcheck disable=SC2034
-YELLOW='\033[1;33m'
-# shellcheck disable=SC2034
-BLUE='\033[0;34m'
-# shellcheck disable=SC2034
-NC='\033[0m'
+# Colors are defined in lib/logging.sh
 
 # Source utilities
 source "$DOTFILES_DIR/lib/utils.sh"

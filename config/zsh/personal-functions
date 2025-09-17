@@ -1,371 +1,87 @@
 #!/usr/bin/env zsh
+# Personal functions based on actual workflow patterns
 
-# Personal functions based on vnykmshr's workflow patterns
-
-# =============================================================================
-# Git Workflow Functions
-# =============================================================================
-
-# Quick commit with automatic message generation
+# Quick commit with auto-generated message
 qc() {
     local message="$*"
-    if [[ -z "$message" ]]; then
-        # Auto-generate commit message from changed files
-        local changed_files=$(git diff --name-only --cached)
-        if [[ -n "$changed_files" ]]; then
-            message="update: $(echo $changed_files | tr '\n' ' ')"
-        else
-            message="misc: updates"
-        fi
-    fi
-    git commit -m "$message"
+    [[ -z "$message" ]] && message="update: $(git diff --name-only --cached | tr '\n' ' ')"
+    [[ -z "$message" ]] && message="misc: updates"
+    git add -u && git commit -m "$message"
 }
 
-# Quick add, commit, push workflow (your most common pattern)
+# Add, commit, push workflow (most used pattern)
 acp() {
     git add -u
-    qc "$*"
+    git commit -m "${*:-update}"
     git push
 }
 
-# Enhanced git log with your preferred format
-gll() {
-    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit --date=relative "${@:-10}"
-}
-
-# Git branch cleanup (remove merged branches)
-git-cleanup() {
-    echo "Cleaning up merged branches..."
-    git branch --merged | grep -v "\*\|main\|master\|develop" | xargs -n 1 git branch -d
-    echo "Pruning remote tracking branches..."
-    git remote prune origin
-}
-
-# =============================================================================
-# Development Server Functions
-# =============================================================================
-
-# Smart development server starter
-devserver() {
+# Smart dev server - detects project type
+dev() {
     if [[ -f "package.json" ]]; then
-        if grep -q '"dev"' package.json; then
-            npm run dev
-        elif grep -q '"start"' package.json; then
-            npm start
-        else
-            node app.js
-        fi
+        npm run dev 2>/dev/null || npm start 2>/dev/null || node server.js
+    elif [[ -f "Cargo.toml" ]]; then
+        cargo run
+    elif [[ -f "go.mod" ]]; then
+        go run .
     elif [[ -f "Makefile" ]]; then
         make dev 2>/dev/null || make run 2>/dev/null || make
-    elif [[ -f "go.mod" ]]; then
-        go run .
-    elif [[ -f "pubspec.yaml" ]]; then
-        flutter run
     else
-        echo "No recognized project type found"
+        echo "Unknown project type"
         return 1
     fi
 }
 
-# Production server with environment detection
-prodserver() {
-    if [[ -f "Makefile" ]]; then
-        make build
-        if [[ -f "./build/markgo" ]]; then
-            ENVIRONMENT=production GIN_MODE=release ./build/markgo
-        else
-            echo "Build artifact not found"
-            return 1
-        fi
-    else
-        NODE_ENV=production node app.js
-    fi
-}
-
-# =============================================================================
-# Project Management Functions
-# =============================================================================
-
-# Clone and enter directory (you do this pattern often)
-clone() {
-    local repo="$1"
-    if [[ -z "$repo" ]]; then
-        echo "Usage: clone <repository-url>"
-        return 1
-    fi
-
-    git clone "$repo"
-    local dirname=$(basename "$repo" .git)
-    cd "$dirname"
-
-    # Auto-setup if it's a recognized project
-    if [[ -f "package.json" ]]; then
-        echo "Node.js project detected. Running npm install..."
-        npm install
-    elif [[ -f "go.mod" ]]; then
-        echo "Go project detected. Running go mod download..."
-        go mod download
-    elif [[ -f "pubspec.yaml" ]]; then
-        echo "Flutter project detected. Running flutter pub get..."
-        flutter pub get
-    fi
-}
-
-# Quick project initialization
-initproject() {
-    local project_name="$1"
-    local project_type="${2:-node}"
-
-    if [[ -z "$project_name" ]]; then
-        echo "Usage: initproject <name> [type]"
-        echo "Types: node, go, flutter"
-        return 1
-    fi
-
-    mkdir -p "$project_name"
-    cd "$project_name"
-
-    case "$project_type" in
-        node)
-            npm init -y
-            echo "node_modules/\n.env\ndist/" > .gitignore
-            ;;
-        go)
-            go mod init "$project_name"
-            echo "main.go created"
-            cat > main.go << EOF
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}
-EOF
-            ;;
-        flutter)
-            flutter create .
-            ;;
-        *)
-            echo "Unknown project type: $project_type"
-            return 1
-            ;;
-    esac
-
-    git init
-    git add .
-    git commit -m "initial commit"
-
-    echo "Project $project_name initialized with $project_type"
-}
-
-# =============================================================================
-# File Operation Functions (Based on your patterns)
-# =============================================================================
-
-# Smart file mover with backup
-smartmv() {
-    local source="$1"
-    local dest="$2"
-
-    if [[ -z "$source" || -z "$dest" ]]; then
-        echo "Usage: smartmv <source> <destination>"
-        return 1
-    fi
-
-    # Create backup if destination exists
-    if [[ -f "$dest" ]]; then
-        echo "Destination exists. Creating backup..."
-        cp "$dest" "${dest}.backup.$(date +%Y%m%d-%H%M%S)"
-    fi
-
-    mv "$source" "$dest"
-    echo "Moved: $source → $dest"
-}
-
-# Bulk image processor (you seem to work with images)
-process_images() {
-    local target_dir="${1:-.}"
-    local max_width="${2:-1200}"
-
-    echo "Processing images in $target_dir (max width: ${max_width}px)..."
-
-    find "$target_dir" -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) | while read -r img; do
-        if command -v convert >/dev/null 2>&1; then
-            echo "Processing: $img"
-            convert "$img" -resize "${max_width}x>" "$img"
-        else
-            echo "ImageMagick not installed. Skipping image processing."
-            break
-        fi
-    done
-}
-
-# =============================================================================
-# Environment & Service Management
-# =============================================================================
-
-# Service manager (for your nginx/redis usage)
-service() {
-    local action="$1"
-    local service_name="$2"
-
-    case "$action" in
-        start)
-            brew services start "$service_name"
-            echo "Started $service_name"
-            ;;
-        stop)
-            brew services stop "$service_name"
-            echo "Stopped $service_name"
-            ;;
-        restart)
-            brew services restart "$service_name"
-            echo "Restarted $service_name"
-            ;;
-        status)
-            brew services list | grep "$service_name"
-            ;;
-        *)
-            echo "Usage: service {start|stop|restart|status} <service-name>"
-            echo "Available services:"
-            brew services list
-            ;;
-    esac
-}
-
-# Environment switcher
-setenv() {
-    local env="$1"
-    case "$env" in
-        dev|development)
-            export NODE_ENV=development
-            export GIN_MODE=debug
-            export ENVIRONMENT=development
-            echo "Environment set to development"
-            ;;
-        prod|production)
-            export NODE_ENV=production
-            export GIN_MODE=release
-            export ENVIRONMENT=production
-            echo "Environment set to production"
-            ;;
-        test)
-            export NODE_ENV=test
-            export GIN_MODE=test
-            export ENVIRONMENT=test
-            echo "Environment set to test"
-            ;;
-        *)
-            echo "Usage: setenv {dev|prod|test}"
-            echo "Current environment:"
-            echo "  NODE_ENV: ${NODE_ENV:-not set}"
-            echo "  GIN_MODE: ${GIN_MODE:-not set}"
-            echo "  ENVIRONMENT: ${ENVIRONMENT:-not set}"
-            ;;
-    esac
-}
-
-# =============================================================================
-# Smart Project Commands (Based on your multi-language workflow)
-# =============================================================================
-
-# Smart dev command - detects project type and runs appropriate dev server
-dev() {
-    if [[ -f "Makefile" ]]; then
-        echo "🔧 Makefile project detected - running 'make dev'"
-        make dev
-    elif [[ -f "package.json" ]]; then
-        echo "📦 Node.js project detected"
-        if jq -e '.scripts.dev' package.json >/dev/null 2>&1; then
-            npm run dev
-        elif jq -e '.scripts.start' package.json >/dev/null 2>&1; then
-            npm start
-        else
-            echo "Running 'node app.js' (your common pattern)"
-            node app.js
-        fi
-    elif [[ -f "go.mod" ]]; then
-        echo "🐹 Go project detected - running 'go run .'"
-        go run .
-    elif [[ -f "pubspec.yaml" ]]; then
-        echo "💙 Flutter project detected - running 'flutter run'"
-        flutter run
-    else
-        echo "❓ Unknown project type - try specifying the command"
-        return 1
-    fi
-}
-
-# ccusage integration (you run this 45 times)
-# Auto-track when switching projects
-track_project() {
-    if command -v ccusage >/dev/null 2>&1; then
-        ccusage track "$(basename "$(pwd)")" 2>/dev/null || true
-    fi
-}
-
-# Enhanced cd with project tracking
-cd() {
-    builtin cd "$@" && track_project
-}
-
-# =============================================================================
-# Development Workflow Shortcuts
-# =============================================================================
-
-# Complete development workflow
-workflow() {
-    local action="$1"
-
-    case "$action" in
-        check)
-            make check 2>/dev/null || (echo "No Makefile found, running basic checks..." && go vet ./... && go test ./...)
-            ;;
-        build)
-            make build 2>/dev/null || go build .
-            ;;
-        test)
-            make test 2>/dev/null || go test ./... || npm test
-            ;;
-        audit)
-            make audit 2>/dev/null || (npm audit 2>/dev/null || echo "No audit available")
-            ;;
-        full)
-            workflow check && workflow test && workflow build
-            ;;
-        *)
-            echo "Usage: workflow {check|build|test|audit|full}"
-            ;;
-    esac
-}
-
-# Quick status overview (git + system)
+# Enhanced status - git + system info
 status() {
-    echo "=== Git Status ==="
-    if git rev-parse --git-dir > /dev/null 2>&1; then
-        git status --short --branch
-        echo ""
-        echo "Recent commits:"
-        git log --oneline -5
-    else
-        echo "Not a git repository"
-    fi
+    echo "📁 $(pwd)"
+    [[ -d .git ]] && echo "🔀 $(git branch --show-current) | $(git status --porcelain | wc -l | tr -d ' ') changes"
+    echo "💾 $(df -h . | awk 'NR==2 {print $4}') free"
+    echo "🔄 $(uptime | cut -d, -f1)"
+}
 
-    echo ""
-    echo "=== System Status ==="
-    echo "PWD: $(pwd)"
-    echo "Files: $(ls -1 | wc -l | tr -d ' ')"
+# Workflow automation
+workflow() {
+    case "$1" in
+        init) git init && git add . && git commit -m "initial commit" ;;
+        push) git add -u && git commit -m "${2:-update}" && git push ;;
+        pull) git pull && git submodule update ;;
+        clean) git clean -fd && git reset --hard ;;
+        *) echo "Usage: workflow {init|push [msg]|pull|clean}" ;;
+    esac
+}
 
-    if [[ -f "package.json" ]]; then
-        echo "Node project: $(node --version 2>/dev/null || echo 'Node not found')"
-    fi
+# Project setup
+mkproject() {
+    local name="$1"
+    [[ -z "$name" ]] && { echo "Usage: mkproject <name>"; return 1; }
+    mkdir "$name" && cd "$name" && git init
+}
 
-    if [[ -f "go.mod" ]]; then
-        echo "Go project: $(go version | cut -d' ' -f3 2>/dev/null || echo 'Go not found')"
-    fi
+# Find and kill process
+killp() {
+    local name="$1"
+    [[ -z "$name" ]] && { echo "Usage: killp <process>"; return 1; }
+    pkill -f "$name"
+}
 
-    if [[ -f "pubspec.yaml" ]]; then
-        echo "Flutter project: $(flutter --version | head -1 2>/dev/null || echo 'Flutter not found')"
-    fi
+# Extract any archive
+extract() {
+    case "$1" in
+        *.tar.gz|*.tgz) tar -xzf "$1" ;;
+        *.tar.bz2) tar -xjf "$1" ;;
+        *.zip) unzip "$1" ;;
+        *.rar) unrar x "$1" ;;
+        *) echo "Unknown format: $1" ;;
+    esac
+}
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Backup file with timestamp
+backup() {
+    cp "$1" "$1.bak.$(date +%Y%m%d_%H%M%S)"
 }

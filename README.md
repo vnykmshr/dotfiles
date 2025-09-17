@@ -1,224 +1,125 @@
-# Professional Dotfiles Collection
+# Professional Dotfiles
 
-> A modern, well-organized dotfiles collection inspired by best practices and designed for professional development workflows.
+> Clean, minimal dotfiles for productive development workflows
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
-[![Editor](https://img.shields.io/badge/Editor-Neovim-blue.svg)](https://neovim.io/)
 
-## ✨ Features
+## Features
 
-- **🎯 Modern Tools**: Neovim with LSP, Treesitter, modern CLI tools (bat, eza, fd, ripgrep)
-- **🔄 Cross-Platform**: Works on macOS, Linux, and WSL2
-- **📦 Smart Installation**: Dry-run support, OS detection, automatic backups
-- **⚡ Performance**: Optimized configurations for speed and efficiency
-- **🔧 Extensible**: Modular structure that's easy to customize
-- **🚀 Professional**: Production-ready with comprehensive documentation
+- **🎯 Modern Tools**: Neovim, modern CLI tools (bat, eza, fd, ripgrep)
+- **🔄 Cross-Platform**: macOS, Linux, WSL2
+- **📦 Smart Install**: Dry-run, OS detection, automatic backups
+- **⚡ Fast**: Optimized for speed and efficiency
+- **🧠 Smart Reminders**: Learn aliases through periodic suggestions
+- **🔧 Extensible**: Easy to customize and extend
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Clone the repository
+# Clone
 git clone https://github.com/vnykmshr/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# Preview what will be installed (dry run)
+# Preview (dry run)
 make install-dry-run
 
-# Install everything
+# Install
 make install
-
-# Or use the setup script directly
-./install/setup.sh
 ```
 
-## 📁 Structure
-
-```
-~/.dotfiles/
-├── install/                 # Installation & setup scripts
-│   ├── setup.sh            # Main bootstrap script
-│   ├── install-packages    # Package installation
-│   └── defaults/           # OS-specific defaults
-├── config/                 # Application configurations
-│   ├── zsh/               # Zsh configuration
-│   ├── git/               # Git configuration
-│   ├── nvim/              # Neovim setup with LSP
-│   ├── tmux/              # Tmux configuration
-│   └── mise/              # Version manager config
-├── bin/                   # Custom scripts & utilities
-├── lib/                   # Shared functions & utilities
-├── docs/                  # Documentation
-├── tests/                 # Installation tests
-└── Makefile              # Task automation
-```
-
-## 🛠 Installation Options
-
-### Full Installation
-```bash
-make install              # Complete setup
-make install-force        # Overwrite existing files
-```
-
-### Package Management
-```bash
-make packages             # Install all packages
-make packages-core        # Install only essential packages
-make packages-dev         # Install development tools
-```
-
-### Development Setup
-```bash
-make dev                  # Full development environment
-make quick-setup          # Minimal setup for new machines
-```
-
-## 📋 What's Included
-
-### Shell & Terminal
-- **Zsh** with modern configuration and plugins
-- **Oh My Zsh** compatibility with custom enhancements
-- **Modern aliases** for enhanced productivity
-- **Tmux** with vim-style keybindings
-
-### Development Tools
-- **Neovim** with LSP, Treesitter, and modern plugins
-- **Git** with helpful aliases and better defaults
-- **mise** for runtime version management
-- **Modern CLI tools**: bat, eza, fd, ripgrep, fzf, zoxide
-
-### Applications & Languages
-- Language runtimes via mise: Node.js, Python, Go, Rust
-- Development tools: Docker, kubectl, AWS CLI
-- macOS apps: iTerm2, VS Code, Rectangle, Raycast
-
-## 🔧 Configuration
-
-### Environment Variables
-```bash
-export DRY_RUN=true       # Preview changes only
-export VERBOSE=true       # Enable detailed output
-export FORCE=true         # Overwrite existing files
-export EDITOR=nvim        # Set preferred editor
-```
-
-### Customization
-```bash
-# Edit main zsh config
-make edit
-
-# Edit specific configs
-$EDITOR ~/.dotfiles/config/zsh/aliases
-$EDITOR ~/.dotfiles/config/git/gitconfig
-$EDITOR ~/.dotfiles/config/nvim/init.lua
-```
-
-## 🧪 Testing & Validation
+## Key Commands
 
 ```bash
-make test                 # Run installation tests
-make validate            # Validate dotfiles structure
-make lint                # Lint shell scripts
-make doctor              # System diagnostics
+make help          # Show all commands
+make install       # Install everything
+make test          # Run tests
+make validate      # Check setup
+make status        # Show info
 ```
 
-## 🔄 Management Commands
+## Alias Highlights
 
-### Updates & Sync
-```bash
-make update              # Pull latest changes
-make sync                # Update + reinstall
-```
-
-### Backup & Restore
-```bash
-make backup              # Create configuration backup
-make uninstall           # Remove dotfiles (creates backup)
-```
-
-### Status & Information
-```bash
-make status              # Show git and system status
-make doctor              # Run system diagnostics
-```
-
-### Cleanup
-```bash
-make clean               # Remove temporary files
-make reset               # Clean reinstall
-```
-
-## 🎯 Self-Management
-
-The dotfiles include a self-management script:
+Based on actual usage patterns:
 
 ```bash
-# Available in PATH after installation
-dotfiles install         # Reinstall dotfiles
-dotfiles sync            # Update and reinstall
-dotfiles backup          # Create backup
-dotfiles status          # Show status
-dotfiles edit            # Open in editor
-dotfiles test            # Run tests
+# Development (most used)
+md                  # make dev
+acp                 # git add -u && git commit && git push
+gst                 # git status --short --branch
+
+# Navigation
+ws                  # cd ~/workspace
+gh                  # cd ~/workspace/github/vnykmshr
+
+# Workflow
+dev                 # smart project dev server
+qc                  # quick commit with auto-message
+status              # enhanced git + system status
 ```
 
-## 🔐 Security & Privacy
+## Smart Features
 
-- **No sensitive data**: All personal information is templated
-- **Secure defaults**: Git signing, SSH key management
-- **Local overrides**: Support for machine-specific configs
-- **Backup protection**: Automatic backups before changes
+### Alias Reminders
+Shows helpful aliases every 10 shell sessions to build muscle memory:
 
-## 🌍 Cross-Platform Support
+```bash
+ar-show             # Show reminders now
+ar-level beginner   # Set skill level
+ar-off              # Disable reminders
+```
 
-### macOS
-- Homebrew package management
-- macOS-specific defaults and apps
-- Native integration with system features
+### Project Detection
+The `dev` command automatically detects project type:
+- Node.js → `npm run dev`
+- Rust → `cargo run`
+- Go → `go run .`
+- Make → `make dev`
 
-### Linux
-- Support for major distributions (Ubuntu, Fedora, Arch)
-- Package manager auto-detection
-- X11 clipboard integration
+## Structure
 
-### Windows (WSL2)
-- WSL2 compatibility
-- Windows-specific adaptations
-- Cross-platform clipboard support
+```
+├── config/         # All configuration files
+│   ├── zsh/        # Zsh setup and functions
+│   ├── git/        # Git config with 40+ aliases
+│   ├── nvim/       # Neovim with LSP
+│   └── tmux/       # Terminal multiplexer
+├── install/        # Installation scripts
+├── tests/          # Quality assurance
+└── bin/            # Utility scripts
+```
 
-## 📖 Documentation
+## Requirements
 
-- [`docs/FEATURES.md`](docs/FEATURES.md) - Detailed feature documentation
-- [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) - Customization guide
-- [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- **macOS**: Xcode Command Line Tools
+- **Linux**: git, curl, zsh
+- **Optional**: homebrew, mise, fzf, zoxide
 
-## 🤝 Contributing
+## Testing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run tests: `make test`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
+Comprehensive test suite ensures reliability:
 
-## 💡 Inspiration
+```bash
+make test           # All tests
+make test-configs   # Config validation
+make test-install   # Installation tests
+make lint           # Code quality
+```
 
-This dotfiles collection draws inspiration from:
+## Customization
 
-- [Thorsten Ball's dotfiles](https://github.com/mrnugget/dotfiles) - Clean, minimal approach
-- [Mathias Bynens' dotfiles](https://github.com/mathiasbynens/dotfiles) - macOS optimization
-- [thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles) - Professional practices
+1. **Personal configs**: Edit files in `config/`
+2. **Local overrides**: Create `~/.zshrc.local`
+3. **Extra aliases**: Add to `config/zsh/personal-aliases`
 
-## 📄 License
+## Philosophy
 
-[MIT License](LICENSE) - Use freely, adapt as needed.
+- **Minimal**: Every line serves a purpose
+- **Fast**: Optimized for quick startup
+- **Reliable**: Thoroughly tested
+- **Human**: No AI bloat, real-world usage
+- **Maintainable**: Clean, readable code
 
----
+## License
 
-⭐ **Star this repository if it helped you!**
-
-🐛 **Found a bug?** [Open an issue](https://github.com/vnykmshr/dotfiles/issues)
-
-💬 **Have questions?** [Start a discussion](https://github.com/vnykmshr/dotfiles/discussions)
+MIT © [vnykmshr](https://github.com/vnykmshr)

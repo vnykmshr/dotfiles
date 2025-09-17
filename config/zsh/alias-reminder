@@ -1,277 +1,87 @@
 #!/usr/bin/env zsh
+# Alias reminder system - shows helpful aliases periodically
 
-# Alias Reminder System
-# Periodically shows useful aliases to help build muscle memory
-
-# =============================================================================
 # Configuration
-# =============================================================================
-
-# Reminder frequency settings
 ALIAS_REMINDER_ENABLED="${ALIAS_REMINDER_ENABLED:-true}"
-ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-10}"  # Show every N shell sessions
-ALIAS_REMINDER_LEVEL="${ALIAS_REMINDER_LEVEL:-beginner}"    # beginner, intermediate, advanced
-ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-3}"     # Max tips per session
-
-# File to track reminders
+ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-10}"
+ALIAS_REMINDER_LEVEL="${ALIAS_REMINDER_LEVEL:-beginner}"
+ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-3}"
 ALIAS_REMINDER_DIR="$HOME/.config/dotfiles"
-ALIAS_REMINDER_DATA="$ALIAS_REMINDER_DIR/alias-reminders.json"
 ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 
-# Create directory if it doesn't exist
+# Create directory if needed
 [[ ! -d "$ALIAS_REMINDER_DIR" ]] && mkdir -p "$ALIAS_REMINDER_DIR"
 
-# =============================================================================
-# Curated Alias Lists
-# =============================================================================
+# Curated aliases based on usage patterns
+declare -A ALIASES
+ALIASES=(
+    # Beginner (most frequent commands)
+    "md"    "make dev (you use this 128 times!)"
+    "acp"   "git add -u && git commit && git push"
+    "gst"   "git status --short --branch (you use this 558 times!)"
+    "ws"    "cd ~/workspace"
+    "gh"    "cd ~/workspace/github/vnykmshr"
+    "ll"    "ls -la"
+    "reload" "source ~/.zshrc"
 
-# Beginner-friendly aliases (your most frequent commands)
-declare -A BEGINNER_ALIASES
-BEGINNER_ALIASES=(
-    # Your top aliases based on usage analysis
-    "md"           "make dev (you use 'make dev' 128 times!)"
-    "acp"          "git add -u && git commit && git push (your complete workflow)"
-    "gst"          "git status --short --branch (enhanced status)"
-    "ws"           "cd ~/workspace (quick workspace navigation)"
-    "gh"           "cd ~/workspace/github/vnykmshr (your projects)"
-    "ll"           "ls -la (detailed file listing)"
-    "reload"       "source ~/.zshrc (reload zsh config)"
-    "wh"           "workflow-helper (automation shortcuts)"
+    # Intermediate
+    "gup"   "git pull && git submodule update"
+    "gcl"   "git clean -fd && git reset --hard"
+    "dev"   "smart project dev server"
+    "cpu"   "htop --sort-key PERCENT_CPU"
+    "ports" "lsof -i"
+
+    # Advanced
+    "workflow" "complete development automation"
+    "qc"    "quick commit with auto messages"
+    "status" "enhanced project status"
 )
 
-# Intermediate aliases for more advanced workflows
-declare -A INTERMEDIATE_ALIASES
-INTERMEDIATE_ALIASES=(
-    "gacp"         "git add -u && git commit && git push (alternative to acp)"
-    "gup"          "git pull && git submodule update (smart git pull)"
-    "gcl"          "git clean -fd && git reset --hard (clean workspace)"
-    "dev"          "smart project dev server (detects project type)"
-    "devserver"    "intelligent dev server starter"
-    "clone"        "git clone with auto-setup dependencies"
-    "cpu"          "htop --sort-key PERCENT_CPU (monitor CPU usage)"
-    "mem"          "htop --sort-key PERCENT_MEM (monitor memory)"
-    "ports"        "lsof -i (show listening ports)"
-)
-
-# Advanced aliases for power users
-declare -A ADVANCED_ALIASES
-ADVANCED_ALIASES=(
-    "workflow"     "complete development workflow automation"
-    "qc"           "quick commit with auto-generated messages"
-    "status"       "enhanced project status (git + system info)"
-    "setenv"       "smart environment switching (dev/prod)"
-    "track_project" "automatic project usage tracking"
-    "git-cleanup"  "remove merged branches safely"
-    "smartmv"      "move files with automatic backup"
-    "process_images" "bulk image processing"
-)
-
-# =============================================================================
-# Utility Functions
-# =============================================================================
-
-# Get current alias list based on level
-get_current_aliases() {
-    case "$ALIAS_REMINDER_LEVEL" in
-        "beginner")
-            echo "BEGINNER_ALIASES"
-            ;;
-        "intermediate")
-            echo "INTERMEDIATE_ALIASES"
-            ;;
-        "advanced")
-            echo "ADVANCED_ALIASES"
-            ;;
-        *)
-            echo "BEGINNER_ALIASES"
-            ;;
-    esac
-}
-
-# Initialize reminder data file
-init_reminder_data() {
-    if [[ ! -f "$ALIAS_REMINDER_DATA" ]]; then
-        cat > "$ALIAS_REMINDER_DATA" << 'EOF'
-{
-  "shown_aliases": [],
-  "dismissed_aliases": [],
-  "level": "beginner",
-  "last_shown": 0,
-  "total_sessions": 0
-}
-EOF
-    fi
-}
-
-# Update session counter
 increment_session_counter() {
-    local current_count=0
-    if [[ -f "$ALIAS_REMINDER_COUNTER" ]]; then
-        current_count=$(cat "$ALIAS_REMINDER_COUNTER")
-    fi
-    echo $((current_count + 1)) > "$ALIAS_REMINDER_COUNTER"
-    echo $((current_count + 1))
+    local count=0
+    [[ -f "$ALIAS_REMINDER_COUNTER" ]] && count=$(cat "$ALIAS_REMINDER_COUNTER")
+    echo $((count + 1)) > "$ALIAS_REMINDER_COUNTER"
+    echo $((count + 1))
 }
 
-# Check if it's time to show reminders
 should_show_reminder() {
     local session_count=$(increment_session_counter)
     (( session_count % ALIAS_REMINDER_FREQUENCY == 0 ))
 }
 
-# Get random aliases that haven't been shown recently
-get_random_aliases() {
-    local alias_var=$(get_current_aliases)
-    local -a available_aliases
-    local -a shown_aliases
-    local max_tips="$ALIAS_REMINDER_MAX_TIPS"
-
-    # Get shown aliases from data file
-    if command -v jq >/dev/null 2>&1 && [[ -f "$ALIAS_REMINDER_DATA" ]]; then
-        shown_aliases=($(jq -r '.shown_aliases[]' "$ALIAS_REMINDER_DATA" 2>/dev/null || true))
-    fi
-
-    # Get all available aliases for current level
-    case "$alias_var" in
-        "BEGINNER_ALIASES")
-            for alias_name in ${(k)BEGINNER_ALIASES}; do
-                if [[ ! " ${shown_aliases[*]} " =~ " ${alias_name} " ]]; then
-                    available_aliases+=("$alias_name")
-                fi
-            done
-            ;;
-        "INTERMEDIATE_ALIASES")
-            for alias_name in ${(k)INTERMEDIATE_ALIASES}; do
-                if [[ ! " ${shown_aliases[*]} " =~ " ${alias_name} " ]]; then
-                    available_aliases+=("$alias_name")
-                fi
-            done
-            ;;
-        "ADVANCED_ALIASES")
-            for alias_name in ${(k)ADVANCED_ALIASES}; do
-                if [[ ! " ${shown_aliases[*]} " =~ " ${alias_name} " ]]; then
-                    available_aliases+=("$alias_name")
-                fi
-            done
-            ;;
-    esac
-
-    # If we've shown all aliases, reset the list
-    if [[ ${#available_aliases[@]} -eq 0 ]]; then
-        if command -v jq >/dev/null 2>&1; then
-            jq '.shown_aliases = []' "$ALIAS_REMINDER_DATA" > "${ALIAS_REMINDER_DATA}.tmp" &&
-            mv "${ALIAS_REMINDER_DATA}.tmp" "$ALIAS_REMINDER_DATA"
-        fi
-        # Repopulate available aliases
-        case "$alias_var" in
-            "BEGINNER_ALIASES")
-                available_aliases=(${(k)BEGINNER_ALIASES})
-                ;;
-            "INTERMEDIATE_ALIASES")
-                available_aliases=(${(k)INTERMEDIATE_ALIASES})
-                ;;
-            "ADVANCED_ALIASES")
-                available_aliases=(${(k)ADVANCED_ALIASES})
-                ;;
-        esac
-    fi
-
-    # Shuffle and take up to max_tips
-    local shuffled_aliases=(${(o)available_aliases})  # Sort for consistency
-    local selected_aliases=()
+show_reminders() {
+    # Get random aliases
+    local -a keys=(${(k)ALIASES})
+    local -a selected=()
     local count=0
 
-    for alias_name in "${shuffled_aliases[@]}"; do
-        if [[ $count -lt $max_tips ]]; then
-            selected_aliases+=("$alias_name")
-            ((count++))
-        else
-            break
-        fi
+    # Simple random selection
+    for key in ${(o)keys}; do
+        [[ $count -lt $ALIAS_REMINDER_MAX_TIPS ]] || break
+        selected+="$key"
+        ((count++))
     done
 
-    echo "${selected_aliases[@]}"
-}
+    [[ ${#selected[@]} -eq 0 ]] && return
 
-# Display alias reminders
-show_alias_reminders() {
-    local -a aliases_to_show
-    aliases_to_show=($(get_random_aliases))
+    echo "\n💡 Alias Reminders (Level: $ALIAS_REMINDER_LEVEL)"
+    echo "════════════════════════════════════════"
 
-    if [[ ${#aliases_to_show[@]} -eq 0 ]]; then
-        return 0
-    fi
-
-    # Colors for output
-    local BLUE='\033[0;34m'
-    local GREEN='\033[0;32m'
-    local YELLOW='\033[1;33m'
-    local CYAN='\033[0;36m'
-    local NC='\033[0m'
-
-    echo ""
-    printf "${CYAN}💡 Alias Reminders${NC} (Level: ${ALIAS_REMINDER_LEVEL})\n"
-    printf "${BLUE}════════════════════════════════════════${NC}\n"
-
-    local alias_var=$(get_current_aliases)
-
-    for alias_name in "${aliases_to_show[@]}"; do
-        local description=""
-
-        case "$alias_var" in
-            "BEGINNER_ALIASES")
-                description="${BEGINNER_ALIASES[$alias_name]}"
-                ;;
-            "INTERMEDIATE_ALIASES")
-                description="${INTERMEDIATE_ALIASES[$alias_name]}"
-                ;;
-            "ADVANCED_ALIASES")
-                description="${ADVANCED_ALIASES[$alias_name]}"
-                ;;
-        esac
-
-        printf "${YELLOW}%-12s${NC} %s\n" "$alias_name" "$description"
+    for alias in $selected; do
+        printf "%-12s %s\n" "$alias" "${ALIASES[$alias]}"
     done
 
-    echo ""
-    printf "${GREEN}💡 Try using these shortcuts to speed up your workflow!${NC}\n"
-    printf "${BLUE}   Configure: export ALIAS_REMINDER_LEVEL={beginner|intermediate|advanced}${NC}\n"
-    printf "${BLUE}   Disable:   export ALIAS_REMINDER_ENABLED=false${NC}\n"
-    echo ""
-
-    # Update shown aliases
-    update_shown_aliases "${aliases_to_show[@]}"
+    echo "\n💡 Try these shortcuts to speed up your workflow!"
+    echo "   Configure: export ALIAS_REMINDER_LEVEL={beginner|intermediate|advanced}"
+    echo "   Disable:   export ALIAS_REMINDER_ENABLED=false\n"
 }
 
-# Update the list of shown aliases
-update_shown_aliases() {
-    local new_aliases=("$@")
-
-    if command -v jq >/dev/null 2>&1 && [[ -f "$ALIAS_REMINDER_DATA" ]]; then
-        local updated_data
-        updated_data=$(jq --argjson new_aliases "$(printf '%s\n' "${new_aliases[@]}" | jq -R . | jq -s .)" \
-                        '.shown_aliases += $new_aliases | .last_shown = now' "$ALIAS_REMINDER_DATA")
-        echo "$updated_data" > "$ALIAS_REMINDER_DATA"
-    fi
-}
-
-# =============================================================================
-# Configuration Commands
-# =============================================================================
-
-# Set reminder level
+# Management commands
 alias-reminder-level() {
-    local level="$1"
-    case "$level" in
+    case "$1" in
         beginner|intermediate|advanced)
-            export ALIAS_REMINDER_LEVEL="$level"
-            echo "Alias reminder level set to: $level"
-
-            # Update config file if jq is available
-            if command -v jq >/dev/null 2>&1 && [[ -f "$ALIAS_REMINDER_DATA" ]]; then
-                jq --arg level "$level" '.level = $level' "$ALIAS_REMINDER_DATA" > "${ALIAS_REMINDER_DATA}.tmp" &&
-                mv "${ALIAS_REMINDER_DATA}.tmp" "$ALIAS_REMINDER_DATA"
-            fi
+            export ALIAS_REMINDER_LEVEL="$1"
+            echo "Alias reminder level set to: $1"
             ;;
         *)
             echo "Usage: alias-reminder-level {beginner|intermediate|advanced}"
@@ -280,87 +90,18 @@ alias-reminder-level() {
     esac
 }
 
-# Show reminders on demand
-alias-reminder-show() {
-    show_alias_reminders
-}
+alias-reminder-show() { show_reminders; }
+alias-reminder-disable() { export ALIAS_REMINDER_ENABLED=false; echo "Disabled"; }
+alias-reminder-enable() { export ALIAS_REMINDER_ENABLED=true; echo "Enabled"; }
+alias-reminder-reset() { rm -f "$ALIAS_REMINDER_COUNTER"; echo "Reset"; }
 
-# Disable reminders
-alias-reminder-disable() {
-    export ALIAS_REMINDER_ENABLED=false
-    echo "Alias reminders disabled for this session"
-    echo "To permanently disable, add 'export ALIAS_REMINDER_ENABLED=false' to ~/.zshrc.local"
-}
-
-# Enable reminders
-alias-reminder-enable() {
-    export ALIAS_REMINDER_ENABLED=true
-    echo "Alias reminders enabled"
-}
-
-# Reset shown aliases (start over)
-alias-reminder-reset() {
-    if command -v jq >/dev/null 2>&1 && [[ -f "$ALIAS_REMINDER_DATA" ]]; then
-        jq '.shown_aliases = []' "$ALIAS_REMINDER_DATA" > "${ALIAS_REMINDER_DATA}.tmp" &&
-        mv "${ALIAS_REMINDER_DATA}.tmp" "$ALIAS_REMINDER_DATA"
-        echo "Alias reminder history reset"
-    fi
-}
-
-# Show configuration and statistics
-alias-reminder-config() {
-    echo "Alias Reminder Configuration:"
-    echo "============================="
-    echo "Enabled: $ALIAS_REMINDER_ENABLED"
-    echo "Level: $ALIAS_REMINDER_LEVEL"
-    echo "Frequency: Every $ALIAS_REMINDER_FREQUENCY sessions"
-    echo "Max tips: $ALIAS_REMINDER_MAX_TIPS per session"
-    echo ""
-
-    if [[ -f "$ALIAS_REMINDER_COUNTER" ]]; then
-        echo "Session count: $(cat "$ALIAS_REMINDER_COUNTER")"
-    fi
-
-    if command -v jq >/dev/null 2>&1 && [[ -f "$ALIAS_REMINDER_DATA" ]]; then
-        local shown_count
-        shown_count=$(jq '.shown_aliases | length' "$ALIAS_REMINDER_DATA" 2>/dev/null || echo "0")
-        echo "Aliases shown: $shown_count"
-    fi
-}
-
-# =============================================================================
-# Main Function - Called on Shell Startup
-# =============================================================================
-
-# Initialize and show reminders if conditions are met
-alias_reminder_main() {
-    # Skip if disabled
-    [[ "$ALIAS_REMINDER_ENABLED" != "true" ]] && return 0
-
-    # Skip if no terminal (non-interactive)
-    [[ ! -t 1 ]] && return 0
-
-    # Initialize data
-    init_reminder_data
-
-    # Check if it's time to show reminders
-    if should_show_reminder; then
-        show_alias_reminders
-    fi
-}
-
-# =============================================================================
-# Aliases for Easy Management
-# =============================================================================
-
+# Short aliases
 alias ar-level='alias-reminder-level'
 alias ar-show='alias-reminder-show'
-alias ar-config='alias-reminder-config'
-alias ar-reset='alias-reminder-reset'
 alias ar-on='alias-reminder-enable'
 alias ar-off='alias-reminder-disable'
 
-# Auto-run when sourced (only in interactive shells)
-if [[ $- == *i* ]]; then
-    alias_reminder_main
+# Auto-run in interactive shells
+if [[ $- == *i* && "$ALIAS_REMINDER_ENABLED" == "true" ]]; then
+    should_show_reminder && show_reminders
 fi
