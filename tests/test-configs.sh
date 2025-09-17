@@ -121,8 +121,8 @@ test_neovim_config() {
         fi
 
         # Test for essential configurations
-        assert_test "grep -q 'vim.opt.number' '$nvim_config'" "Neovim has line numbers config"
-        assert_test "grep -q 'vim.g.mapleader' '$nvim_config'" "Neovim has leader key config"
+        assert_test "grep -q 'number.*=.*true' '$nvim_config'" "Neovim has line numbers config"
+        assert_test "grep -q 'mapleader' '$nvim_config'" "Neovim has leader key config"
         assert_test "grep -q 'require.*lazy' '$nvim_config'" "Neovim uses lazy.nvim plugin manager"
     fi
 }
@@ -165,7 +165,7 @@ test_makefile() {
         done
 
         # Test that help target lists other targets
-        assert_test "make -f '$makefile' help | grep -q 'install'" "Makefile help shows install target"
+        assert_test "make -f '$makefile' help 2>/dev/null | grep -q install" "Makefile help shows install target"
     fi
 }
 
@@ -189,7 +189,7 @@ test_utility_scripts() {
             assert_test "test -x '$script'" "$filename is executable"
 
             # Test shows help
-            if [[ "$filename" != "install-packages" ]]; then  # install-packages doesn't have --help
+            if [[ "$filename" != "install-packages" ]]; then # install-packages doesn't have --help
                 assert_test "'$script' --help >/dev/null || '$script' -h >/dev/null" "$filename shows help"
             fi
 

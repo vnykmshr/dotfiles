@@ -97,7 +97,7 @@ assert_alias_exists() {
 
     ((TESTS_RUN++))
 
-    if HOME="$TEST_HOME" bash -c "source '$TEST_HOME/.zshrc' && alias '$alias_name'" >/dev/null 2>&1; then
+    if HOME="$TEST_HOME" zsh -c "source '$TEST_HOME/.zshrc' && alias '$alias_name'" >/dev/null 2>&1; then
         log_success "$description"
         ((TESTS_PASSED++))
         return 0
@@ -328,7 +328,7 @@ test_backup_functionality() {
     log_info "Testing backup functionality..."
 
     # Create a fake existing file
-    echo "existing content" > "$TEST_HOME/.zshrc"
+    echo "existing content" >"$TEST_HOME/.zshrc"
 
     # Run installation which should backup the file
     if HOME="$TEST_HOME" FORCE=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
@@ -379,7 +379,7 @@ main() {
                 skip_cleanup=true
                 shift
                 ;;
-            --help|-h)
+            --help | -h)
                 echo "Usage: $0 [--keep-test-env] [--help|-h]"
                 echo "  --keep-test-env  Don't cleanup test environment after running"
                 echo "  --help, -h       Show this help message"

@@ -187,18 +187,18 @@ format_files() {
     find "$PROJECT_ROOT" -type f \
         -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \
         -o -name "*.md" -o -name "*.lua" -o -name "*.json" \
-        -o -name "*.yml" -o -name "*.yaml" -o -name "*.conf" \
-        | while read -r file; do
-        if [[ -f "$file" && ! "$file" =~ \.git/ ]]; then
-            # Remove trailing whitespace
-            sed -i '' 's/[[:space:]]*$//' "$file"
+        -o -name "*.yml" -o -name "*.yaml" -o -name "*.conf" |
+        while read -r file; do
+            if [[ -f "$file" && ! "$file" =~ \.git/ ]]; then
+                # Remove trailing whitespace
+                sed -i '' 's/[[:space:]]*$//' "$file"
 
-            # Ensure final newline
-            if [[ -s "$file" && $(tail -c1 "$file" | wc -l) -eq 0 ]]; then
-                echo "" >> "$file"
+                # Ensure final newline
+                if [[ -s "$file" && $(tail -c1 "$file" | wc -l) -eq 0 ]]; then
+                    echo "" >>"$file"
+                fi
             fi
-        fi
-    done
+        done
 
     log_success "Auto-formatting complete"
 }
@@ -213,8 +213,8 @@ check_all_files() {
         -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \
         -o -name "*.md" -o -name "*.lua" -o -name "*.json" \
         -o -name "*.yml" -o -name "*.yaml" -o -name "*.conf" \
-        -o -name "Makefile" -o -name "*.make" -o -name "*.mk" \
-        | grep -v -E '\.(git|node_modules|build|dist)/')
+        -o -name "Makefile" -o -name "*.make" -o -name "*.mk" |
+        grep -v -E '\.(git|node_modules|build|dist)/')
 
     if [[ ${#files[@]} -eq 0 ]]; then
         log_warn "No files found to check"
@@ -239,7 +239,7 @@ check_all_files() {
 
         # Specific format checks based on file type
         case "$file" in
-            *.sh|*.bash|*.zsh)
+            *.sh | *.bash | *.zsh)
                 check_shell_format "$file"
                 local shell_issues=$?
                 ((file_issues += shell_issues))
@@ -254,7 +254,7 @@ check_all_files() {
                 local json_issues=$?
                 ((file_issues += json_issues))
                 ;;
-            *.yml|*.yaml)
+            *.yml | *.yaml)
                 check_yaml_format "$file"
                 local yaml_issues=$?
                 ((file_issues += yaml_issues))
@@ -298,11 +298,11 @@ main() {
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --fix|-f)
+            --fix | -f)
                 fix_format=true
                 shift
                 ;;
-            --help|-h)
+            --help | -h)
                 echo "Usage: $0 [--fix|-f] [--help|-h]"
                 echo "  --fix, -f    Auto-fix formatting issues"
                 echo "  --help, -h   Show this help message"

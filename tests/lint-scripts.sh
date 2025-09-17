@@ -136,17 +136,17 @@ find_shell_scripts() {
         \( -name "*.sh" \
         -o -name "*.bash" \
         -o -name "*.zsh" \
-        -o -executable \) \
+        -o -perm +111 \) \
         -not -path "*/.*" \
         -not -path "*/node_modules/*" \
         -not -path "*/build/*" \
-        -not -path "*/dist/*" \
-        | while read -r file; do
-        # Check if it's actually a shell script
-        if [[ "$file" =~ \.(sh|bash|zsh)$ ]] || [[ -f "$file" && $(head -1 "$file" 2>/dev/null) =~ ^#!/.*sh ]]; then
-            echo "$file"
-        fi
-    done
+        -not -path "*/dist/*" |
+        while read -r file; do
+            # Check if it's actually a shell script
+            if [[ "$file" =~ \.(sh|bash|zsh)$ ]] || [[ -f "$file" && $(head -1 "$file" 2>/dev/null) =~ ^#!/.*sh ]]; then
+                echo "$file"
+            fi
+        done
 }
 
 # Auto-fix formatting issues
@@ -170,11 +170,11 @@ main() {
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --fix|-f)
+            --fix | -f)
                 fix_format=true
                 shift
                 ;;
-            --help|-h)
+            --help | -h)
                 echo "Usage: $0 [--fix|-f] [--help|-h]"
                 echo "  --fix, -f    Auto-fix formatting issues"
                 echo "  --help, -h   Show this help message"
@@ -204,8 +204,10 @@ main() {
     # Find and lint all shell scripts
     log_info "Scanning for shell scripts..."
 
-    local scripts
-    mapfile -t scripts < <(find_shell_scripts)
+    local scripts=()
+    while IFS= read -r script; do
+        scripts+=("$script")
+    done < <(find_shell_scripts)
 
     if [[ ${#scripts[@]} -eq 0 ]]; then
         log_warn "No shell scripts found"
