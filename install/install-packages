@@ -1,0 +1,429 @@
+#!/usr/bin/env bash
+
+# Package Installation Script
+# Cross-platform package installation with modern tools
+
+# Source utilities
+source "$DOTFILES_DIR/lib/utils.sh"
+source "$DOTFILES_DIR/lib/os-detect.sh"
+source "$DOTFILES_DIR/lib/logging.sh"
+
+# =============================================================================
+# Core Development Tools
+# =============================================================================
+
+install_core_tools() {
+    log_step "Installing core development tools"
+
+    case "$OS_NAME" in
+        macos)
+            # Essential macOS packages via Homebrew
+            local packages=(
+                # Core utilities
+                curl
+                wget
+                git
+                zsh
+                tmux
+
+                # Modern CLI tools
+                bat          # Better cat
+                eza          # Better ls
+                fd           # Better find
+                ripgrep      # Better grep
+                fzf          # Fuzzy finder
+                zoxide       # Smart cd
+
+                # Development tools
+                neovim       # Modern vim
+                mise         # Version manager
+                gh           # GitHub CLI
+                jq           # JSON processor
+
+                # System monitoring
+                htop
+                tree
+
+                # Compression
+                unzip
+                p7zip
+            )
+
+            log_info "Installing Homebrew packages..."
+            for package in "${packages[@]}"; do
+                if ! brew list "$package" >/dev/null 2>&1; then
+                    run_cmd "brew install $package"
+                else
+                    log_info "Already installed: $package"
+                fi
+            done
+            ;;
+
+        ubuntu|debian)
+            # Update package list
+            run_cmd "sudo apt update"
+
+            # Essential Ubuntu/Debian packages
+            local packages=(
+                # Core utilities
+                curl
+                wget
+                git
+                zsh
+                tmux
+                build-essential
+
+                # Development tools
+                neovim
+                jq
+
+                # System tools
+                htop
+                tree
+                unzip
+                p7zip-full
+
+                # Clipboard support
+                xclip
+            )
+
+            log_info "Installing apt packages..."
+            run_cmd "sudo apt install -y ${packages[*]}"
+
+            # Modern CLI tools (install manually if not available)
+            install_modern_cli_tools_linux
+            ;;
+
+        fedora|centos|rhel)
+            # Essential Fedora/RHEL packages
+            local packages=(
+                # Core utilities
+                curl
+                wget
+                git
+                zsh
+                tmux
+
+                # Development tools
+                neovim
+                jq
+
+                # System tools
+                htop
+                tree
+                unzip
+                p7zip
+            )
+
+            log_info "Installing dnf/yum packages..."
+            run_cmd "sudo $PACKAGE_MANAGER install -y ${packages[*]}"
+
+            install_modern_cli_tools_linux
+            ;;
+
+        arch)
+            # Essential Arch packages
+            local packages=(
+                # Core utilities
+                curl
+                wget
+                git
+                zsh
+                tmux
+                base-devel
+
+                # Modern CLI tools
+                bat
+                eza
+                fd
+                ripgrep
+                fzf
+                zoxide
+
+                # Development tools
+                neovim
+                jq
+
+                # System tools
+                htop
+                tree
+                unzip
+                p7zip
+
+                # Clipboard
+                xclip
+            )
+
+            log_info "Installing pacman packages..."
+            run_cmd "sudo pacman -S --noconfirm --needed ${packages[*]}"
+            ;;
+
+        *)
+            log_warn "Unknown OS: $OS_NAME. Skipping package installation."
+            ;;
+    esac
+}
+
+# Install modern CLI tools on Linux
+install_modern_cli_tools_linux() {
+    log_info "Installing modern CLI tools..."
+
+    # bat (better cat)
+    if ! command_exists bat; then
+        case "$OS_NAME" in
+            ubuntu|debian)
+                run_cmd "sudo apt install -y bat"
+                # Ubuntu installs as 'batcat'
+                if command_exists batcat && ! command_exists bat; then
+                    run_cmd "sudo ln -sf /usr/bin/batcat /usr/local/bin/bat"
+                fi
+                ;;
+        esac
+    fi
+
+    # eza (better ls)
+    if ! command_exists eza; then
+        log_info "Installing eza via cargo..."
+        if command_exists cargo; then
+            run_cmd "cargo install eza"
+        else
+            log_warn "Cargo not found. Install Rust to get eza."
+        fi
+    fi
+
+    # fd (better find)
+    if ! command_exists fd; then
+        case "$OS_NAME" in
+            ubuntu|debian)
+                run_cmd "sudo apt install -y fd-find"
+                # Ubuntu installs as 'fdfind'
+                if command_exists fdfind && ! command_exists fd; then
+                    run_cmd "sudo ln -sf /usr/bin/fdfind /usr/local/bin/fd"
+                fi
+                ;;
+        esac
+    fi
+
+    # ripgrep (better grep)
+    if ! command_exists rg; then
+        case "$OS_NAME" in
+            ubuntu|debian)
+                run_cmd "sudo apt install -y ripgrep"
+                ;;
+        esac
+    fi
+
+    # fzf (fuzzy finder)
+    if ! command_exists fzf; then
+        log_info "Installing fzf..."
+        run_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf"
+        run_cmd "~/.fzf/install --all"
+    fi
+
+    # zoxide (smart cd)
+    if ! command_exists zoxide; then
+        log_info "Installing zoxide via curl..."
+        run_cmd "curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
+    fi
+}
+
+# =============================================================================
+# Language Runtimes and Version Managers
+# =============================================================================
+
+install_language_tools() {
+    log_step "Installing language tools and runtimes"
+
+    # Install mise (modern version manager)
+    if ! command_exists mise; then
+        log_info "Installing mise..."
+        run_cmd "curl https://mise.run | sh"
+
+        # Add to PATH for current session
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+
+    # Install languages via mise
+    if command_exists mise; then
+        log_info "Installing languages via mise..."
+
+        # Node.js
+        run_cmd "mise use -g node@lts"
+
+        # Python
+        run_cmd "mise use -g python@latest"
+
+        # Go
+        run_cmd "mise use -g go@latest"
+
+        # Rust (via rustup if not using mise)
+        if ! command_exists rustc; then
+            log_info "Installing Rust via rustup..."
+            run_cmd "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+        fi
+    fi
+}
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+install_development_tools() {
+    log_step "Installing development tools"
+
+    case "$OS_NAME" in
+        macos)
+            # macOS-specific dev tools
+            local packages=(
+                # Databases
+                postgresql
+                redis
+
+                # Containers
+                docker
+                docker-compose
+
+                # Cloud tools
+                awscli
+                terraform
+
+                # Kubernetes
+                kubectl
+                helm
+            )
+
+            for package in "${packages[@]}"; do
+                if ! brew list "$package" >/dev/null 2>&1; then
+                    run_cmd "brew install $package"
+                else
+                    log_info "Already installed: $package"
+                fi
+            done
+
+            # Install Docker Desktop separately if needed
+            if ! command_exists docker; then
+                log_info "Consider installing Docker Desktop from https://docker.com"
+            fi
+            ;;
+
+        *)
+            log_info "Additional dev tools installation varies by platform"
+            log_info "Consider installing: docker, postgresql, redis, awscli, terraform, kubectl"
+            ;;
+    esac
+}
+
+# =============================================================================
+# Fonts
+# =============================================================================
+
+install_fonts() {
+    log_step "Installing fonts"
+
+    case "$OS_NAME" in
+        macos)
+            # Install Nerd Fonts via Homebrew
+            run_cmd "brew tap homebrew/cask-fonts"
+
+            local fonts=(
+                font-fira-code-nerd-font
+                font-jetbrains-mono-nerd-font
+                font-source-code-pro
+            )
+
+            for font in "${fonts[@]}"; do
+                run_cmd "brew install --cask $font"
+            done
+            ;;
+
+        *)
+            log_info "Font installation varies by platform"
+            log_info "Consider installing Nerd Fonts for better terminal experience"
+            ;;
+    esac
+}
+
+# =============================================================================
+# GUI Applications (macOS)
+# =============================================================================
+
+install_gui_apps() {
+    if [[ "$OS_NAME" == "macos" ]]; then
+        log_step "Installing GUI applications (macOS)"
+
+        local apps=(
+            # Development
+            visual-studio-code
+            iterm2
+
+            # Utilities
+            raycast
+            rectangle
+            the-unarchiver
+
+            # Browsers
+            firefox
+
+            # Optional: Uncomment if you want these
+            # docker
+            # postman
+            # slack
+            # notion
+        )
+
+        for app in "${apps[@]}"; do
+            if ! brew list --cask "$app" >/dev/null 2>&1; then
+                run_cmd "brew install --cask $app"
+            else
+                log_info "Already installed: $app"
+            fi
+        done
+    fi
+}
+
+# =============================================================================
+# Main Installation Function
+# =============================================================================
+
+install_packages_main() {
+    log_info "Starting package installation for $OS_NAME"
+
+    # Core tools (essential)
+    install_core_tools
+
+    # Language runtimes
+    install_language_tools
+
+    # Development tools
+    if [[ "${INSTALL_DEV_TOOLS:-true}" == "true" ]]; then
+        install_development_tools
+    fi
+
+    # Fonts
+    if [[ "${INSTALL_FONTS:-true}" == "true" ]]; then
+        install_fonts
+    fi
+
+    # GUI apps (macOS only)
+    if [[ "${INSTALL_GUI_APPS:-false}" == "true" ]]; then
+        install_gui_apps
+    fi
+
+    log_success "Package installation complete!"
+    log_info "You may need to restart your shell or run 'source ~/.zshrc'"
+}
+
+# Run installation if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    # Source required libraries if not already sourced
+    if ! command -v log_info >/dev/null 2>&1; then
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+        source "$DOTFILES_DIR/lib/utils.sh"
+        source "$DOTFILES_DIR/lib/os-detect.sh"
+        source "$DOTFILES_DIR/lib/logging.sh"
+        detect_os
+    fi
+
+    install_packages_main
+fi

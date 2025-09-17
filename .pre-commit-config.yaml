@@ -1,0 +1,120 @@
+# Pre-commit hooks for dotfiles quality assurance
+# See https://pre-commit.com for more information
+
+repos:
+  # Built-in hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Basic file checks
+      - id: trailing-whitespace
+        exclude: '\.md$'
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+
+      # Script checks
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+      # Security
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+
+      # Text formatting
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Shell script formatting and linting
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.7.0-4
+    hooks:
+      - id: shfmt
+        args: [-w, -s, -i, '4', -ci]
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: [-e, SC1090, -e, SC1091]
+
+  # Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        exclude: '^(CHANGELOG\.md)$'
+
+  # Local hooks for custom checks
+  - repo: local
+    hooks:
+      # Validate dotfiles structure
+      - id: validate-structure
+        name: Validate dotfiles structure
+        entry: make validate
+        language: system
+        pass_filenames: false
+        files: '^(install/|config/|bin/|Makefile).*'
+
+      # Run configuration tests
+      - id: test-configs
+        name: Test configuration files
+        entry: ./tests/test-configs.sh
+        language: system
+        pass_filenames: false
+        files: '^config/.*'
+
+      # Check for hardcoded paths
+      - id: check-hardcoded-paths
+        name: Check for hardcoded paths
+        entry: bash -c 'if grep -r "/usr/local\|/opt/homebrew\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git .; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
+        language: system
+        pass_filenames: false
+
+      # Check for TODO/FIXME comments in non-documentation files
+      - id: check-todos
+        name: Check for TODO/FIXME comments
+        entry: bash -c 'if grep -r "TODO\|FIXME\|XXX" --include="*.sh" --include="*.zsh" --include="*.lua" --exclude-dir=.git --exclude-dir=docs .; then echo "Found TODO/FIXME comments - consider addressing them"; exit 0; fi'
+        language: system
+        pass_filenames: false
+
+      # Validate aliases don't conflict with system commands
+      - id: check-alias-conflicts
+        name: Check for alias conflicts with system commands
+        entry: bash -c 'while read -r alias_line; do alias_name=$(echo "$alias_line" | sed "s/alias \([^=]*\)=.*/\1/"); if command -v "$alias_name" >/dev/null 2>&1; then echo "Warning: alias $alias_name conflicts with system command"; fi; done < <(grep "^alias " config/zsh/*aliases* || true)'
+        language: system
+        pass_filenames: false
+        files: '^config/zsh/.*aliases.*'
+
+      # Check shell function naming conventions
+      - id: check-function-naming
+        name: Check function naming conventions
+        entry: bash -c 'if grep -E "^[a-z][a-zA-Z0-9_]*\(\)" config/zsh/functions config/zsh/personal-functions 2>/dev/null | grep -E "[A-Z]"; then echo "Function names should use snake_case"; exit 1; fi'
+        language: system
+        pass_filenames: false
+        files: '^config/zsh/.*functions.*'
+
+      # Validate Git configuration
+      - id: validate-git-config
+        name: Validate Git configuration
+        entry: bash -c 'git config --file=config/git/gitconfig --list >/dev/null'
+        language: system
+        pass_filenames: false
+        files: '^config/git/.*'
+
+      # Check for proper shebang in scripts
+      - id: check-shebang-consistency
+        name: Check shebang consistency
+        entry: bash -c 'find . -name "*.sh" -exec head -1 {} \; | sort | uniq -c | sort -nr | head -3'
+        language: system
+        pass_filenames: false
+        files: '\.sh$'

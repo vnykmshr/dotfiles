@@ -1,0 +1,217 @@
+#!/usr/bin/env zsh
+
+# Custom completions for enhanced productivity
+
+# =============================================================================
+# Make Target Completion (You use make commands frequently)
+# =============================================================================
+
+# Intelligent make target completion
+_make_targets() {
+    local context state line
+    local -a targets
+
+    if [[ -f Makefile ]]; then
+        targets=(${(f)"$(grep '^[a-zA-Z][^:]*:' Makefile | cut -d':' -f1 | sort -u)"})
+        _describe 'make targets' targets
+    elif [[ -f makefile ]]; then
+        targets=(${(f)"$(grep '^[a-zA-Z][^:]*:' makefile | cut -d':' -f1 | sort -u)"})
+        _describe 'make targets' targets
+    else
+        # Fallback to default make completion
+        _make
+    fi
+}
+
+# Override make completion
+compdef _make_targets make
+
+# =============================================================================
+# Git Completion Enhancements
+# =============================================================================
+
+# Enhanced git branch completion for your frequent branch switching
+_git_branches() {
+    local branches
+    branches=(${(f)"$(git branch 2>/dev/null | sed 's/^..//' | grep -v '^$')"})
+    _describe 'git branches' branches
+}
+
+# Git workflow completions for your aliases
+compdef _git_branches gco  # git checkout completion
+
+# =============================================================================
+# Custom Command Completions
+# =============================================================================
+
+# workflow-helper completion
+_workflow_helper() {
+    local -a commands
+    commands=(
+        'commit:Quick commit workflow'
+        'deploy:Build and deploy workflow'
+        'status:Enhanced project status'
+        'setup:Project dependency setup'
+        'clean:Clean workspace'
+        'sync:Full sync workflow'
+    )
+    _describe 'workflow-helper commands' commands
+}
+
+compdef _workflow_helper workflow-helper
+compdef _workflow_helper wh
+
+# ccusage completion (you use ccusage daily frequently)
+_ccusage() {
+    local -a commands
+    commands=(
+        'daily:Show daily usage'
+        'weekly:Show weekly usage'
+        'monthly:Show monthly usage'
+        'track:Track project usage'
+    )
+    _describe 'ccusage commands' commands
+}
+
+compdef _ccusage ccusage
+
+# =============================================================================
+# Directory Completion Enhancements
+# =============================================================================
+
+# Smart cd completion for your workspace structure
+_workspace_dirs() {
+    local -a dirs
+    if [[ -d ~/workspace ]]; then
+        dirs=(${(f)"$(find ~/workspace -maxdepth 2 -type d -name "*" 2>/dev/null | sed 's|.*/||' | sort -u)"})
+        _describe 'workspace directories' dirs
+    fi
+}
+
+# Enhanced completion for workspace navigation aliases
+compdef _workspace_dirs workspace
+compdef _workspace_dirs ws
+
+# =============================================================================
+# Node.js/npm Completion Enhancements
+# =============================================================================
+
+# npm script completion from package.json
+_npm_scripts() {
+    if [[ -f package.json ]]; then
+        local -a scripts
+        scripts=(${(f)"$(jq -r '.scripts | keys[]' package.json 2>/dev/null)"})
+        _describe 'npm scripts' scripts
+    fi
+}
+
+# Enhanced npm run completion
+compdef _npm_scripts 'npm run'
+
+# =============================================================================
+# Go Completion Enhancements
+# =============================================================================
+
+# Go module completion for go mod commands
+_go_modules() {
+    if [[ -f go.mod ]]; then
+        local -a modules
+        modules=(${(f)"$(go list -m all 2>/dev/null | cut -d' ' -f1)"})
+        _describe 'go modules' modules
+    fi
+}
+
+# =============================================================================
+# Flutter Completion Enhancements
+# =============================================================================
+
+# Flutter device completion for flutter run
+_flutter_devices() {
+    local -a devices
+    devices=(${(f)"$(flutter devices --machine 2>/dev/null | jq -r '.[].id' 2>/dev/null)"})
+    _describe 'flutter devices' devices
+}
+
+# Flutter command completion enhancement
+_flutter_enhanced() {
+    local context state line
+    local -a commands
+
+    commands=(
+        'run:Run the application'
+        'build:Build the application'
+        'test:Run tests'
+        'clean:Clean build artifacts'
+        'pub:Pub package manager'
+        'create:Create a new project'
+        'devices:List connected devices'
+        'doctor:Show Flutter doctor'
+    )
+
+    if [[ $words[CURRENT-1] == "run" ]]; then
+        _flutter_devices
+    else
+        _describe 'flutter commands' commands
+    fi
+}
+
+compdef _flutter_enhanced flutter
+compdef _flutter_enhanced fl
+
+# =============================================================================
+# Brew Completion Enhancements
+# =============================================================================
+
+# Enhanced brew completion for your frequent package management
+_brew_enhanced() {
+    local context state line
+    local -a commands
+
+    commands=(
+        'install:Install packages'
+        'uninstall:Uninstall packages'
+        'update:Update Homebrew'
+        'upgrade:Upgrade packages'
+        'cleanup:Clean up old versions'
+        'services:Manage services'
+        'info:Show package info'
+        'search:Search packages'
+        'list:List installed packages'
+    )
+    _describe 'brew commands' commands
+}
+
+compdef _brew_enhanced brew
+
+# =============================================================================
+# Project Type Detection for Smart Completions
+# =============================================================================
+
+# Smart completion based on project type
+_smart_project_completion() {
+    if [[ -f Makefile ]]; then
+        _make_targets
+    elif [[ -f package.json ]]; then
+        _npm_scripts
+    elif [[ -f go.mod ]]; then
+        _go_modules
+    elif [[ -f pubspec.yaml ]]; then
+        _flutter_devices
+    fi
+}
+
+# Apply smart completion to the dev function
+compdef _smart_project_completion dev
+
+# =============================================================================
+# Load Additional Completions
+# =============================================================================
+
+# Load additional completions if available
+if [[ -d ~/.zsh/completions ]]; then
+    fpath=(~/.zsh/completions $fpath)
+fi
+
+# Initialize completion system
+autoload -Uz compinit
+compinit

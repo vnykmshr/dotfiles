@@ -1,0 +1,254 @@
+#!/usr/bin/env zsh
+
+# Modern aliases for enhanced productivity
+
+# =============================================================================
+# Core System Aliases
+# =============================================================================
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# List files with modern options
+if command -v eza >/dev/null 2>&1; then
+    # Modern replacement for ls
+    alias ls='eza --group-directories-first'
+    alias ll='eza -l --group-directories-first --time-style=long-iso'
+    alias la='eza -la --group-directories-first --time-style=long-iso'
+    alias lt='eza --tree --level=2'
+    alias lta='eza --tree --all --level=2'
+else
+    # Traditional ls with good defaults
+    alias ls='ls -hFG --color=auto'
+    alias ll='ls -la'
+    alias la='ls -A'
+    alias lt='tree -L 2'
+fi
+
+# Directory listing shortcuts
+alias lr='ls -R'                    # recursive ls
+alias lx='ll -BX'                   # sort by extension
+alias lz='ll -rS'                   # sort by size
+alias lm='la | $PAGER'              # pipe through pager
+
+# =============================================================================
+# Safety First - Dangerous Command Protection
+# =============================================================================
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias chmod='chmod --preserve-root'
+alias chown='chown --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
+# Typo protection
+alias shh='ssh'
+alias sduo='sudo'
+alias suod='sudo'
+
+# =============================================================================
+# System Information & Monitoring
+# =============================================================================
+
+# System info
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias ps='ps auxf'
+alias psg='ps aux | grep'
+alias top='top -o cpu'
+
+# Network
+alias ports='netstat -tulanp'
+alias ping='ping -c 5'
+alias fastping='ping -c 100 -s 2'
+
+# Weather (requires curl)
+alias weather='curl -s "https://wttr.in/?format=3"'
+alias forecast='curl -s "https://wttr.in/"'
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# Git shortcuts (more extensive git aliases in gitconfig)
+alias g='git'
+alias ga='git add'
+alias gb='git branch'
+alias gc='git commit'
+alias gco='git checkout'
+alias gd='git diff'
+alias gl='git log --oneline'
+alias gp='git push'
+alias gs='git status'
+alias gst='git status'
+
+# Modern alternatives
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat --style=plain'
+    alias less='bat --style=plain --paging=always'
+fi
+
+if command -v fd >/dev/null 2>&1; then
+    alias find='fd'
+fi
+
+if command -v ripgrep >/dev/null 2>&1; then
+    alias grep='rg'
+fi
+
+if command -v zoxide >/dev/null 2>&1; then
+    alias cd='z'
+fi
+
+# Editor shortcuts
+alias v='$EDITOR'
+alias vim='$EDITOR'
+alias vi='$EDITOR'
+alias e='$EDITOR'
+
+# =============================================================================
+# Development Environment
+# =============================================================================
+
+# Node.js
+alias npm-update='npm update -g'
+alias npm-list='npm list -g --depth=0'
+alias npx='npx --yes'
+
+# Python
+alias py='python3'
+alias pip='pip3'
+alias venv='python3 -m venv'
+alias activate='source venv/bin/activate'
+
+# Docker
+alias d='docker'
+alias dc='docker-compose'
+alias dcu='docker-compose up -d'
+alias dcd='docker-compose down'
+alias dcl='docker-compose logs -f'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+
+# Kubernetes
+alias k='kubectl'
+alias kgp='kubectl get pods'
+alias kgs='kubectl get services'
+alias kgd='kubectl get deployments'
+
+# =============================================================================
+# File Operations & Archives
+# =============================================================================
+
+# Create directories with parents
+alias mkdir='mkdir -pv'
+
+# Archive operations
+alias tar-create='tar -czf'
+alias tar-extract='tar -xzf'
+alias tar-list='tar -tzf'
+
+# Quick file creation
+alias touch='touch -c'
+
+# Find large files
+alias findbig='find . -type f -exec ls -s {} \; | sort -n -r | head -5'
+
+# =============================================================================
+# Network & Web
+# =============================================================================
+
+# HTTP requests
+alias get='curl --location --progress-bar'
+alias post='curl --location --progress-bar --data'
+alias header='curl --location --head'
+
+# JSON formatting
+if command -v jq >/dev/null 2>&1; then
+    alias json='jq .'
+fi
+
+# Web server
+alias serve='python3 -m http.server'
+alias serve-here='python3 -m http.server 8000'
+
+# =============================================================================
+# Utility Functions as Aliases
+# =============================================================================
+
+# Color output for grep
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+
+# Human readable sizes
+alias du1='du --max-depth=1'
+alias du2='du --max-depth=2'
+
+# Date/time
+alias now='date +"%T"'
+alias nowtime=now
+alias nowdate='date +"%d-%m-%Y"'
+
+# =============================================================================
+# System Specific Aliases
+# =============================================================================
+
+# macOS specific
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Show/hide hidden files in Finder
+    alias showfiles='defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder'
+    alias hidefiles='defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder'
+
+    # Empty trash
+    alias emptytrash='sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* "delete from LSQuarantineEvent"'
+
+    # Copy/paste from command line
+    alias pbcopy='pbcopy'
+    alias pbpaste='pbpaste'
+
+    # Lock screen
+    alias lock='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
+
+# Linux specific
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Copy/paste for X11
+    if command -v xclip >/dev/null 2>&1; then
+        alias pbcopy='xclip -selection clipboard'
+        alias pbpaste='xclip -selection clipboard -o'
+    elif command -v xsel >/dev/null 2>&1; then
+        alias pbcopy='xsel --clipboard --input'
+        alias pbpaste='xsel --clipboard --output'
+    fi
+
+    # Package managers
+    if command -v apt >/dev/null 2>&1; then
+        alias update='sudo apt update && sudo apt upgrade'
+        alias install='sudo apt install'
+        alias search='apt search'
+    elif command -v yum >/dev/null 2>&1; then
+        alias update='sudo yum update'
+        alias install='sudo yum install'
+        alias search='yum search'
+    elif command -v pacman >/dev/null 2>&1; then
+        alias update='sudo pacman -Syu'
+        alias install='sudo pacman -S'
+        alias search='pacman -Ss'
+    fi
+fi
+
+# =============================================================================
+# Dotfiles Management
+# =============================================================================
+
+alias dotfiles='cd $DOTFILES'
+alias reload='source ~/.zshrc'
+alias edit-zsh='$EDITOR ~/.zshrc'
+alias edit-aliases='$EDITOR $DOTFILES/config/zsh/aliases'

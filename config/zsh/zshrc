@@ -1,0 +1,216 @@
+#!/usr/bin/env zsh
+
+# Modern Zsh Configuration
+# Professional dotfiles setup with performance optimizations
+
+# Performance: Start measuring load time
+if [[ "$DOTFILES_DEBUG" == "true" ]]; then
+    zmodload zsh/zprof
+fi
+
+# =============================================================================
+# Core Configuration
+# =============================================================================
+
+# Dotfiles directory
+export DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+
+# History configuration
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=50000
+export SAVEHIST=50000
+
+# History options (optimized for frequent command repetition)
+setopt EXTENDED_HISTORY       # Write the history file in the ':start:elapsed;command' format
+setopt HIST_EXPIRE_DUPS_FIRST # Expire a duplicate event first when trimming history
+setopt HIST_FIND_NO_DUPS      # Do not display a previously found event
+setopt HIST_IGNORE_ALL_DUPS   # Delete an old recorded event if a new event is a duplicate
+setopt HIST_IGNORE_DUPS       # Do not record an event that was just recorded again
+setopt HIST_IGNORE_SPACE      # Do not record an event starting with a space
+setopt HIST_SAVE_NO_DUPS      # Do not write a duplicate event to the history file
+setopt HIST_VERIFY            # Do not execute immediately upon history expansion
+setopt HIST_REDUCE_BLANKS     # Remove extra blanks from each command line being added to history
+setopt INC_APPEND_HISTORY     # Write to the history file immediately, not when the shell exits
+setopt SHARE_HISTORY          # Share history between all sessions
+
+# Directory navigation
+setopt AUTO_CD                # Auto change to a directory without typing cd
+setopt AUTO_PUSHD             # Push the old directory onto the stack on cd
+setopt PUSHD_IGNORE_DUPS      # Do not store duplicates in the stack
+setopt PUSHD_SILENT           # Do not print the directory stack after pushd or popd
+
+# Globbing
+setopt EXTENDED_GLOB          # Use extended globbing syntax
+setopt GLOB_DOTS              # Include dotfiles in glob patterns
+
+# Job control
+setopt LONG_LIST_JOBS         # List jobs in the long format by default
+setopt AUTO_RESUME            # Attempt to resume existing job before creating a new process
+
+# Misc
+setopt INTERACTIVE_COMMENTS   # Allow comments in interactive mode
+setopt MULTIOS               # Write to multiple descriptors
+setopt PROMPT_SUBST          # Enable parameter expansion, command substitution, and arithmetic expansion in prompts
+
+# =============================================================================
+# Environment Variables
+# =============================================================================
+
+# Editor preferences
+export EDITOR="${EDITOR:-nvim}"
+export VISUAL="$EDITOR"
+export PAGER="${PAGER:-less}"
+
+# Less configuration
+export LESS='-R -i -w -M -z-4'
+export LESSHISTFILE=/dev/null
+
+# Language and locale
+export LANG="${LANG:-en_US.UTF-8}"
+export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+
+# Development tools
+export MISE_YES=1              # Auto-confirm mise installations
+export MISE_EXPERIMENTAL=1    # Enable experimental features
+
+# Path configuration
+typeset -U path PATH
+path=(
+    "$HOME/.local/bin"
+    "$HOME/bin"
+    "$DOTFILES/bin"
+    "$HOME/.cargo/bin"
+    "$HOME/.mise/shims"
+    /opt/homebrew/bin
+    /opt/homebrew/sbin
+    /usr/local/bin
+    /usr/local/sbin
+    $path
+)
+
+# =============================================================================
+# Load Configuration Modules
+# =============================================================================
+
+# Helper function to source config files
+load_config() {
+    local config_file="$1"
+    local config_path="$DOTFILES/config/zsh/$config_file"
+
+    if [[ -r "$config_path" ]]; then
+        source "$config_path"
+    fi
+}
+
+# Load configuration modules in order
+load_config "exports"           # Additional environment variables
+load_config "aliases"           # Command aliases
+load_config "functions"         # Custom functions
+load_config "personal-aliases"  # Personal aliases based on usage patterns
+load_config "personal-functions"# Personal functions based on workflow
+load_config "completions"       # Custom completions
+load_config "prompt"            # Prompt configuration
+load_config "plugins"           # Plugin management
+load_config "local"             # Local/machine-specific config
+
+# =============================================================================
+# Tool Integrations
+# =============================================================================
+
+# mise (version manager)
+if command -v mise >/dev/null 2>&1; then
+    eval "$(mise activate zsh)"
+fi
+
+# Homebrew
+if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# fzf (fuzzy finder)
+if command -v fzf >/dev/null 2>&1; then
+    eval "$(fzf --zsh)"
+fi
+
+# zoxide (smart cd)
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
+
+# =============================================================================
+# Completion System
+# =============================================================================
+
+# Enable completion system
+autoload -Uz compinit
+
+# Security: only check for new completions once per day
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
+
+# Completion options
+setopt ALWAYS_TO_END          # Move cursor to end if word had one match
+setopt AUTO_LIST              # Automatically list choices on ambiguous completion
+setopt AUTO_MENU              # Show completion menu on successive tab press
+setopt AUTO_PARAM_SLASH       # If completed parameter is a directory, add a trailing slash
+setopt COMPLETE_IN_WORD       # Complete from both ends of a word
+setopt FLOW_CONTROL           # Disable flow control (ctrl-s/ctrl-q)
+setopt MENU_COMPLETE          # Do not autoselect the first completion entry
+
+# Completion styles
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' use-cache yes
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+# Colors for completions
+if [[ -n "$LS_COLORS" ]]; then
+    zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+fi
+
+# =============================================================================
+# Key Bindings
+# =============================================================================
+
+# Use emacs key bindings
+bindkey -e
+
+# Enhanced history search (optimized for frequent command repetition)
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+bindkey '^P' history-search-backward    # Search backwards in history
+bindkey '^N' history-search-forward     # Search forwards in history
+
+# Word movement
+bindkey '^[[1;5D' backward-word  # Ctrl+Left
+bindkey '^[[1;5C' forward-word   # Ctrl+Right
+
+# Line editing
+bindkey '^U' backward-kill-line  # Ctrl+U
+bindkey '^K' kill-line          # Ctrl+K
+
+# Quick command editing
+bindkey '^E' end-of-line        # Ctrl+E
+bindkey '^A' beginning-of-line  # Ctrl+A
+
+# =============================================================================
+# Performance Debug
+# =============================================================================
+
+if [[ "$DOTFILES_DEBUG" == "true" ]]; then
+    zprof
+fi
+
+# =============================================================================
+# Local Overrides
+# =============================================================================
+
+# Source local configuration if it exists
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

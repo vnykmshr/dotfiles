@@ -1,0 +1,354 @@
+# Global gitignore file for common artifacts
+
+# =============================================================================
+# Operating System
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# =============================================================================
+# IDEs and Editors
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+Session.vim
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Atom
+.atom/
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# Version managers
+.nvmrc
+.node-version
+.ruby-version
+.python-version
+.java-version
+.tool-versions
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# =============================================================================
+# Language Specific
+# =============================================================================
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Ruby
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+.bundle
+.byebug_history
+.rspec
+/vendor/bundle
+
+# Go
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Test binary, built with `go test -c`
+*.test
+# Output of the go coverage tool
+*.out
+# Dependency directories
+vendor/
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+build/
+target/
+*.iml
+
+# C/C++
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+core
+
+# =============================================================================
+# Databases
+# =============================================================================
+
+*.sqlite
+*.sqlite3
+*.db
+
+# =============================================================================
+# Temporary Files
+# =============================================================================
+
+# Temporary directories
+tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*.tmp
+
+# Archive files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# =============================================================================
+# Personal Files
+# =============================================================================
+
+# Personal notes and todos
+TODO
+NOTES
+.notes
+notes.txt
+todo.txt
+
+# SSH keys (security)
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.pem
+
+# GPG keys
+*.gpg
+*.pgp
+
+# =============================================================================
+# Build Tools and Package Managers
+# =============================================================================
+
+# Docker
+.dockerignore
+Dockerfile.local
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# =============================================================================
+# Cloud and DevOps
+# =============================================================================
+
+# AWS
+.aws/
+*.pem
+
+# Google Cloud
+.gcloud/
+*-key.json
+
+# Kubernetes
+*.kubeconfig
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# Local development overrides
+docker-compose.override.yml
+.env.local
+config.local.*
+*.local
+
+# Test outputs
+test-results/
+junit.xml
+coverage-report/
+
+# Documentation builds
+_site/
+.sass-cache/
+.jekyll-metadata
+.jekyll-cache/
+
+# Mac specific for mounted volumes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent

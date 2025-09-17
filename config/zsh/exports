@@ -1,0 +1,139 @@
+#!/usr/bin/env zsh
+
+# Additional environment variables and exports
+
+# =============================================================================
+# Development Environment
+# =============================================================================
+
+# Default editor
+export EDITOR="${EDITOR:-nvim}"
+export VISUAL="$EDITOR"
+
+# Pager
+export PAGER="${PAGER:-less}"
+export MANPAGER="$PAGER"
+
+# Browser
+export BROWSER="${BROWSER:-open}"
+
+# =============================================================================
+# Language Specific
+# =============================================================================
+
+# Node.js
+export NODE_REPL_HISTORY="$HOME/.node_history"
+export NODE_REPL_HISTORY_SIZE='32768'
+export NODE_REPL_SAVE_HISTORY='true'
+
+# Python
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONUNBUFFERED=1
+
+# Go
+export GOPATH="$HOME/go"
+export GOBIN="$GOPATH/bin"
+
+# Rust
+export CARGO_HOME="$HOME/.cargo"
+export RUSTUP_HOME="$HOME/.rustup"
+
+# =============================================================================
+# Tool Configuration
+# =============================================================================
+
+# fzf
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
+
+# ripgrep
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+
+# bat
+export BAT_THEME="TwoDark"
+
+# less
+export LESS='-R -i -w -M -z-4'
+export LESSHISTFILE=/dev/null
+
+# =============================================================================
+# Directory Colors
+# =============================================================================
+
+# Enable colors for ls, etc.
+export CLICOLOR=1
+
+# Define colors for different file types (BSD/macOS)
+export LSCOLORS="Gxfxcxdxbxegedabagacad"
+
+# Define colors for different file types (GNU/Linux)
+export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
+
+# =============================================================================
+# History Configuration
+# =============================================================================
+
+# Zsh history (also set in zshrc, but keeping here for completeness)
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=50000
+export SAVEHIST=50000
+
+# =============================================================================
+# XDG Base Directory Specification
+# =============================================================================
+
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_STATE_HOME="$HOME/.local/state"
+
+# =============================================================================
+# Application Configuration
+# =============================================================================
+
+# Docker
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
+# AWS
+export AWS_PAGER=""
+
+# Homebrew (if installed)
+if [[ -d "/opt/homebrew" ]]; then
+    export HOMEBREW_PREFIX="/opt/homebrew"
+    export HOMEBREW_NO_ANALYTICS=1
+    export HOMEBREW_NO_INSECURE_REDIRECT=1
+    export HOMEBREW_CASK_OPTS="--require-sha"
+elif [[ -d "/usr/local/Homebrew" ]]; then
+    export HOMEBREW_PREFIX="/usr/local"
+    export HOMEBREW_NO_ANALYTICS=1
+    export HOMEBREW_NO_INSECURE_REDIRECT=1
+    export HOMEBREW_CASK_OPTS="--require-sha"
+fi
+
+# =============================================================================
+# Security
+# =============================================================================
+
+# GPG
+export GPG_TTY=$(tty)
+
+# SSH
+export SSH_KEY_PATH="$HOME/.ssh/id_ed25519"
+
+# =============================================================================
+# Performance
+# =============================================================================
+
+# Disable .DS_Store files on network volumes (macOS)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    export DS_STORE_NETWORK_DISABLE=1
+fi
+
+# =============================================================================
+# Local Overrides
+# =============================================================================
+
+# Source local exports if they exist
+[[ -f "$HOME/.exports.local" ]] && source "$HOME/.exports.local"

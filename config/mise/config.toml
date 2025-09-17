@@ -1,0 +1,49 @@
+# mise configuration
+# Modern version manager for development tools
+
+[settings]
+# Automatically activate when entering directories with .tool-versions
+auto_activate = true
+
+# Show verbose output
+verbose = false
+
+# Automatically install missing tools
+auto_install = true
+
+# Use mise for legacy version files (.nvmrc, .ruby-version, etc.)
+legacy_version_file = true
+
+# Default tools to install globally
+[tools]
+# Node.js LTS
+node = "lts"
+
+# Python latest stable
+python = "latest"
+
+# Go latest
+go = "latest"
+
+# Rust via rustup (if not managed by mise)
+# rust = "latest"
+
+# Additional tools
+jq = "latest"
+ripgrep = "latest"
+fd = "latest"
+bat = "latest"
+
+# Language-specific settings
+[settings.node]
+# Use corepack for package managers
+corepack = true
+
+[settings.python]
+# Default packages to install with every Python version
+default_packages_file = "~/.default-python-packages"
+
+[env]
+# Environment variables
+MISE_EXPERIMENTAL = "1"
+MISE_YES = "1"
