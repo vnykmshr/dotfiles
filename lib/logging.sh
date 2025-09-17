@@ -3,26 +3,26 @@
 # Logging utilities for dotfiles setup
 
 # ANSI color codes
-declare -g RED='\033[0;31m'
-declare -g GREEN='\033[0;32m'
-declare -g YELLOW='\033[1;33m'
-declare -g BLUE='\033[0;34m'
-declare -g PURPLE='\033[0;35m'
-declare -g CYAN='\033[0;36m'
-declare -g WHITE='\033[1;37m'
-declare -g GRAY='\033[0;90m'
-declare -g NC='\033[0m' # No Color
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+GRAY='\033[0;90m'
+NC='\033[0m' # No Color
 
 # Log levels
-declare -g LOG_LEVEL="${LOG_LEVEL:-INFO}"
+LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
 # Icons/symbols
-declare -g CHECKMARK="✓"
-declare -g CROSS="✗"
-declare -g ARROW="→"
-declare -g WARNING="⚠"
-declare -g INFO="ℹ"
-declare -g GEAR="⚙"
+CHECKMARK="✓"
+CROSS="✗"
+ARROW="→"
+WARNING="⚠"
+INFO="ℹ"
+GEAR="⚙"
 
 # Get timestamp
 timestamp() {
@@ -34,8 +34,8 @@ should_log() {
     local level="$1"
     case "$LOG_LEVEL" in
         DEBUG) [[ "$level" =~ ^(DEBUG|INFO|WARN|ERROR)$ ]] ;;
-        INFO)  [[ "$level" =~ ^(INFO|WARN|ERROR)$ ]] ;;
-        WARN)  [[ "$level" =~ ^(WARN|ERROR)$ ]] ;;
+        INFO) [[ "$level" =~ ^(INFO|WARN|ERROR)$ ]] ;;
+        WARN) [[ "$level" =~ ^(WARN|ERROR)$ ]] ;;
         ERROR) [[ "$level" == "ERROR" ]] ;;
         *) true ;;
     esac
@@ -147,7 +147,7 @@ with_spinner() {
     local i=0
     printf "%s " "$message" >&2
     while kill -0 $pid 2>/dev/null; do
-        i=$(( (i+1) %4 ))
+        i=$(((i + 1) % 4))
         printf "\b%s" "${spin:$i:1}" >&2
         sleep .1
     done

@@ -14,7 +14,7 @@ detect_os() {
     OS_ARCH="$(uname -m)"
     case "$OS_ARCH" in
         x86_64) OS_ARCH="amd64" ;;
-        aarch64|arm64) OS_ARCH="arm64" ;;
+        aarch64 | arm64) OS_ARCH="arm64" ;;
     esac
 
     # Detect OS
@@ -33,17 +33,17 @@ detect_os() {
 
             # Set package manager based on distro
             case "$OS_NAME" in
-                ubuntu|debian|pop)
+                ubuntu | debian | pop)
                     PACKAGE_MANAGER="apt"
                     ;;
-                fedora|centos|rhel|rocky|almalinux)
+                fedora | centos | rhel | rocky | almalinux)
                     PACKAGE_MANAGER="dnf"
                     # Use yum on older systems
                     if ! command -v dnf >/dev/null 2>&1; then
                         PACKAGE_MANAGER="yum"
                     fi
                     ;;
-                arch|manjaro)
+                arch | manjaro)
                     PACKAGE_MANAGER="pacman"
                     ;;
                 opensuse*)

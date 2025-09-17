@@ -101,7 +101,7 @@ confirm() {
     response="${response:-$default}"
 
     case "$response" in
-        [yY][eE][sS]|[yY])
+        [yY][eE][sS] | [yY])
             return 0
             ;;
         *)
@@ -120,12 +120,12 @@ pause() {
 # Check if a port is in use
 port_in_use() {
     local port="$1"
-    netstat -an | grep ":$port " > /dev/null 2>&1
+    netstat -an | grep ":$port " >/dev/null 2>&1
 }
 
 # Get the current Git branch
 get_git_branch() {
-    if git rev-parse --git-dir > /dev/null 2>&1; then
+    if git rev-parse --git-dir >/dev/null 2>&1; then
         git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null
     fi
 }
@@ -133,11 +133,11 @@ get_git_branch() {
 # Check if directory is a Git repository
 is_git_repo() {
     local dir="${1:-.}"
-    (cd "$dir" && git rev-parse --git-dir > /dev/null 2>&1)
+    (cd "$dir" && git rev-parse --git-dir >/dev/null 2>&1)
 }
 
 # Generate a random string
 random_string() {
     local length="${1:-32}"
-    LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c "$length"
+    LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c "$length"
 }
