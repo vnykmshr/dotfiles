@@ -20,7 +20,7 @@ log_error() { printf "${RED}✗ %s${NC}\n" "$*" >&2; }
 
 # Usage
 usage() {
-    cat << EOF
+    cat <<EOF
 Workflow Helper - Based on your shell usage patterns
 
 USAGE:
@@ -324,13 +324,13 @@ main() {
     shift || true
 
     case "$command" in
-        commit|c)
+        commit | c)
             cmd_commit "$@"
             ;;
-        deploy|d)
+        deploy | d)
             cmd_deploy "$@"
             ;;
-        status|s)
+        status | s)
             cmd_status "$@"
             ;;
         setup)
@@ -342,7 +342,7 @@ main() {
         sync)
             cmd_sync "$@"
             ;;
-        help|--help|-h)
+        help | --help | -h)
             usage
             ;;
         *)
