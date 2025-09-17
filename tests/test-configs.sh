@@ -3,7 +3,7 @@
 # Configuration Validation Tests
 # Tests configuration files for syntax and functionality
 
-set -euo pipefail
+set -uo pipefail
 
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,12 +29,24 @@ assert_test() {
 
     ((TESTS_RUN++))
 
+    # Debug in CI
+    if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
+        echo "DEBUG: Running test command: $test_command"
+        echo "DEBUG: Description: $description"
+    fi
+
     if eval "$test_command" >/dev/null 2>&1; then
         log_success "$description"
         ((TESTS_PASSED++))
         return 0
     else
         log_error "$description"
+        # In CI, show what failed
+        if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
+            echo "DEBUG: Command failed: $test_command"
+            echo "DEBUG: Error output:"
+            eval "$test_command" 2>&1 || true
+        fi
         ((TESTS_FAILED++))
         return 1
     fi
