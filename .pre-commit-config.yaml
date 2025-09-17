@@ -90,7 +90,7 @@ repos:
       # Validate aliases don't conflict with system commands
       - id: check-alias-conflicts
         name: Check for alias conflicts with system commands
-        entry: bash -c 'while read -r alias_line; do alias_name=$(echo "$alias_line" | sed "s/alias \([^=]*\)=.*/\1/"); if command -v "$alias_name" >/dev/null 2>&1; then echo "Warning: alias $alias_name conflicts with system command"; fi; done < <(grep "^alias " config/zsh/*aliases* || true)'
+        entry: ./bin/check-alias-conflicts
         language: system
         pass_filenames: false
         files: '^config/zsh/.*aliases.*'
@@ -103,13 +103,13 @@ repos:
         pass_filenames: false
         files: '^config/zsh/.*functions.*'
 
-      # Validate Git configuration
+      # Validate Git configuration (skip if template)
       - id: validate-git-config
         name: Validate Git configuration
-        entry: bash -c 'git config --file=config/git/gitconfig --list >/dev/null'
+        entry: bash -c 'if [[ -f "config/git/gitconfig" ]] && [[ ! "$(head -5 config/git/gitconfig)" =~ \{\{ ]]; then git config --file=config/git/gitconfig --list >/dev/null; else echo "Skipping validation - template file or not generated yet"; fi'
         language: system
         pass_filenames: false
-        files: '^config/git/.*'
+        files: '^config/git/gitconfig$'
 
       # Check for proper shebang in scripts
       - id: check-shebang-consistency

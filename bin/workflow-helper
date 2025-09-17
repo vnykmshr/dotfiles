@@ -117,12 +117,13 @@ cmd_deploy() {
                 log_info "Building project..."
                 make build
 
-                # Check for common build artifacts
-                if [[ -f "./build/markgo" ]]; then
-                    log_info "Starting production server..."
-                    ENVIRONMENT=production GIN_MODE=release ./build/markgo
+                # Check for common build artifacts using project basename
+                local project_name="$(basename "$(pwd)")"
+                if [[ -f "./build/$project_name" ]]; then
+                    log_info "Starting production server: $project_name"
+                    ENVIRONMENT=production GIN_MODE=release "./build/$project_name"
                 else
-                    log_warn "Build artifact not found, running make run..."
+                    log_warn "Build artifact ./build/$project_name not found, running make run..."
                     make run
                 fi
             else

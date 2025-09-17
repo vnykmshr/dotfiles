@@ -1,0 +1,55 @@
+# SSH Client Configuration Template
+# This file is processed during setup to create ~/.ssh/config
+
+# Default settings for all hosts
+Host *
+    # Use SSH keys from ssh-agent
+    AddKeysToAgent yes
+    # Use system keychain on macOS
+    UseKeychain yes
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 10
+    # Forward agent for key-based auth
+    ForwardAgent no
+    # Compression
+    Compression yes
+    # Control master for faster subsequent connections
+    ControlMaster auto
+    ControlPath ~/.ssh/master-%r@%h:%p
+    ControlPersist 600
+
+# GitHub configuration
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile {{SSH_GITHUB_KEY}}
+    IdentitiesOnly yes
+
+# GitLab configuration (if used)
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    IdentityFile {{SSH_GITLAB_KEY}}
+    IdentitiesOnly yes
+
+# Personal server (template - customize as needed)
+Host {{PERSONAL_SERVER_ALIAS}}
+    HostName {{PERSONAL_SERVER_HOST}}
+    User {{PERSONAL_SERVER_USER}}
+    IdentityFile {{SSH_PERSONAL_KEY}}
+    Port {{PERSONAL_SERVER_PORT}}
+
+# Work server (template - customize as needed)
+Host {{WORK_SERVER_ALIAS}}
+    HostName {{WORK_SERVER_HOST}}
+    User {{WORK_SERVER_USER}}
+    IdentityFile {{SSH_WORK_KEY}}
+    Port {{WORK_SERVER_PORT}}
+
+# Local development (template)
+Host local-dev
+    HostName {{LOCAL_DEV_HOST}}
+    User {{LOCAL_DEV_USER}}
+    IdentityFile {{SSH_LOCAL_KEY}}
+    Port 22

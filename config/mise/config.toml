@@ -36,8 +36,8 @@ bat = "latest"
 
 # Language-specific settings
 [settings.node]
-# Use corepack for package managers
-corepack = true
+# Default packages to install with every Node.js version
+# default_packages_file = "~/.default-node-packages"
 
 [settings.python]
 # Default packages to install with every Python version
@@ -47,3 +47,6 @@ default_packages_file = "~/.default-python-packages"
 # Environment variables
 MISE_EXPERIMENTAL = "1"
 MISE_YES = "1"
+
+# Enable Node.js corepack for package manager management
+COREPACK_ENABLE_STRICT = "0"

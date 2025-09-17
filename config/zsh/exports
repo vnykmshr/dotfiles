@@ -133,3 +133,7 @@ fi
 
 # Source local exports if they exist
 [[ -f "$HOME/.exports.local" ]] && source "$HOME/.exports.local"
+
+# Source dotfiles-generated local exports
+DOTFILES_EXPORTS_LOCAL="${DOTFILES_DIR:-$HOME/.dotfiles}/config/zsh/exports.local"
+[[ -f "$DOTFILES_EXPORTS_LOCAL" ]] && source "$DOTFILES_EXPORTS_LOCAL"

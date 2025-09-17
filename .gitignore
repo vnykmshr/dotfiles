@@ -58,3 +58,8 @@ private
 
 ## Project specific
 todos/
+
+# Generated configuration files (user-specific)
+config/git/gitconfig
+config/ssh/config
+config/zsh/exports.local

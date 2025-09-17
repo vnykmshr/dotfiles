@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Check for alias conflicts with system commands
+
+set -euo pipefail
+
+# Check alias files
+for file in config/zsh/aliases config/zsh/personal-aliases; do
+    if [[ -f "$file" ]]; then
+        echo "Checking aliases in $file..."
+
+        # Extract aliases and check for conflicts
+        grep "^alias " "$file" | while IFS= read -r line; do
+            # Extract alias name (everything between 'alias ' and '=')
+            if [[ $line =~ ^alias\ ([^=]+)= ]]; then
+                alias_name="${BASH_REMATCH[1]}"
+
+                # Check if it conflicts with a system command
+                if command -v "$alias_name" >/dev/null 2>&1; then
+                    echo "Warning: alias '$alias_name' conflicts with system command in $file"
+                fi
+            fi
+        done
+    fi
+done
+
+echo "Alias conflict check complete."

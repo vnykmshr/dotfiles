@@ -99,6 +99,7 @@ main() {
     # Installation steps
     install_dependencies
     setup_symlinks
+    process_templates
     install_packages
     configure_shell
     setup_development_tools
@@ -168,6 +169,11 @@ setup_symlinks() {
     link_config "config/git/gitconfig" ".gitconfig"
     link_config "config/git/gitignore_global" ".gitignore_global"
 
+    # SSH configuration (if generated)
+    if [[ -f "$DOTFILES_DIR/config/ssh/config" ]]; then
+        link_config "config/ssh/config" ".ssh/config"
+    fi
+
     # Neovim configuration
     mkdir -p "$HOME/.config"
     link_config "config/nvim" ".config/nvim"
@@ -177,6 +183,185 @@ setup_symlinks() {
 
     # mise configuration
     link_config "config/mise/config.toml" ".config/mise/config.toml"
+}
+
+# Process template files to generate personalized configs
+process_templates() {
+    log_step "Processing configuration templates"
+
+    # Process gitconfig template
+    process_gitconfig_template
+
+    # Process SSH config template
+    process_ssh_template
+
+    # Process zsh exports template
+    process_zsh_exports_template
+
+    log_info "Template processing complete"
+}
+
+# Process gitconfig template with user input
+process_gitconfig_template() {
+    local template_file="$DOTFILES_DIR/config/git/gitconfig.template"
+    local output_file="$DOTFILES_DIR/config/git/gitconfig"
+
+    if [[ ! -f "$template_file" ]]; then
+        log_warn "Git config template not found, skipping"
+        return 0
+    fi
+
+    log_info "Configuring Git settings..."
+
+    # Default values
+    local git_user_name="${GIT_USER_NAME:-}"
+    local git_user_email="${GIT_USER_EMAIL:-}"
+    local git_signing_key="${GIT_SIGNING_KEY:-~/.ssh/id_ed25519.pub}"
+    local editor="${EDITOR:-nvim}"
+    local git_gpg_sign="${GIT_GPG_SIGN:-false}"
+
+    # Prompt for user details if not provided via environment
+    if [[ -z "$git_user_name" ]] && [[ "$DRY_RUN" != "true" ]]; then
+        read -rp "Enter your name for Git commits: " git_user_name
+    fi
+
+    if [[ -z "$git_user_email" ]] && [[ "$DRY_RUN" != "true" ]]; then
+        read -rp "Enter your email for Git commits: " git_user_email
+    fi
+
+    # Use fallback values if still empty
+    git_user_name="${git_user_name:-Your Name}"
+    git_user_email="${git_user_email:-your.email@example.com}"
+
+    # Process the template
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate gitconfig with:"
+        log_info "  Name: $git_user_name"
+        log_info "  Email: $git_user_email"
+        log_info "  Signing key: $git_signing_key"
+        log_info "  Editor: $editor"
+        log_info "  GPG sign: $git_gpg_sign"
+    else
+        # Generate the config file
+        sed -e "s|{{GIT_USER_NAME}}|$git_user_name|g" \
+            -e "s|{{GIT_USER_EMAIL}}|$git_user_email|g" \
+            -e "s|{{GIT_SIGNING_KEY}}|$git_signing_key|g" \
+            -e "s|{{EDITOR}}|$editor|g" \
+            -e "s|{{GIT_GPG_SIGN}}|$git_gpg_sign|g" \
+            "$template_file" > "$output_file"
+
+        log_success "Generated personalized gitconfig"
+    fi
+}
+
+# Process SSH config template
+process_ssh_template() {
+    local template_file="$DOTFILES_DIR/config/ssh/config.template"
+    local output_file="$DOTFILES_DIR/config/ssh/config"
+
+    if [[ ! -f "$template_file" ]]; then
+        log_warn "SSH config template not found, skipping"
+        return 0
+    fi
+
+    log_info "Configuring SSH settings..."
+
+    # Default values
+    local ssh_github_key="${SSH_GITHUB_KEY:-~/.ssh/id_ed25519}"
+    local ssh_gitlab_key="${SSH_GITLAB_KEY:-~/.ssh/id_ed25519}"
+    local ssh_personal_key="${SSH_PERSONAL_KEY:-~/.ssh/id_ed25519}"
+    local ssh_work_key="${SSH_WORK_KEY:-~/.ssh/id_rsa}"
+    local ssh_local_key="${SSH_LOCAL_KEY:-~/.ssh/id_ed25519}"
+
+    local personal_server_alias="${PERSONAL_SERVER_ALIAS:-my-server}"
+    local personal_server_host="${PERSONAL_SERVER_HOST:-example.com}"
+    local personal_server_user="${PERSONAL_SERVER_USER:-$USER}"
+    local personal_server_port="${PERSONAL_SERVER_PORT:-22}"
+
+    local work_server_alias="${WORK_SERVER_ALIAS:-work-server}"
+    local work_server_host="${WORK_SERVER_HOST:-work.example.com}"
+    local work_server_user="${WORK_SERVER_USER:-$USER}"
+    local work_server_port="${WORK_SERVER_PORT:-22}"
+
+    local local_dev_host="${LOCAL_DEV_HOST:-localhost}"
+    local local_dev_user="${LOCAL_DEV_USER:-$USER}"
+
+    # Process the template
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate SSH config with standard keys and server templates"
+    else
+        # Generate the config file
+        mkdir -p "$(dirname "$output_file")"
+        sed -e "s|{{SSH_GITHUB_KEY}}|$ssh_github_key|g" \
+            -e "s|{{SSH_GITLAB_KEY}}|$ssh_gitlab_key|g" \
+            -e "s|{{SSH_PERSONAL_KEY}}|$ssh_personal_key|g" \
+            -e "s|{{SSH_WORK_KEY}}|$ssh_work_key|g" \
+            -e "s|{{SSH_LOCAL_KEY}}|$ssh_local_key|g" \
+            -e "s|{{PERSONAL_SERVER_ALIAS}}|$personal_server_alias|g" \
+            -e "s|{{PERSONAL_SERVER_HOST}}|$personal_server_host|g" \
+            -e "s|{{PERSONAL_SERVER_USER}}|$personal_server_user|g" \
+            -e "s|{{PERSONAL_SERVER_PORT}}|$personal_server_port|g" \
+            -e "s|{{WORK_SERVER_ALIAS}}|$work_server_alias|g" \
+            -e "s|{{WORK_SERVER_HOST}}|$work_server_host|g" \
+            -e "s|{{WORK_SERVER_USER}}|$work_server_user|g" \
+            -e "s|{{WORK_SERVER_PORT}}|$work_server_port|g" \
+            -e "s|{{LOCAL_DEV_HOST}}|$local_dev_host|g" \
+            -e "s|{{LOCAL_DEV_USER}}|$local_dev_user|g" \
+            "$template_file" > "$output_file"
+
+        log_success "Generated personalized SSH config"
+    fi
+}
+
+# Process zsh exports template
+process_zsh_exports_template() {
+    local template_file="$DOTFILES_DIR/config/zsh/exports.local.template"
+    local output_file="$DOTFILES_DIR/config/zsh/exports.local"
+
+    if [[ ! -f "$template_file" ]]; then
+        log_warn "Zsh exports template not found, skipping"
+        return 0
+    fi
+
+    log_info "Configuring local environment variables..."
+
+    # Default values
+    local workspace_dir="${WORKSPACE_DIR:-$HOME/workspace}"
+    local projects_dir="${PROJECTS_DIR:-$HOME/projects}"
+    local personal_bin_dir="${PERSONAL_BIN_DIR:-$HOME/.local/bin}"
+    local browser="${BROWSER:-open}"
+    local terminal="${TERMINAL:-Terminal}"
+    local pager="${PAGER:-less}"
+    local npm_prefix="${NPM_PREFIX:-$HOME/.npm-global}"
+    local python_path="${PYTHON_PATH:-}"
+    local go_path="${GO_PATH:-$HOME/go}"
+    local cargo_home="${CARGO_HOME:-$HOME/.cargo}"
+    local preferred_editor="${PREFERRED_EDITOR:-nvim}"
+    local preferred_lang="${PREFERRED_LANG:-en_US.UTF-8}"
+    local code_editor="${CODE_EDITOR:-code}"
+
+    # Process the template
+    if [[ "$DRY_RUN" == "true" ]]; then
+        log_info "[DRY RUN] Would generate local exports with workspace: $workspace_dir"
+    else
+        # Generate the config file
+        sed -e "s|{{WORKSPACE_DIR}}|$workspace_dir|g" \
+            -e "s|{{PROJECTS_DIR}}|$projects_dir|g" \
+            -e "s|{{PERSONAL_BIN_DIR}}|$personal_bin_dir|g" \
+            -e "s|{{BROWSER}}|$browser|g" \
+            -e "s|{{TERMINAL}}|$terminal|g" \
+            -e "s|{{PAGER}}|$pager|g" \
+            -e "s|{{NPM_PREFIX}}|$npm_prefix|g" \
+            -e "s|{{PYTHON_PATH}}|$python_path|g" \
+            -e "s|{{GO_PATH}}|$go_path|g" \
+            -e "s|{{CARGO_HOME}}|$cargo_home|g" \
+            -e "s|{{PREFERRED_EDITOR}}|$preferred_editor|g" \
+            -e "s|{{PREFERRED_LANG}}|$preferred_lang|g" \
+            -e "s|{{CODE_EDITOR}}|$code_editor|g" \
+            "$template_file" > "$output_file"
+
+        log_success "Generated local environment exports"
+    fi
 }
 
 # Link a config file/directory
@@ -231,7 +416,7 @@ configure_shell() {
     log_step "Configuring shell"
 
     # Skip shell change in CI environments
-    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" ]]; then
+    if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
         log_info "CI environment detected, skipping shell change"
         return 0
     fi

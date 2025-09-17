@@ -1,0 +1,78 @@
+#!/usr/bin/env zsh
+
+# Local environment variables - customize for your setup
+# This file is generated from template and should not be committed
+
+# =============================================================================
+# Personal Development Paths
+# =============================================================================
+
+# Personal workspace directory
+export WORKSPACE="{{WORKSPACE_DIR}}"
+
+# Projects directory
+export PROJECTS="{{PROJECTS_DIR}}"
+
+# Personal tools and scripts
+export PERSONAL_BIN="{{PERSONAL_BIN_DIR}}"
+
+# Add personal bin to PATH if it exists
+[[ -d "$PERSONAL_BIN" ]] && export PATH="$PERSONAL_BIN:$PATH"
+
+# =============================================================================
+# API Keys and Tokens (example placeholders)
+# =============================================================================
+
+# GitHub token for CLI operations (optional)
+# export GITHUB_TOKEN="{{GITHUB_TOKEN}}"
+
+# OpenAI API key (if using AI tools)
+# export OPENAI_API_KEY="{{OPENAI_API_KEY}}"
+
+# Other service tokens
+# export AWS_PROFILE="{{AWS_PROFILE}}"
+# export DOCKER_HUB_USERNAME="{{DOCKER_USERNAME}}"
+
+# =============================================================================
+# Local Tool Configurations
+# =============================================================================
+
+# Custom browser for development
+export BROWSER="{{BROWSER}}"
+
+# Preferred terminal for tools that launch terminals
+export TERMINAL="{{TERMINAL}}"
+
+# Custom pager settings
+export PAGER="{{PAGER}}"
+
+# =============================================================================
+# Programming Language Specific
+# =============================================================================
+
+# Node.js
+export NPM_CONFIG_PREFIX="{{NPM_PREFIX}}"
+
+# Python
+export PYTHONPATH="{{PYTHON_PATH}}"
+
+# Go
+export GOPATH="{{GO_PATH}}"
+export GOBIN="$GOPATH/bin"
+
+# Rust
+export CARGO_HOME="{{CARGO_HOME}}"
+
+# =============================================================================
+# Local Overrides
+# =============================================================================
+
+# Override any exports from main exports file here
+# export EDITOR="{{PREFERRED_EDITOR}}"
+# export LANG="{{PREFERRED_LANG}}"
+
+# Custom aliases for local development
+alias ll='ls -la'
+alias code='{{CODE_EDITOR}}'
+alias work='cd {{WORKSPACE_DIR}}'
+alias projects='cd {{PROJECTS_DIR}}'
