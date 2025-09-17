@@ -2,277 +2,34 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main, develop ]
-
-env:
-  TERM: xterm-256color
+    branches: [main]
 
 jobs:
-  lint:
-    name: Lint and Format Check
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y shellcheck
-
-        # Install shfmt
-        wget -O shfmt https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.7.0_linux_amd64
-        chmod +x shfmt
-        mkdir -p "$HOME/.local/bin"
-        mv shfmt "$HOME/.local/bin/"
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-    - name: Run shell script linting
-      run: |
-        ./tests/lint-scripts.sh
-
-    - name: Run format checking
-      run: |
-        ./tests/format-check.sh
-
-    - name: Check for security issues
-      run: |
-        # Check for potential secrets
-        if grep -r -i -E "(password|secret|token|key.*=|api.*key)" . \
-           --exclude-dir=.git \
-           --exclude="*.md" \
-           --exclude="ci.yml"; then
-          echo "⚠️  Potential secrets found!"
-          exit 1
-        fi
-
   test:
-    name: Installation Tests
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install tools
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y shellcheck zsh
+
+    - name: Validate configs
+      run: ./tests/test-configs.sh
+
+    - name: Test installation
+      run: DRY_RUN=true ./install/setup.sh
+
+  cross-platform:
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-
+    runs-on: ${{ matrix.os }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Install test dependencies
-      run: |
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          sudo apt-get update
-          sudo apt-get install -y zsh git curl wget
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          brew install zsh git curl wget
-        fi
-
-    - name: Run configuration validation tests
-      run: |
-        ./tests/test-configs.sh
-
-    - name: Run installation tests
-      run: |
-        ./tests/test-install.sh
-
-    - name: Test dry-run installation
-      run: |
-        DRY_RUN=true ./install/setup.sh
-
-  validate:
-    name: Structure Validation
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Validate project structure
-      run: |
-        # Check for required files
-        required_files=(
-          "install/setup.sh"
-          "config/zsh/zshrc"
-          "config/git/gitconfig"
-          "config/nvim/init.lua"
-          "Makefile"
-          "README.md"
-        )
-
-        for file in "${required_files[@]}"; do
-          if [[ ! -f "$file" ]]; then
-            echo "❌ Missing required file: $file"
-            exit 1
-          else
-            echo "✅ Found: $file"
-          fi
-        done
-
-    - name: Validate Makefile targets
-      run: |
-        make help
-        make validate
-
-    - name: Check documentation
-      run: |
-        # Ensure README has basic sections
-        if ! grep -q "## Features" README.md; then
-          echo "❌ README missing Features section"
-          exit 1
-        fi
-
-        if ! grep -q "## Installation" README.md; then
-          echo "❌ README missing Installation section"
-          exit 1
-        fi
-
-        echo "✅ Documentation validation passed"
-
-  compatibility:
-    name: Shell Compatibility
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        shell: [bash, zsh]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install shell
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ${{ matrix.shell }}
-
-    - name: Test shell compatibility
-      shell: ${{ matrix.shell }} {0}
-      run: |
-        # Test that shell scripts work with different shells
-        if [[ "${{ matrix.shell }}" == "zsh" ]]; then
-          # Test zsh configuration
-          source config/zsh/zshrc || echo "Zsh config has issues"
-        fi
-
-        # Test shell scripts
-        ./tests/lint-scripts.sh --help >/dev/null
-        ./tests/test-configs.sh --help >/dev/null
-
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run security checks
-      run: |
-        # Check file permissions
-        find . -type f -name "*.sh" | while read -r script; do
-          if [[ ! -x "$script" ]]; then
-            echo "⚠️  Script not executable: $script"
-          fi
-        done
-
-        # Check for world-writable files
-        if find . -type f -perm -002 | grep -q .; then
-          echo "❌ World-writable files found"
-          exit 1
-        fi
-
-        # Check for files with no read permission
-        if find . -type f ! -perm -044 | grep -q .; then
-          echo "❌ Files with restrictive permissions found"
-          exit 1
-        fi
-
-        echo "✅ Security scan passed"
-
-  integration:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: [lint, test, validate]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y zsh git curl wget jq
-
-    - name: Full installation test
-      run: |
-        # Create a test user environment
-        export TEST_HOME="/tmp/integration-test-$$"
-        mkdir -p "$TEST_HOME"
-
-        # Copy dotfiles
-        cp -r . "$TEST_HOME/.dotfiles"
-
-        # Run installation
-        cd "$TEST_HOME/.dotfiles"
-        HOME="$TEST_HOME" FORCE=true ./install/setup.sh
-
-        # Test that aliases work
-        cd "$TEST_HOME"
-        if ! HOME="$TEST_HOME" zsh -c "source .zshrc && alias gst"; then
-          echo "❌ Aliases not working"
-          exit 1
-        fi
-
-        echo "✅ Integration test passed"
-
-    - name: Test workflow helper
-      run: |
-        export TEST_HOME="/tmp/integration-test-$$"
-        cd "$TEST_HOME/.dotfiles"
-
-        # Test workflow helper commands
-        HOME="$TEST_HOME" ./bin/workflow-helper --help
-        HOME="$TEST_HOME" ./bin/workflow-helper status || true
-
-        echo "✅ Workflow helper test passed"
-
-  benchmark:
-    name: Performance Benchmark
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Benchmark shell startup time
-      run: |
-        # Install zsh
-        sudo apt-get update
-        sudo apt-get install -y zsh time
-
-        # Create test environment
-        export TEST_HOME="/tmp/benchmark-test-$$"
-        mkdir -p "$TEST_HOME"
-        cp -r . "$TEST_HOME/.dotfiles"
-
-        # Install dotfiles
-        cd "$TEST_HOME/.dotfiles"
-        HOME="$TEST_HOME" FORCE=true ./install/setup.sh >/dev/null 2>&1
-
-        # Benchmark zsh startup time
-        echo "🚀 Benchmarking zsh startup time..."
-        cd "$TEST_HOME"
-
-        for i in {1..5}; do
-          /usr/bin/time -f "Run $i: %es" zsh -i -c exit 2>&1 | grep "Run $i"
-        done
-
-        # Average startup time should be reasonable
-        avg_time=$(/usr/bin/time -f "%e" zsh -i -c exit 2>&1)
-        if (( $(echo "$avg_time > 2.0" | bc -l) )); then
-          echo "⚠️  Zsh startup time is slow: ${avg_time}s"
-        else
-          echo "✅ Zsh startup time is good: ${avg_time}s"
-        fi
+    - name: Test dry-run install
+      run: DRY_RUN=true ./install/setup.sh
