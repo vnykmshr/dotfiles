@@ -269,8 +269,12 @@ process_templates() {
         return 1
     fi
 
-    # Load configuration
-    load_config
+    # Load configuration (don't fail if no config exists in dry-run)
+    if [[ "$DRY_RUN" == "true" ]]; then
+        load_config || true  # Don't fail in dry-run mode
+    else
+        load_config
+    fi
 
     # Process gitconfig template
     process_gitconfig_template
