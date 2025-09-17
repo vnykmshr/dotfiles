@@ -31,5 +31,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install tools (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y shellcheck zsh
+
     - name: Test dry-run install
       run: DRY_RUN=true ./install/setup.sh

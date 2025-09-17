@@ -230,6 +230,12 @@ install_packages() {
 configure_shell() {
     log_step "Configuring shell"
 
+    # Skip shell change in CI environments
+    if [[ -n "$CI" || -n "$GITHUB_ACTIONS" ]]; then
+        log_info "CI environment detected, skipping shell change"
+        return 0
+    fi
+
     # Change default shell to zsh if not already
     if [[ "$SHELL" != */zsh ]]; then
         local zsh_path
@@ -240,6 +246,7 @@ configure_shell() {
             run_cmd "chsh -s \"$zsh_path\""
         else
             log_error "Zsh not found. Cannot change default shell."
+            return 1
         fi
     else
         log_info "Shell is already zsh"
