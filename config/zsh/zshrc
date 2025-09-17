@@ -81,12 +81,13 @@ path=(
     "$DOTFILES/bin"
     "$HOME/.cargo/bin"
     "$HOME/.mise/shims"
-    /opt/homebrew/bin
-    /opt/homebrew/sbin
-    /usr/local/bin
-    /usr/local/sbin
     $path
 )
+
+# Add brew paths if they exist
+for brew_path in "/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/local/sbin"; do
+    [[ -d "$brew_path" ]] && path=("$brew_path" $path)
+done
 
 # =============================================================================
 # Load Configuration Modules
@@ -107,10 +108,11 @@ load_config "exports"           # Additional environment variables
 load_config "aliases"           # Command aliases
 load_config "functions"         # Custom functions
 load_config "personal-aliases"  # Personal aliases based on usage patterns
-load_config "personal-functions"# Personal functions based on workflow
+load_config "personal-functions" # Personal functions based on workflow
 load_config "completions"       # Custom completions
 load_config "prompt"            # Prompt configuration
 load_config "plugins"           # Plugin management
+load_config "alias-reminder"    # Alias reminder system for muscle memory
 load_config "local"             # Local/machine-specific config
 
 # =============================================================================
@@ -122,11 +124,9 @@ if command -v mise >/dev/null 2>&1; then
     eval "$(mise activate zsh)"
 fi
 
-# Homebrew
-if [[ -x /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [[ -x /usr/local/bin/brew ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
+# Homebrew - detect installation dynamically
+if command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
 fi
 
 # fzf (fuzzy finder)
