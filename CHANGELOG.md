@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-09-18
+
+### Added
+- macOS defaults automation script with 41 system preferences
+- `make tools` command to show development tools status
+- Permission handling for macOS accessibility settings
+
+### Fixed
+- macOS defaults permission error blocking installation
+- Removed missing test-configs.sh hook from pre-commit
+- Arithmetic expression failures in test scripts
+
+### Changed
+- Enhanced Makefile with development tools overview
+- Improved pre-commit system reliability
+
+## [3.0.0] - 2024-10-15
+
+### Added
+- JSON-based template system with placeholder replacement
+- Advanced OS detection and environment handling
+- Full mise integration for tool management
+- Automated testing framework
+
+## [2.2.0] - 2024-10-10
+
+### Added
+- Alias conflict detection
+- Neovim LSP configuration
+- Extended language support via mise
+
+## [2.1.0] - 2024-10-05
+
+### Added
+- mise version manager integration
+- Enhanced shell configuration
+- Improved package management
+
 ## [1.0.0] - 2024-09-17
 
 ### 🎉 First Production Release
