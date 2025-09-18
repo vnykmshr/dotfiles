@@ -61,19 +61,24 @@ gst                 # git status --short --branch
 ## Core Features
 
 ### Environment Detection
+
 Auto-activates project tools and versions:
+
 - **Node.js**: Reads `.nvmrc`, switches versions
 - **Python**: Uses `.python-version` with mise/pyenv
 - **Go/Rust**: Configures paths and environments
 - **npm scripts**: Creates dynamic aliases
 
 ### Security Automation
+
 - **.env Protection**: Auto-secures environment files
 - **Git Hooks**: Pre-commit secret scanning
 - **SSH Validation**: Key permission checks
 
 ### Cross-Platform Support
+
 Unified experience across macOS, Linux, WSL, containers:
+
 - Consistent clipboard commands (`pbcopy`/`pbpaste`)
 - Normalized keybindings and environment detection
 

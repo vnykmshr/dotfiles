@@ -1,7 +1,7 @@
-#!/usr/bin/env zsh
 # Modern Zsh Configuration - Clean Version
 
-# Debug mode
+# Performance and debug mode
+[[ "$ZSH_PROF" == "1" ]] && zmodload zsh/zprof
 [[ "$DOTFILES_DEBUG" == "true" ]] && zmodload zsh/zprof
 
 # Core configuration
@@ -47,25 +47,56 @@ load_config() {
     [[ -r "$config_path" ]] && source "$config_path"
 }
 
-# Load core modules
-for module in aliases functions personal-aliases personal-functions \
-              cross-platform environment-detection direnv-integration \
-              intelligent-history security-automation prompt; do
+# Load core modules (always needed)
+for module in aliases functions; do
     load_config "$module"
 done
+
+# Load user customizations
+load_config "personal-aliases"
+load_config "personal-functions"
+
+# Load optional modules (can be disabled)
+[[ "$DOTFILES_SKIP_CROSS_PLATFORM" != "1" ]] && load_config "cross-platform"
+[[ "$DOTFILES_SKIP_ENV_DETECTION" != "1" ]] && load_config "environment-detection"
+[[ "$DOTFILES_SKIP_DIRENV" != "1" ]] && load_config "direnv-integration"
+[[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "intelligent-history"
+[[ "$DOTFILES_SKIP_SECURITY" != "1" ]] && load_config "security-automation"
+[[ "$DOTFILES_SKIP_PERFORMANCE" != "1" ]] && load_config "performance"
+load_config "prompt"
 
 # Load CLI tools and workflow automation
 [[ -r "$DOTFILES/config/cli-tools/init" ]] && source "$DOTFILES/config/cli-tools/init"
 [[ -r "$DOTFILES/config/workflow/init" ]] && source "$DOTFILES/config/workflow/init"
 
-# Tool integrations
-command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+# Tool integrations (lazy load heavy ones)
 command -v brew >/dev/null 2>&1 && eval "$(brew shellenv)"
-command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 
-# Completion system
+# Lazy load mise if not already active
+if command -v mise >/dev/null 2>&1 && [[ -z "$MISE_SHELL" ]]; then
+    mise() {
+        unfunction mise
+        eval "$(command mise activate zsh)"
+        mise "$@"
+    }
+fi
+
+# Lazy load fzf
+if command -v fzf >/dev/null 2>&1; then
+    fzf() {
+        unfunction fzf
+        eval "$(command fzf --zsh)"
+        fzf "$@"
+    }
+fi
+
+# Completion system (optimized)
 autoload -Uz compinit
-[[ -n ~/.zcompdump(#qN.mh+24) ]] && compinit || compinit -C
+if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+    compinit
+else
+    compinit -C
+fi
 
 # Essential completion options
 setopt AUTO_MENU COMPLETE_IN_WORD MENU_COMPLETE

@@ -7,6 +7,7 @@
 ### Personal Aliases (`config/zsh/personal-aliases`)
 
 **Development Workflow**:
+
 ```bash
 # Language-specific shortcuts
 alias py="python3"
@@ -25,6 +26,7 @@ alias cleanup="git branch --merged | grep -v main | xargs -n 1 git branch -d"
 ```
 
 **Environment-Specific**:
+
 ```bash
 # Docker development
 alias dc="docker-compose"
@@ -42,6 +44,7 @@ alias awsprofile='export AWS_PROFILE=$(aws configure list-profiles | fzf)'
 ### Git Configuration (`config/git/gitconfig.template`)
 
 **Personal Section** (updated during installation):
+
 ```ini
 [user]
     name = Your Name
@@ -54,6 +57,7 @@ alias awsprofile='export AWS_PROFILE=$(aws configure list-profiles | fzf)'
 ```
 
 **Workflow Customization**:
+
 ```ini
 [alias]
     # Add your preferred aliases
@@ -73,6 +77,7 @@ alias awsprofile='export AWS_PROFILE=$(aws configure list-profiles | fzf)'
 ### SSH Configuration (`config/ssh/config.template`)
 
 **Multiple Identity Management**:
+
 ```ssh
 # Work identity
 Host work-*
@@ -101,6 +106,7 @@ Host staging
 ### Shell Functions (`config/zsh/functions`)
 
 **Project Management**:
+
 ```bash
 # Quick project initialization
 mkproject() {
@@ -124,6 +130,7 @@ setenv() {
 ```
 
 **Utility Functions**:
+
 ```bash
 # Extract any archive
 extract() {
@@ -151,6 +158,7 @@ fkill() {
 ### Custom Tool Example
 
 Create `config/workflow/deploy-helper`:
+
 ```bash
 #!/usr/bin/env bash
 
@@ -188,6 +196,7 @@ esac
 ```
 
 Make it executable:
+
 ```bash
 chmod +x config/workflow/deploy-helper
 ```
@@ -195,6 +204,7 @@ chmod +x config/workflow/deploy-helper
 ### Environment-Aware Tools
 
 Create `config/workflow/project-setup`:
+
 ```bash
 #!/usr/bin/env bash
 
@@ -239,6 +249,7 @@ main "$@"
 ### Neovim Configuration (`config/nvim/init.lua`)
 
 **Language-Specific Setup**:
+
 ```lua
 -- Customize for your primary languages
 local lsp_servers = {
@@ -256,6 +267,7 @@ vim.keymap.set('n', '<leader>gt', ':LazyGit<CR>')  -- If you use LazyGit
 ## Testing Your Customizations
 
 Always test changes:
+
 ```bash
 # Test syntax
 make lint
@@ -270,6 +282,7 @@ DRY_RUN=true ./install/setup.sh
 ## Environment Variables
 
 Add to `config/zsh/zshrc` or create `~/.zshrc.local`:
+
 ```bash
 # Development tools
 export EDITOR="nvim"
@@ -290,6 +303,7 @@ export NOTES_DIR="$HOME/notes"
 ## Integration with External Tools
 
 ### GitHub CLI Configuration
+
 ```bash
 # Add to personal-aliases
 alias pr="gh pr create --web"
@@ -298,6 +312,7 @@ alias clone="gh repo clone"
 ```
 
 ### Docker Development
+
 ```bash
 # Add to functions
 dexec() {
@@ -314,6 +329,7 @@ dlogs() {
 ## Maintenance
 
 ### Regular Updates
+
 ```bash
 # Keep your setup current
 cd ~/.dotfiles
@@ -322,6 +338,7 @@ make test  # Ensure everything still works
 ```
 
 ### Backup Important Customizations
+
 ```bash
 # Keep track of your changes
 git add config/zsh/personal-aliases
@@ -330,6 +347,7 @@ git commit -m "Personal customizations update"
 ```
 
 ### Share Improvements
+
 Consider contributing useful patterns back to the main project or sharing with your team.
 
 ---

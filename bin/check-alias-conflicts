@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Check alias files
 for file in config/zsh/aliases config/zsh/personal-aliases; do
-    if [[ -f "$file" ]]; then
+    if [[ -f $file ]]; then
         echo "Checking aliases in $file..."
 
         # Extract aliases and check for conflicts

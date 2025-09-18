@@ -82,7 +82,7 @@ main() {
     log_info "Starting dotfiles setup..."
     log_info "Dotfiles directory: $DOTFILES_DIR"
 
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_warn "DRY RUN MODE - No changes will be made"
     fi
 
@@ -91,7 +91,7 @@ main() {
     log_info "Detected OS: $OS_NAME ($OS_ARCH)"
 
     # Create backup directory if needed
-    if [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $DRY_RUN != "true" ]]; then
         mkdir -p "$BACKUP_DIR"
         log_info "Backup directory: $BACKUP_DIR"
     fi
@@ -107,7 +107,7 @@ main() {
 
     log_success "Dotfiles setup complete!"
 
-    if [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $DRY_RUN != "true" ]]; then
         log_info "Backup created at: $BACKUP_DIR"
         log_info "Run 'source ~/.zshrc' or restart your shell to apply changes"
     fi
@@ -144,7 +144,7 @@ install_homebrew() {
     fi
 
     log_info "Installing Homebrew..."
-    if [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $DRY_RUN != "true" ]]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         # Add Homebrew to PATH for Apple Silicon Macs
@@ -190,11 +190,11 @@ init_config() {
     local config_file="$DOTFILES_DIR/config.json"
     local example_file="$DOTFILES_DIR/config.json.example"
 
-    if [[ ! -f "$config_file" ]]; then
-        if [[ -f "$example_file" ]]; then
-            if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ ! -f $config_file ]]; then
+        if [[ -f $example_file ]]; then
+            if [[ $DRY_RUN == "true" ]]; then
                 log_info "[DRY RUN] Would copy config.json.example to config.json"
-                return 0  # In dry-run, continue without creating file
+                return 0 # In dry-run, continue without creating file
             else
                 cp "$example_file" "$config_file"
                 log_success "Created config.json from example template"
@@ -231,7 +231,7 @@ init_config() {
 load_config() {
     local config_file="$DOTFILES_DIR/config.json"
 
-    if [[ -f "$config_file" ]]; then
+    if [[ -f $config_file ]]; then
         log_info "Loading configuration from config.json"
         return 0
     else
@@ -246,10 +246,10 @@ get_config_value() {
     local default="$2"
     local config_file="$DOTFILES_DIR/config.json"
 
-    if [[ -f "$config_file" ]] && command -v jq >/dev/null 2>&1; then
+    if [[ -f $config_file ]] && command -v jq >/dev/null 2>&1; then
         local value
         value=$(jq -r "$key // \"$default\"" "$config_file" 2>/dev/null)
-        if [[ "$value" != "null" && -n "$value" ]]; then
+        if [[ $value != "null" && -n $value ]]; then
             echo "$value"
         else
             echo "$default"
@@ -270,8 +270,8 @@ process_templates() {
     fi
 
     # Load configuration (don't fail if no config exists in dry-run)
-    if [[ "$DRY_RUN" == "true" ]]; then
-        load_config || true  # Don't fail in dry-run mode
+    if [[ $DRY_RUN == "true" ]]; then
+        load_config || true # Don't fail in dry-run mode
     else
         load_config
     fi
@@ -295,21 +295,21 @@ process_template_generic() {
     local description="$3"
     shift 3
 
-    if [[ ! -f "$template_file" ]]; then
+    if [[ ! -f $template_file ]]; then
         log_warn "$description template not found, skipping"
         return 0
     fi
 
     log_info "Processing $description..."
 
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_info "[DRY RUN] Would generate $description from template"
         return 0
     fi
 
     # Build sed command with all placeholder replacements
     local sed_cmd=""
-    while (( $# >= 2 )); do
+    while (($# >= 2)); do
         local placeholder="$1"
         local value="$2"
         sed_cmd+="-e 's|{{${placeholder}}}|${value}|g' "
@@ -345,18 +345,18 @@ process_gitconfig_template() {
     fi
 
     # Prompt for user details if using defaults and not in dry run
-    if [[ "$git_user_name" == "Your Name" ]] && [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $git_user_name == "Your Name" ]] && [[ $DRY_RUN != "true" ]]; then
         read -rp "Enter your name for Git commits: " git_user_name
         git_user_name="${git_user_name:-Your Name}"
     fi
 
-    if [[ "$git_user_email" == "your.email@example.com" ]] && [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $git_user_email == "your.email@example.com" ]] && [[ $DRY_RUN != "true" ]]; then
         read -rp "Enter your email for Git commits: " git_user_email
         git_user_email="${git_user_email:-your.email@example.com}"
     fi
 
     # Show preview in dry run mode
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_info "[DRY RUN] Would generate gitconfig with:"
         log_info "  Name: $git_user_name"
         log_info "  Email: $git_user_email"
@@ -402,7 +402,7 @@ process_ssh_template() {
     local local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "$USER")
 
     # Show preview in dry run mode
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_info "[DRY RUN] Would generate SSH config with standard keys and server templates"
         return 0
     fi
@@ -447,7 +447,7 @@ process_zsh_exports_template() {
     local code_editor="code"
 
     # Show preview in dry run mode
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_info "[DRY RUN] Would generate local exports with workspace: $workspace_dir"
         return 0
     fi
@@ -482,8 +482,8 @@ link_config() {
     run_cmd "mkdir -p \"$target_dir\""
 
     # Backup existing file if it exists and is not a symlink
-    if [[ -e "$target_path" && ! -L "$target_path" ]]; then
-        if [[ "$FORCE" == "true" || "$DRY_RUN" == "true" ]]; then
+    if [[ -e $target_path && ! -L $target_path ]]; then
+        if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
             local backup_file
             backup_file="$(basename "$target_path")"
             run_cmd "mv \"$target_path\" \"$BACKUP_DIR/$backup_file\""
@@ -494,7 +494,7 @@ link_config() {
     fi
 
     # Remove existing symlink
-    if [[ -L "$target_path" ]]; then
+    if [[ -L $target_path ]]; then
         run_cmd "rm \"$target_path\""
     fi
 
@@ -508,13 +508,13 @@ install_packages() {
     log_step "Installing packages"
 
     # Skip packages if SKIP_PACKAGES is set (useful for CI/testing)
-    if [[ "${SKIP_PACKAGES:-}" == "true" ]]; then
+    if [[ ${SKIP_PACKAGES:-} == "true" ]]; then
         log_info "Skipping package installation (SKIP_PACKAGES=true)"
         return 0
     fi
 
     local package_file="$DOTFILES_DIR/install/install-packages"
-    if [[ -f "$package_file" ]]; then
+    if [[ -f $package_file ]]; then
         # shellcheck disable=SC1090
         source "$package_file"
     else
@@ -527,17 +527,17 @@ configure_shell() {
     log_step "Configuring shell"
 
     # Skip shell change in CI environments
-    if [[ -n "${CI:-}" || -n "${GITHUB_ACTIONS:-}" ]]; then
+    if [[ -n ${CI:-} || -n ${GITHUB_ACTIONS:-} ]]; then
         log_info "CI environment detected, skipping shell change"
         return 0
     fi
 
     # Change default shell to zsh if not already
-    if [[ "$SHELL" != */zsh ]]; then
+    if [[ $SHELL != */zsh ]]; then
         local zsh_path
         zsh_path="$(command -v zsh)"
 
-        if [[ -n "$zsh_path" ]]; then
+        if [[ -n $zsh_path ]]; then
             log_info "Changing default shell to zsh: $zsh_path"
             run_cmd "chsh -s \"$zsh_path\""
         else
@@ -569,7 +569,7 @@ setup_development_tools() {
 
     # Add bin directory to PATH
     local bin_dir="$DOTFILES_DIR/bin"
-    if [[ -d "$bin_dir" ]]; then
+    if [[ -d $bin_dir ]]; then
         log_info "Custom scripts available in: $bin_dir"
     fi
 }
@@ -587,10 +587,10 @@ install_modern_cli_tools() {
     local install_tools=true
 
     # Skip tools if SKIP_TOOLS is set (useful for CI/testing)
-    if [[ "${SKIP_TOOLS:-}" == "true" ]]; then
+    if [[ ${SKIP_TOOLS:-} == "true" ]]; then
         install_tools=false
         log_info "Skipping CLI tools installation (SKIP_TOOLS=true)"
-    elif [[ "$DRY_RUN" != "true" ]] && [[ -t 0 ]]; then  # Only prompt if interactive
+    elif [[ $DRY_RUN != "true" ]] && [[ -t 0 ]]; then # Only prompt if interactive
         echo ""
         log_info "Modern CLI tools provide enhanced replacements for common commands:"
         echo "  • eza (better ls with git integration)"
@@ -607,7 +607,7 @@ install_modern_cli_tools() {
         fi
     fi
 
-    if [[ "$install_tools" == "true" ]]; then
+    if [[ $install_tools == "true" ]]; then
         log_info "Installing modern CLI tools via mise..."
 
         # Set up mise configuration directory
@@ -638,7 +638,7 @@ apply_os_defaults() {
     log_step "Applying OS defaults"
 
     local defaults_script="$DOTFILES_DIR/install/defaults/$OS_NAME"
-    if [[ -f "$defaults_script" && -x "$defaults_script" ]]; then
+    if [[ -f $defaults_script && -x $defaults_script ]]; then
         log_info "Applying $OS_NAME defaults..."
         run_cmd "\"$defaults_script\""
     else

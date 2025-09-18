@@ -7,9 +7,9 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-PURPLE='\033[0;35m'  # Used in some contexts
+PURPLE='\033[0;35m' # Used in some contexts
 CYAN='\033[0;36m'
-WHITE='\033[1;37m'   # Reserved for future use
+WHITE='\033[1;37m' # Reserved for future use
 GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
@@ -33,10 +33,10 @@ timestamp() {
 should_log() {
     local level="$1"
     case "$LOG_LEVEL" in
-        DEBUG) [[ "$level" =~ ^(DEBUG|INFO|WARN|ERROR)$ ]] ;;
-        INFO) [[ "$level" =~ ^(INFO|WARN|ERROR)$ ]] ;;
-        WARN) [[ "$level" =~ ^(WARN|ERROR)$ ]] ;;
-        ERROR) [[ "$level" == "ERROR" ]] ;;
+        DEBUG) [[ $level =~ ^(DEBUG|INFO|WARN|ERROR)$ ]] ;;
+        INFO) [[ $level =~ ^(INFO|WARN|ERROR)$ ]] ;;
+        WARN) [[ $level =~ ^(WARN|ERROR)$ ]] ;;
+        ERROR) [[ $level == "ERROR" ]] ;;
         *) true ;;
     esac
 }
@@ -100,7 +100,7 @@ log_step() {
 # Log command execution
 log_cmd() {
     local cmd="$1"
-    if [[ "$VERBOSE" == "true" ]]; then
+    if [[ $VERBOSE == "true" ]]; then
         log_debug "Running: $cmd"
     fi
 }
@@ -132,7 +132,7 @@ with_spinner() {
     local message="${2:-Working...}"
     local pid
 
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         log_info "[DRY RUN] $message"
         log_debug "Would run: $cmd"
         return 0
@@ -148,7 +148,7 @@ with_spinner() {
     printf "%s " "$message" >&2
     while kill -0 $pid 2>/dev/null; do
         i=$(((i + 1) % 4))
-        printf "\b%s" "${spin:$i:1}" >&2
+        printf "\b%s" "${spin:i:1}" >&2
         sleep .1
     done
 

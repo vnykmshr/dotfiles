@@ -10,7 +10,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/utils"
 create_nodejs() {
     local name="$1" dir="$2"
 
-    cat > "$dir/package.json" <<EOF
+    cat >"$dir/package.json" <<EOF
 {
   "name": "$name",
   "version": "1.0.0",
@@ -23,8 +23,8 @@ create_nodejs() {
 }
 EOF
 
-    echo "console.log('Hello from $name!');" > "$dir/index.js"
-    echo "node_modules/" > "$dir/.gitignore"
+    echo "console.log('Hello from $name!');" >"$dir/index.js"
+    echo "node_modules/" >"$dir/.gitignore"
 
     log_success "Node.js project '$name' created"
 }
@@ -32,7 +32,7 @@ EOF
 create_python() {
     local name="$1" dir="$2"
 
-    cat > "$dir/main.py" <<EOF
+    cat >"$dir/main.py" <<EOF
 #!/usr/bin/env python3
 
 def main():
@@ -42,11 +42,11 @@ if __name__ == "__main__":
     main()
 EOF
 
-    cat > "$dir/requirements.txt" <<EOF
+    cat >"$dir/requirements.txt" <<EOF
 # Add your dependencies here
 EOF
 
-    cat > "$dir/.gitignore" <<EOF
+    cat >"$dir/.gitignore" <<EOF
 __pycache__/
 *.pyc
 .venv/
@@ -58,13 +58,13 @@ EOF
 create_go() {
     local name="$1" dir="$2"
 
-    cat > "$dir/go.mod" <<EOF
+    cat >"$dir/go.mod" <<EOF
 module $name
 
 go 1.21
 EOF
 
-    cat > "$dir/main.go" <<EOF
+    cat >"$dir/main.go" <<EOF
 package main
 
 import "fmt"
@@ -74,7 +74,7 @@ func main() {
 }
 EOF
 
-    echo "/$name" > "$dir/.gitignore"
+    echo "/$name" >"$dir/.gitignore"
 
     log_success "Go project '$name' created"
 }
@@ -86,19 +86,38 @@ main() {
     # Simple argument parsing
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -t|--template) template="$2"; shift 2 ;;
-            -h|--help) echo "Usage: $0 [-t template] <name>"; echo "Templates: nodejs, python, go"; exit 0 ;;
-            -*) echo "Unknown option: $1" >&2; exit 1 ;;
-            *) name="$1"; shift ;;
+            -t | --template)
+                template="$2"
+                shift 2
+                ;;
+            -h | --help)
+                echo "Usage: $0 [-t template] <name>"
+                echo "Templates: nodejs, python, go"
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                exit 1
+                ;;
+            *)
+                name="$1"
+                shift
+                ;;
         esac
     done
 
     # Validate inputs
-    [[ -z "$name" ]] && { echo "Project name required" >&2; exit 1; }
-    [[ -d "$name" ]] && { echo "Directory '$name' already exists" >&2; exit 1; }
+    [[ -z $name ]] && {
+        echo "Project name required" >&2
+        exit 1
+    }
+    [[ -d $name ]] && {
+        echo "Directory '$name' already exists" >&2
+        exit 1
+    }
 
     # Select template if not provided
-    if [[ -z "$template" ]]; then
+    if [[ -z $template ]]; then
         echo "Select template:"
         echo "1) nodejs"
         echo "2) python"
@@ -108,7 +127,10 @@ main() {
             1) template="nodejs" ;;
             2) template="python" ;;
             3) template="go" ;;
-            *) echo "Invalid choice" >&2; exit 1 ;;
+            *)
+                echo "Invalid choice" >&2
+                exit 1
+                ;;
         esac
     fi
 
@@ -120,7 +142,10 @@ main() {
         nodejs) create_nodejs "$name" "." ;;
         python) create_python "$name" "." ;;
         go) create_go "$name" "." ;;
-        *) echo "Unknown template: $template" >&2; exit 1 ;;
+        *)
+            echo "Unknown template: $template" >&2
+            exit 1
+            ;;
     esac
 
     # Initialize git

@@ -21,7 +21,7 @@ quick_save() {
     local dry_run="${1:-false}"
     ensure_git_repo
 
-    if [[ "$dry_run" == "true" ]]; then
+    if [[ $dry_run == "true" ]]; then
         log_info "[DRY RUN] Would add all changes: git add ."
         log_info "[DRY RUN] Would prompt for commit message"
         log_info "[DRY RUN] Would commit and push to current branch"
@@ -34,7 +34,7 @@ quick_save() {
 
     # Get commit message
     read -p "Commit message: " -r message
-    if [[ -z "$message" ]]; then
+    if [[ -z $message ]]; then
         log_error "Commit message required"
         return 1
     fi
@@ -61,7 +61,7 @@ quick_pull() {
     local dry_run="${1:-false}"
     ensure_git_repo
 
-    if [[ "$dry_run" == "true" ]]; then
+    if [[ $dry_run == "true" ]]; then
         log_info "[DRY RUN] Would pull with rebase: git pull --rebase"
         return 0
     fi
@@ -101,7 +101,7 @@ quick_status() {
         ahead=$(git rev-list --count "@{upstream}..HEAD" 2>/dev/null || echo "0")
         behind=$(git rev-list --count "HEAD..@{upstream}" 2>/dev/null || echo "0")
 
-        if [[ "$ahead" -gt 0 || "$behind" -gt 0 ]]; then
+        if [[ $ahead -gt 0 || $behind -gt 0 ]]; then
             echo "Sync: $ahead ahead, $behind behind"
         else
             echo "Sync: Up to date"
@@ -144,7 +144,7 @@ main() {
     local dry_run=false
 
     # Check for dry run flag
-    if [[ "${2:-}" == "-n" || "${2:-}" == "--dry-run" ]]; then
+    if [[ ${2:-} == "-n" || ${2:-} == "--dry-run" ]]; then
         dry_run=true
     fi
 
@@ -155,10 +155,10 @@ main() {
         pull)
             quick_pull "$dry_run"
             ;;
-        status|st)
+        status | st)
             quick_status
             ;;
-        help|--help|-h)
+        help | --help | -h)
             usage
             ;;
         *)
@@ -170,6 +170,6 @@ main() {
 }
 
 # Only run main if script is executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     main "$@"
 fi

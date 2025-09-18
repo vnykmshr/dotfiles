@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+# Zsh aliases configuration
 
 # Modern aliases for enhanced productivity
 
@@ -246,6 +246,6 @@ fi
 # =============================================================================
 
 alias dotfiles='cd $DOTFILES'
-alias reload='source ~/.zshrc'
+# reload function defined in functions file
 alias edit-zsh='$EDITOR ~/.zshrc'
 alias edit-aliases='$EDITOR $DOTFILES/config/zsh/aliases'

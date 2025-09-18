@@ -10,10 +10,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Colors
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
 # Counters
-TESTS_RUN=0; TESTS_PASSED=0; TESTS_FAILED=0
+TESTS_RUN=0
+TESTS_PASSED=0
+TESTS_FAILED=0
 
 # Logging
 log_info() { printf "${BLUE}ℹ %s${NC}\n" "$*"; }
@@ -94,14 +100,14 @@ test_syntax() {
 
     # Workflow scripts
     for script in "$PROJECT_ROOT"/config/workflow/*; do
-        [[ -f "$script" && -x "$script" ]] && assert_test "bash -n '$script'" "Workflow syntax valid: $(basename "$script")"
+        [[ -f $script && -x $script ]] && assert_test "bash -n '$script'" "Workflow syntax valid: $(basename "$script")"
     done
 
     # Zsh configs
     local zsh_files=("zshrc" "aliases" "functions" "personal-aliases")
     for file in "${zsh_files[@]}"; do
         local path="$PROJECT_ROOT/config/zsh/$file"
-        [[ -f "$path" ]] && assert_test "zsh -n '$path'" "Zsh syntax valid: $file"
+        [[ -f $path ]] && assert_test "zsh -n '$path'" "Zsh syntax valid: $file"
     done
 }
 
@@ -137,7 +143,7 @@ test_installation() {
     assert_test "test -L '$test_dir/.gitconfig'" "Git config symlinked"
 
     # Test backup functionality
-    echo "existing" > "$test_dir/.zshrc"
+    echo "existing" >"$test_dir/.zshrc"
     assert_test "HOME='$test_dir' FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true '$test_dir/.dotfiles/install/setup.sh' >/dev/null" "Backup installation succeeds"
     assert_test "find '$test_dir' -name '.dotfiles-backup-*' -type d | head -1 | xargs -I {} test -f {}/.zshrc" "Backup created"
 
@@ -168,7 +174,7 @@ test_modern_cli_integration() {
 
     # Test CLI tools config
     local cli_init="$PROJECT_ROOT/config/cli-tools/init"
-    if [[ -f "$cli_init" ]]; then
+    if [[ -f $cli_init ]]; then
         assert_test "bash -n '$cli_init'" "CLI tools init syntax valid"
     fi
 }

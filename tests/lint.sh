@@ -8,13 +8,17 @@ set -eo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Colors
-RED='\033[0;31m'; GREEN='\033[0;32m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m'
 
 log_info() { printf "${BLUE}ℹ %s${NC}\n" "$*"; }
 log_success() { printf "${GREEN}✓ %s${NC}\n" "$*"; }
 log_error() { printf "${RED}✗ %s${NC}\n" "$*"; }
 
-PASSED=0; FAILED=0
+PASSED=0
+FAILED=0
 
 check_file() {
     local file="$1"

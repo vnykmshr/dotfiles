@@ -1,0 +1,74 @@
+# Modern prompt configuration
+# Modern prompt configuration
+
+# Skip if user has set DOTFILES_SKIP_PROMPT=1
+[[ "$DOTFILES_SKIP_PROMPT" == "1" ]] && return
+
+# Skip if prompt is already customized (oh-my-zsh, starship, etc.)
+[[ -n "$ZSH_THEME" || -n "$STARSHIP_CONFIG" || "$PROMPT" != *"%"* ]] && return
+
+# Check if user wants to skip during first setup
+if [[ ! -f "$HOME/.config/dotfiles/prompt-choice" ]]; then
+    if [[ -t 0 && -t 1 ]]; then
+        echo ""
+        echo "Dotfiles can set up a clean, modern prompt."
+        echo "Skip if you use oh-my-zsh, starship, or have your own prompt."
+        echo ""
+        read -q "REPLY?Set up dotfiles prompt? (y/n): "
+        echo ""
+
+        mkdir -p "$HOME/.config/dotfiles"
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "yes" > "$HOME/.config/dotfiles/prompt-choice"
+        else
+            echo "no" > "$HOME/.config/dotfiles/prompt-choice"
+            return
+        fi
+    else
+        # Non-interactive, default to no
+        mkdir -p "$HOME/.config/dotfiles"
+        echo "no" > "$HOME/.config/dotfiles/prompt-choice"
+        return
+    fi
+fi
+
+# Check stored choice
+if [[ -f "$HOME/.config/dotfiles/prompt-choice" ]]; then
+    local choice=$(cat "$HOME/.config/dotfiles/prompt-choice")
+    [[ "$choice" != "yes" ]] && return
+fi
+
+# Enable prompt substitution
+setopt PROMPT_SUBST
+
+# Git status function
+git_prompt() {
+    local branch diff1 diff2
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
+
+    # Check for changes
+    git diff-index --quiet HEAD 2>/dev/null
+    if [[ $? -ne 0 ]]; then
+        diff1="*"
+    fi
+
+    # Check for staged changes
+    git diff-index --quiet --cached HEAD 2>/dev/null
+    if [[ $? -ne 0 ]]; then
+        diff2="+"
+    fi
+
+    echo " %F{242}($branch$diff1$diff2)%f"
+}
+
+# Exit status indicator
+exit_status() {
+    echo "%(?..%F{red}✗%f )"
+}
+
+# Set the prompt
+PROMPT='$(exit_status)%F{blue}%1~%f$(git_prompt) %F{green}→%f '
+RPROMPT=''
+
+# Simple continuation prompt
+PS2='%F{yellow}→%f '

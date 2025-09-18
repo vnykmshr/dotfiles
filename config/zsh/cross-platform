@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+# Cross-platform compatibility configuration
 # Cross-Platform Compatibility
 
 # =============================================================================
@@ -138,7 +138,7 @@ env_info() {
     [[ "$DOTFILES_ENV" == "wsl" ]] && echo "WSL Distro: ${WSL_DISTRO_NAME:-unknown}"
 }
 
-alias envinfo='env_info'
+# envinfo function defined in environment-detection file
 alias platform='echo "$DOTFILES_OS ($DOTFILES_ENV)"'
 
 # Initialize all cross-platform features

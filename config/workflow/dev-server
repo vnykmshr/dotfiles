@@ -14,7 +14,7 @@ start_server() {
     local project_type
     project_type=$(detect_project_type)
 
-    if [[ "$project_type" == "unknown" ]]; then
+    if [[ $project_type == "unknown" ]]; then
         log_warn "No supported project detected in current directory"
         log_info "Supported: Node.js, Python, Go, Rust, Static"
         return 1
@@ -23,12 +23,12 @@ start_server() {
     local dev_cmd
     dev_cmd=$(get_dev_command "$project_type")
 
-    if [[ -z "$dev_cmd" ]]; then
+    if [[ -z $dev_cmd ]]; then
         log_warn "No dev server command found for $project_type project"
         return 1
     fi
 
-    if [[ "$dry_run" == "true" ]]; then
+    if [[ $dry_run == "true" ]]; then
         log_info "[DRY RUN] Would start $project_type dev server: $dev_cmd"
     else
         log_info "Starting $project_type dev server: $dev_cmd"
@@ -45,7 +45,7 @@ show_info() {
     echo "============================="
     echo "Project type: $project_type"
 
-    if [[ "$project_type" == "unknown" ]]; then
+    if [[ $project_type == "unknown" ]]; then
         echo "No supported project detected"
         echo ""
         echo "Supported project types:"
@@ -61,7 +61,7 @@ show_info() {
     local dev_cmd
     dev_cmd=$(get_dev_command "$project_type")
 
-    if [[ -n "$dev_cmd" ]]; then
+    if [[ -n $dev_cmd ]]; then
         echo "Dev command: $dev_cmd"
     else
         echo "No dev server command available"
@@ -99,13 +99,13 @@ EOF
 # Main function
 main() {
     case "${1:-}" in
-        -n|--dry-run)
+        -n | --dry-run)
             start_server true
             ;;
-        -i|--info)
+        -i | --info)
             show_info
             ;;
-        -h|--help)
+        -h | --help)
             usage
             ;;
         "")
@@ -120,6 +120,6 @@ main() {
 }
 
 # Only run main if script is executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     main "$@"
 fi

@@ -14,7 +14,7 @@ run_tests() {
     local project_type
     project_type=$(detect_project_type)
 
-    if [[ "$project_type" == "unknown" ]]; then
+    if [[ $project_type == "unknown" ]]; then
         log_warn "No supported project detected in current directory"
         log_info "Supported: Node.js, Python, Go, Rust, Make"
         return 1
@@ -23,12 +23,12 @@ run_tests() {
     local test_cmd
     test_cmd=$(get_test_command "$project_type")
 
-    if [[ -z "$test_cmd" ]]; then
+    if [[ -z $test_cmd ]]; then
         log_warn "No test command found for $project_type project"
         return 1
     fi
 
-    if [[ "$dry_run" == "true" ]]; then
+    if [[ $dry_run == "true" ]]; then
         log_info "[DRY RUN] Would run tests for $project_type project: $test_cmd"
     else
         log_info "Running tests for $project_type project: $test_cmd"
@@ -45,7 +45,7 @@ show_info() {
     echo "======================"
     echo "Project type: $project_type"
 
-    if [[ "$project_type" == "unknown" ]]; then
+    if [[ $project_type == "unknown" ]]; then
         echo "No supported project detected"
         echo ""
         echo "Supported project types:"
@@ -60,7 +60,7 @@ show_info() {
     local test_cmd
     test_cmd=$(get_test_command "$project_type")
 
-    if [[ -n "$test_cmd" ]]; then
+    if [[ -n $test_cmd ]]; then
         echo "Test command: $test_cmd"
     else
         echo "No test command available"
@@ -97,13 +97,13 @@ EOF
 # Main function
 main() {
     case "${1:-}" in
-        -n|--dry-run)
+        -n | --dry-run)
             run_tests true
             ;;
-        -i|--info)
+        -i | --info)
             show_info
             ;;
-        -h|--help)
+        -h | --help)
             usage
             ;;
         "")
@@ -118,6 +118,6 @@ main() {
 }
 
 # Only run main if script is executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     main "$@"
 fi

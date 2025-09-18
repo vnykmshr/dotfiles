@@ -86,7 +86,7 @@ cmd_commit() {
     fi
 
     # Commit with message
-    if [[ -n "$message" ]]; then
+    if [[ -n $message ]]; then
         git commit -m "$message"
         log_success "Committed: $message"
     else
@@ -100,7 +100,7 @@ cmd_commit() {
     # Ask if user wants to push (common in your workflow)
     echo -n "Push to remote? (y/N): "
     read -r push_answer
-    if [[ "$push_answer" =~ ^[Yy]$ ]]; then
+    if [[ $push_answer =~ ^[Yy]$ ]]; then
         git push
         log_success "Pushed to remote"
     fi

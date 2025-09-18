@@ -150,7 +150,7 @@ test_hooks() {
 backup_existing_hooks() {
     local git_hooks_dir=".git/hooks"
 
-    if [[ -d "$git_hooks_dir" ]]; then
+    if [[ -d $git_hooks_dir ]]; then
         local backup_dir="${git_hooks_dir}.backup.$(date +%Y%m%d-%H%M%S)"
 
         log_info "Backing up existing git hooks to $backup_dir"
@@ -224,7 +224,7 @@ main() {
     setup_hooks
 
     # Test hooks unless skipped
-    if [[ "$skip_test" == "false" ]]; then
+    if [[ $skip_test == "false" ]]; then
         test_hooks
     fi
 

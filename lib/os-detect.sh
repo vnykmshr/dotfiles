@@ -18,12 +18,12 @@ detect_os() {
     esac
 
     # Detect OS
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ $OSTYPE == "darwin"* ]]; then
         OS_NAME="macos"
         OS_VERSION="$(sw_vers -productVersion)"
         PACKAGE_MANAGER="brew"
 
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    elif [[ $OSTYPE == "linux-gnu"* ]]; then
         # Use /etc/os-release if available
         if [[ -f /etc/os-release ]]; then
             # shellcheck source=/dev/null
@@ -75,7 +75,7 @@ detect_os() {
             PACKAGE_MANAGER="unknown"
         fi
 
-    elif [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]]; then
+    elif [[ $OSTYPE == "msys"* ]] || [[ $OSTYPE == "cygwin"* ]]; then
         OS_NAME="windows"
         OS_VERSION="$(cmd.exe /c ver 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
         PACKAGE_MANAGER="choco"
@@ -94,7 +94,7 @@ detect_os() {
 # Check if running on a specific OS
 is_os() {
     local target_os="$1"
-    [[ "$OS_NAME" == "$target_os" ]]
+    [[ $OS_NAME == "$target_os" ]]
 }
 
 # Check if running on macOS
@@ -104,23 +104,23 @@ is_macos() {
 
 # Check if running on Linux
 is_linux() {
-    [[ "$OS_NAME" != "macos" && "$OS_NAME" != "windows" && "$OS_NAME" != "unknown" ]]
+    [[ $OS_NAME != "macos" && $OS_NAME != "windows" && $OS_NAME != "unknown" ]]
 }
 
 # Check if running on Windows (including WSL)
 is_windows() {
-    is_os "windows" || [[ -n "${WSL_DISTRO_NAME:-}" ]]
+    is_os "windows" || [[ -n ${WSL_DISTRO_NAME:-} ]]
 }
 
 # Check if running in WSL
 is_wsl() {
-    [[ -n "${WSL_DISTRO_NAME:-}" ]] || [[ "$(uname -r)" == *microsoft* ]]
+    [[ -n ${WSL_DISTRO_NAME:-} ]] || [[ "$(uname -r)" == *microsoft* ]]
 }
 
 # Check if running on a specific Linux distribution
 is_distro() {
     local target_distro="$1"
-    [[ "$OS_NAME" == "$target_distro" ]]
+    [[ $OS_NAME == "$target_distro" ]]
 }
 
 # Get package manager install command

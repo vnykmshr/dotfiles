@@ -352,7 +352,7 @@ install_fonts() {
 # =============================================================================
 
 install_gui_apps() {
-    if [[ "$OS_NAME" == "macos" ]]; then
+    if [[ $OS_NAME == "macos" ]]; then
         log_step "Installing GUI applications (macOS)"
 
         local apps=(
@@ -399,17 +399,17 @@ install_packages_main() {
     install_language_tools
 
     # Development tools
-    if [[ "${INSTALL_DEV_TOOLS:-true}" == "true" ]]; then
+    if [[ ${INSTALL_DEV_TOOLS:-true} == "true" ]]; then
         install_development_tools
     fi
 
     # Fonts
-    if [[ "${INSTALL_FONTS:-true}" == "true" ]]; then
+    if [[ ${INSTALL_FONTS:-true} == "true" ]]; then
         install_fonts
     fi
 
     # GUI apps (macOS only)
-    if [[ "${INSTALL_GUI_APPS:-false}" == "true" ]]; then
+    if [[ ${INSTALL_GUI_APPS:-false} == "true" ]]; then
         install_gui_apps
     fi
 
@@ -418,7 +418,7 @@ install_packages_main() {
 }
 
 # Run installation if script is executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     # Source required libraries if not already sourced
     if ! command -v log_info >/dev/null 2>&1; then
         SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

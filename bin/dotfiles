@@ -122,7 +122,7 @@ cmd_backup() {
 
     for config in "${configs[@]}"; do
         local file="$HOME/$config"
-        if [[ -f "$file" ]]; then
+        if [[ -f $file ]]; then
             cp "$file" "$backup_dir/"
             log_info "Backed up: $config"
         fi
@@ -136,7 +136,7 @@ cmd_backup() {
 
     for dir in "${config_dirs[@]}"; do
         local source_dir="$HOME/$dir"
-        if [[ -d "$source_dir" ]]; then
+        if [[ -d $source_dir ]]; then
             cp -r "$source_dir" "$backup_dir/"
             log_info "Backed up: $dir"
         fi
@@ -149,13 +149,13 @@ cmd_backup() {
 cmd_restore() {
     local backup_dir="${1:-}"
 
-    if [[ -z "$backup_dir" ]]; then
+    if [[ -z $backup_dir ]]; then
         log_error "Please specify backup directory"
         log_info "Usage: $SCRIPT_NAME restore <backup-directory>"
         exit 1
     fi
 
-    if [[ ! -d "$backup_dir" ]]; then
+    if [[ ! -d $backup_dir ]]; then
         log_error "Backup directory not found: $backup_dir"
         exit 1
     fi
@@ -168,7 +168,7 @@ cmd_restore() {
         basename="$(basename "$file")"
         local target="$HOME/$basename"
 
-        if [[ -f "$file" ]]; then
+        if [[ -f $file ]]; then
             cp "$file" "$target"
             log_info "Restored: $basename"
         fi
@@ -220,10 +220,10 @@ cmd_edit() {
 
     log_info "Opening dotfiles in $editor..."
 
-    if [[ "$editor" == "nvim" || "$editor" == "vim" ]]; then
+    if [[ $editor == "nvim" || $editor == "vim" ]]; then
         # Open in editor with file explorer
         exec "$editor" "$DOTFILES_DIR"
-    elif [[ "$editor" == "code" ]]; then
+    elif [[ $editor == "code" ]]; then
         # Open in VS Code
         exec code "$DOTFILES_DIR"
     else
@@ -239,7 +239,7 @@ cmd_test() {
     log_info "Running dotfiles tests..."
 
     local test_script="$DOTFILES_DIR/tests/test-install.sh"
-    if [[ -f "$test_script" ]]; then
+    if [[ -f $test_script ]]; then
         exec "$test_script" "$@"
     else
         log_warn "Test script not found: $test_script"

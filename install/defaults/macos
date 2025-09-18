@@ -25,7 +25,7 @@ defaults_cmd() {
 # Wrapper for optional defaults commands that may require permissions
 optional_defaults_cmd() {
     local cmd="defaults $*"
-    if [[ "$DRY_RUN" == "true" ]]; then
+    if [[ $DRY_RUN == "true" ]]; then
         echo "[DRY RUN] $cmd"
     else
         if ! eval "$cmd" 2>/dev/null; then
@@ -154,7 +154,7 @@ configure_development() {
 restart_applications() {
     log_info "Restarting applications to apply changes"
 
-    if [[ "$DRY_RUN" != "true" ]]; then
+    if [[ $DRY_RUN != "true" ]]; then
         # Kill applications to force reload of preferences
         killall Finder 2>/dev/null || true
         killall Dock 2>/dev/null || true

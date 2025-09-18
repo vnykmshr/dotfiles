@@ -11,11 +11,13 @@ This project provides a solid foundation and practical examples, but the real va
 ## Design Principles
 
 ### 1. **Template-Based Configuration**
+
 - Configuration files are templates, not rigid prescriptions
 - Personal data (name, email, SSH keys) separated from versioned configs
 - Easy to adapt without breaking the core system
 
 ### 2. **Modular Architecture**
+
 ```
 config/
 ├── zsh/          # Shell environment and functions
@@ -27,11 +29,13 @@ config/
 ```
 
 ### 3. **Progressive Enhancement**
+
 - Works out-of-the-box with sensible defaults
 - Each component is optional and independently configurable
 - Graceful fallbacks when tools aren't available
 
 ### 4. **Professional Quality**
+
 - Clean, maintainable code following industry standards
 - Comprehensive test coverage ensuring reliability
 - Cross-platform compatibility (macOS, Linux, WSL)
@@ -39,42 +43,51 @@ config/
 ## Core Components
 
 ### Shell Environment (Zsh)
+
 **Purpose**: Professional terminal experience with intelligent defaults
 
 **Key Features**:
+
 - Smart history management and completion
 - Git-aware prompt with status indicators
 - Efficient PATH management for development tools
 - Function library for common development tasks
 
 **Customization Points**:
+
 - `config/zsh/personal-aliases` - Your personal shortcuts
 - `config/zsh/functions` - Custom shell functions
 - Prompt themes and color schemes
 
 ### Version Control (Git)
+
 **Purpose**: Streamlined git workflow with powerful aliases
 
 **Template System**:
+
 - `config/git/gitconfig.template` - Base configuration
 - Installation generates personalized `.gitconfig`
 - Separates personal info from shared settings
 
 **Power User Features**:
+
 - Intelligent aliases (`st`, `ll`, `lg`, `aa`, `cm`)
 - Global gitignore patterns for clean repositories
 - Delta integration for enhanced diffs
 
 ### Development Workflow
+
 **Purpose**: Automation tools for common development tasks
 
 **Workflow Tools** (`config/workflow/`):
+
 - `project-init` - Quick project scaffolding
 - `git-helpers` - Advanced git operations
 - `dev-server` - Development server management
 - `test-runner` - Testing automation
 
 **Integration Points**:
+
 - Easily extensible with your own scripts
 - Environment-aware (detects project types)
 - Composable for complex workflows
@@ -82,6 +95,7 @@ config/
 ## Getting Started
 
 ### 1. **Understand Before Installing**
+
 ```bash
 # Review the structure
 ls -la config/
@@ -90,6 +104,7 @@ cat install/setup.sh
 ```
 
 ### 2. **Install with Awareness**
+
 ```bash
 # See what will happen
 DRY_RUN=true ./install/setup.sh
@@ -99,6 +114,7 @@ DRY_RUN=true ./install/setup.sh
 ```
 
 ### 3. **Customize Immediately**
+
 - Edit `config/git/gitconfig.template` with your preferences
 - Add personal aliases to `config/zsh/personal-aliases`
 - Modify `config/nvim/init.lua` for your editor workflow
@@ -106,6 +122,7 @@ DRY_RUN=true ./install/setup.sh
 ## Customization Philosophy
 
 ### **Don't Just Copy—Understand**
+
 ```bash
 # Bad: Blindly copying someone's aliases
 alias gp="git push"
@@ -118,7 +135,9 @@ alias gca="git commit --amend"  # You frequently amend
 ```
 
 ### **Build Your Development Identity**
+
 Your dotfiles should answer these questions:
+
 - What languages/frameworks do you work with?
 - What's your preferred workflow (terminal vs GUI, vim vs other editors)?
 - How do you organize projects and navigate code?
@@ -127,6 +146,7 @@ Your dotfiles should answer these questions:
 ### **Examples of Personal Adaptation**
 
 **Frontend Developer**:
+
 ```bash
 # Add to personal-aliases
 alias dev="npm run dev"
@@ -142,6 +162,7 @@ npm_fresh() {
 ```
 
 **Backend Developer**:
+
 ```bash
 # Docker-focused workflow
 alias dc="docker-compose"
@@ -155,6 +176,7 @@ alias rediscli="redis-cli"
 ```
 
 **DevOps Engineer**:
+
 ```bash
 # Infrastructure tools
 alias k="kubectl"
@@ -169,6 +191,7 @@ alias pods="kubectl get pods"
 ## Advanced Customization
 
 ### **Template System Usage**
+
 ```bash
 # SSH config for multiple environments
 # Edit config/ssh/config.template:
@@ -182,6 +205,7 @@ Host personal-*
 ```
 
 ### **Workflow Tool Creation**
+
 ```bash
 # Create your own workflow tool
 # config/workflow/deploy-helper
@@ -199,6 +223,7 @@ deploy_prod() {
 ```
 
 ### **Environment Detection**
+
 ```bash
 # Adapt behavior based on context
 # Add to zshrc for work laptop:
@@ -211,12 +236,14 @@ fi
 ## Quality Standards
 
 ### **Why This Approach Works**
+
 - **Maintainable**: Clean separation of concerns
 - **Reliable**: Comprehensive testing ensures stability
 - **Flexible**: Template system supports any workflow
 - **Professional**: Enterprise-grade practices
 
 ### **Testing Your Changes**
+
 ```bash
 # Always test modifications
 make test           # Run full test suite
@@ -236,12 +263,14 @@ While this is designed for personal use, improvements to the core system are wel
 ## Going Further
 
 ### **Advanced Topics**
+
 - Setting up development containers with your dotfiles
 - Automating dotfile deployment across multiple machines
 - Integrating with team development standards
 - Building custom completion systems
 
 ### **Resources for Inspiration**
+
 - Study other developers' dotfiles for ideas
 - Join dotfiles communities for sharing techniques
 - Read documentation for tools you use daily
