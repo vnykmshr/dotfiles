@@ -70,13 +70,12 @@ tramp
 .python-version
 .java-version
 .tool-versions
+.mise.toml
 
 # Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
+!.env.example
+!.env.template
 
 # Logs
 *.log
@@ -101,10 +100,19 @@ coverage/
 
 # Node.js
 node_modules/
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .npm
+.yarn-integrity
 .eslintcache
+.next/
+.nuxt/
+.cache/
+dist/
+.turbo/
+.vercel
+.netlify/
 
 # Python
 __pycache__/
@@ -128,8 +136,8 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-.env
-.venv
+# Virtual environments (covered by .env* above)
+.venv/
 env/
 venv/
 ENV/
@@ -190,9 +198,6 @@ Cargo.lock
 *.jar
 *.war
 *.ear
-.gradle/
-build/
-target/
 *.iml
 
 # C/C++
@@ -291,7 +296,7 @@ buildNumber.properties
 .mvn/timing.properties
 
 # Gradle
-.gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -331,7 +336,6 @@ _deps
 
 # Local development overrides
 docker-compose.override.yml
-.env.local
 config.local.*
 *.local
 
