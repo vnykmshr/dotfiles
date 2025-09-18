@@ -22,6 +22,18 @@ defaults_cmd() {
     run_cmd "$cmd"
 }
 
+# Wrapper for optional defaults commands that may require permissions
+optional_defaults_cmd() {
+    local cmd="defaults $*"
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "[DRY RUN] $cmd"
+    else
+        if ! eval "$cmd" 2>/dev/null; then
+            log_info "Skipped: $cmd (requires additional permissions)"
+        fi
+    fi
+}
+
 # Apply system-wide keyboard and input settings
 configure_keyboard_input() {
     log_info "Configuring keyboard and input settings"
@@ -105,8 +117,8 @@ configure_security() {
 configure_performance() {
     log_info "Configuring performance settings"
 
-    # Reduce transparency effects
-    defaults_cmd write com.apple.universalaccess reduceTransparency -bool true
+    # Reduce transparency effects (requires accessibility permissions)
+    optional_defaults_cmd write com.apple.universalaccess reduceTransparency -bool true
 
     # Faster Mission Control animations
     defaults_cmd write com.apple.dock expose-animation-duration -float 0.1

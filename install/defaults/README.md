@@ -54,7 +54,7 @@ Apply immediately:
 - Immediate password requirement after sleep
 
 ### Performance
-- Reduce transparency effects
+- Reduce transparency effects (may require accessibility permissions)
 - Faster Mission Control animations
 - Always show scrollbars
 - Disable Resume system-wide
