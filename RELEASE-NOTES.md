@@ -1,10 +1,10 @@
 # Release Notes - v3.0.0
 
-> **Major Release** | **Date**: 2024-09-18 | **Codename**: "Professional Grade Optimization"
+> Major optimization release | 2024-09-18
 
-## 🎯 Release Highlights
+## Summary
 
-This major release represents a **complete codebase optimization** achieving a **65% code reduction** while maintaining 100% functionality. The dotfiles have evolved from a functional configuration to a **professional-grade development environment**.
+65% code reduction while maintaining 100% functionality through comprehensive optimization and cleanup.
 
 ## 📊 Optimization Achievements
 
@@ -132,18 +132,4 @@ Starting with v3.0.0, developers will experience:
 
 ---
 
-## 💝 A Personal Note
-
-This release represents more than code optimization—it's the evolution of a dotfiles project into a **professional development companion**. Through rigorous engineering discipline, we've achieved something remarkable: **dramatic simplification without sacrificing functionality**.
-
-The **65% code reduction** proves that with proper analysis and clean coding principles, we can build better tools that are:
-- **Faster** to load and execute
-- **Easier** to maintain and extend
-- **More reliable** through comprehensive testing
-- **More professional** in every aspect
-
-**v3.0.0 is ready**. The codebase is optimized, tested, and production-ready. Time to deploy this professional-grade development environment! 🚀
-
----
-
-*Released with pride and technical excellence* ✨
+**Installation**: `curl -sSL https://raw.githubusercontent.com/vnykmshr/dotfiles/v3.0.0/setup.sh | bash`
