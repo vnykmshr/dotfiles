@@ -33,9 +33,14 @@ go = "latest"
 
 # Additional tools
 jq = "latest"
-ripgrep = "latest"
-fd = "latest"
-bat = "latest"
+
+# Modern CLI tools (Phase 1 - v2.0)
+ripgrep = "latest"    # Better grep
+fd = "latest"         # Better find
+bat = "latest"        # Better cat with syntax highlighting
+eza = "latest"        # Better ls with git integration
+delta = "latest"      # Better git diff
+zoxide = "latest"     # Smart cd
 
 # Language-specific settings
 [settings.node]

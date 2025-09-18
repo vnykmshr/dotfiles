@@ -1,0 +1,70 @@
+#!/usr/bin/env zsh
+# Modern CLI Tools Initialization
+# Sources all modern tool configurations and sets up integrations
+
+# Get the directory where this script is located
+local cli_tools_dir="${0:A:h}"
+
+# Source all configuration files in order
+source_if_exists() {
+    local file="$1"
+    if [[ -f "$file" ]]; then
+        source "$file"
+    fi
+}
+
+# Load tool configurations
+source_if_exists "$cli_tools_dir/eza.conf"
+source_if_exists "$cli_tools_dir/bat.conf"
+source_if_exists "$cli_tools_dir/ripgrep.conf"
+source_if_exists "$cli_tools_dir/fd.conf"
+source_if_exists "$cli_tools_dir/delta.conf"
+source_if_exists "$cli_tools_dir/zoxide.conf"
+
+# Load aliases (must be last to override any conflicts)
+source_if_exists "$cli_tools_dir/aliases"
+
+# Initialize tools that require setup
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init zsh)"
+fi
+
+# Export functions for use in other scripts
+export -f source_if_exists 2>/dev/null || true
+
+# Tool availability check function
+check_modern_tools() {
+    echo "Modern CLI Tools Status:"
+    echo "========================"
+
+    local tools=(
+        "eza:Better ls"
+        "bat:Better cat"
+        "rg:Better grep"
+        "fd:Better find"
+        "delta:Better git diff"
+        "zoxide:Smart cd"
+    )
+
+    for tool_info in "${tools[@]}"; do
+        local tool="${tool_info%%:*}"
+        local description="${tool_info##*:}"
+
+        if command -v "$tool" >/dev/null 2>&1; then
+            echo "✓ $tool ($description)"
+        else
+            echo "✗ $tool ($description) - not installed"
+        fi
+    done
+
+    echo ""
+    echo "Run 'mise install' to install missing tools."
+}
+
+# Export the check function
+export -f check_modern_tools 2>/dev/null || true
+
+# Add helpful aliases for the check function
+alias toolcheck='check_modern_tools'
+alias tools='check_modern_tools'
+alias clitools='check_modern_tools'

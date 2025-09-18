@@ -49,6 +49,30 @@
 	renames = copies
 	# Color moved lines differently
 	colorMoved = zebra
+	# Use delta for better diffs (if available)
+	external = delta
+
+[interactive]
+	# Use delta for interactive diffs
+	diffFilter = delta --color-only
+
+[delta]
+	# Delta configuration for enhanced git diffs
+	navigate = true
+	light = false
+	side-by-side = true
+	line-numbers = true
+	decorations = true
+	file-style = bold yellow ul
+	file-decoration-style = none
+	hunk-header-decoration-style = cyan box ul
+	plus-style = syntax "#003800"
+	minus-style = syntax "#3f0001"
+	syntax-theme = Monokai Extended
+	line-numbers-left-style = cyan
+	line-numbers-right-style = cyan
+	line-numbers-minus-style = 124
+	line-numbers-plus-style = 28
 
 [color]
 	# Enable colors

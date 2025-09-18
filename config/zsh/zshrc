@@ -115,6 +115,11 @@ load_config "plugins"           # Plugin management
 load_config "alias-reminder"    # Alias reminder system for muscle memory
 load_config "local"             # Local/machine-specific config
 
+# Load modern CLI tools configuration
+if [[ -r "$DOTFILES/config/cli-tools/init" ]]; then
+    source "$DOTFILES/config/cli-tools/init"
+fi
+
 # =============================================================================
 # Tool Integrations
 # =============================================================================
@@ -134,10 +139,7 @@ if command -v fzf >/dev/null 2>&1; then
     eval "$(fzf --zsh)"
 fi
 
-# zoxide (smart cd)
-if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init zsh)"
-fi
+# Note: zoxide is now initialized in cli-tools/init
 
 # =============================================================================
 # Completion System
