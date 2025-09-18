@@ -105,7 +105,8 @@ cmd_sync() {
 
 # Create backup
 cmd_backup() {
-    local backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+    local backup_dir
+    backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
     log_info "Creating backup at: $backup_dir"
     mkdir -p "$backup_dir"
