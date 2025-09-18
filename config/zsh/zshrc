@@ -120,6 +120,11 @@ if [[ -r "$DOTFILES/config/cli-tools/init" ]]; then
     source "$DOTFILES/config/cli-tools/init"
 fi
 
+# Load workflow automation tools
+if [[ -r "$DOTFILES/config/workflow/init" ]]; then
+    source "$DOTFILES/config/workflow/init"
+fi
+
 # =============================================================================
 # Tool Integrations
 # =============================================================================

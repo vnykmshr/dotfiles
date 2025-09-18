@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# Simple Git Helpers
+# Essential git shortcuts for daily workflows
+
+set -euo pipefail
+
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils"
+
+# Check if we're in a git repository
+ensure_git_repo() {
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        log_error "Not in a git repository"
+        exit 1
+    fi
+}
+
+# Quick add, commit, and push
+quick_save() {
+    local dry_run="${1:-false}"
+    ensure_git_repo
+
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "[DRY RUN] Would add all changes: git add ."
+        log_info "[DRY RUN] Would prompt for commit message"
+        log_info "[DRY RUN] Would commit and push to current branch"
+        return 0
+    fi
+
+    # Add all changes
+    git add .
+    log_success "Staged all changes"
+
+    # Get commit message
+    read -p "Commit message: " -r message
+    if [[ -z "$message" ]]; then
+        log_error "Commit message required"
+        return 1
+    fi
+
+    # Commit
+    git commit -m "$message"
+    log_success "Created commit: $message"
+
+    # Push (with upstream if needed)
+    local current_branch
+    current_branch=$(git branch --show-current)
+
+    if git push 2>/dev/null; then
+        log_success "Pushed to $current_branch"
+    elif git push -u origin "$current_branch" 2>/dev/null; then
+        log_success "Pushed and set upstream for $current_branch"
+    else
+        log_error "Push failed - check remote configuration"
+    fi
+}
+
+# Quick pull with rebase
+quick_pull() {
+    local dry_run="${1:-false}"
+    ensure_git_repo
+
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "[DRY RUN] Would pull with rebase: git pull --rebase"
+        return 0
+    fi
+
+    if git pull --rebase; then
+        log_success "Successfully pulled with rebase"
+    else
+        log_error "Pull failed - resolve conflicts manually"
+        echo "  git status        # Check conflicts"
+        echo "  git add <files>   # After resolving"
+        echo "  git rebase --continue"
+    fi
+}
+
+# Show simple status
+quick_status() {
+    ensure_git_repo
+
+    echo "Git Status"
+    echo "=========="
+
+    local current_branch
+    current_branch=$(git branch --show-current)
+    echo "Branch: $current_branch"
+
+    # Check if there are changes
+    if git diff-index --quiet HEAD --; then
+        echo "Status: Clean working directory"
+    else
+        echo "Status: Working directory has changes"
+        git status --short
+    fi
+
+    # Check sync status if upstream exists
+    if git config "branch.$current_branch.remote" >/dev/null 2>&1; then
+        local ahead behind
+        ahead=$(git rev-list --count "@{upstream}..HEAD" 2>/dev/null || echo "0")
+        behind=$(git rev-list --count "HEAD..@{upstream}" 2>/dev/null || echo "0")
+
+        if [[ "$ahead" -gt 0 || "$behind" -gt 0 ]]; then
+            echo "Sync: $ahead ahead, $behind behind"
+        else
+            echo "Sync: Up to date"
+        fi
+    fi
+}
+
+# Usage information
+usage() {
+    cat <<EOF
+Simple Git Helpers
+
+USAGE:
+    git-helpers [COMMAND] [OPTIONS]
+
+COMMANDS:
+    save        Quick add, commit, and push workflow
+    pull        Pull with rebase and conflict guidance
+    status      Show simple repository status
+    help        Show this help message
+
+OPTIONS:
+    -n, --dry-run   Show what would be done without executing
+
+EXAMPLES:
+    git-helpers save         # Add all, commit with message, push
+    git-helpers save -n      # Show what save would do (dry run)
+    git-helpers pull         # Pull with rebase
+    git-helpers status       # Show branch and sync status
+
+SHORTCUTS:
+    These commands provide simple workflows for common git operations.
+    For complex operations, use git commands directly.
+EOF
+}
+
+# Main function
+main() {
+    local command="${1:-status}"
+    local dry_run=false
+
+    # Check for dry run flag
+    if [[ "${2:-}" == "-n" || "${2:-}" == "--dry-run" ]]; then
+        dry_run=true
+    fi
+
+    case "$command" in
+        save)
+            quick_save "$dry_run"
+            ;;
+        pull)
+            quick_pull "$dry_run"
+            ;;
+        status|st)
+            quick_status
+            ;;
+        help|--help|-h)
+            usage
+            ;;
+        *)
+            log_error "Unknown command: $command"
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+# Only run main if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

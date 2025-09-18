@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Simple Development Server
+# Detects project type and starts appropriate dev server
+
+set -euo pipefail
+
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils"
+
+# Start development server for current project
+start_server() {
+    local dry_run="${1:-false}"
+    local project_type
+    project_type=$(detect_project_type)
+
+    if [[ "$project_type" == "unknown" ]]; then
+        log_warn "No supported project detected in current directory"
+        log_info "Supported: Node.js, Python, Go, Rust, Static"
+        return 1
+    fi
+
+    local dev_cmd
+    dev_cmd=$(get_dev_command "$project_type")
+
+    if [[ -z "$dev_cmd" ]]; then
+        log_warn "No dev server command found for $project_type project"
+        return 1
+    fi
+
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "[DRY RUN] Would start $project_type dev server: $dev_cmd"
+    else
+        log_info "Starting $project_type dev server: $dev_cmd"
+        eval "$dev_cmd"
+    fi
+}
+
+# Show available dev server info
+show_info() {
+    local project_type
+    project_type=$(detect_project_type)
+
+    echo "Development Server Information"
+    echo "============================="
+    echo "Project type: $project_type"
+
+    if [[ "$project_type" == "unknown" ]]; then
+        echo "No supported project detected"
+        echo ""
+        echo "Supported project types:"
+        echo "  • Node.js (npm run dev/start)"
+        echo "  • Python (Django, Flask, FastAPI)"
+        echo "  • Go (go run)"
+        echo "  • Rust (cargo run)"
+        echo "  • Static (Python HTTP server)"
+        echo "  • Make (make dev/serve)"
+        return 1
+    fi
+
+    local dev_cmd
+    dev_cmd=$(get_dev_command "$project_type")
+
+    if [[ -n "$dev_cmd" ]]; then
+        echo "Dev command: $dev_cmd"
+    else
+        echo "No dev server command available"
+    fi
+}
+
+# Usage information
+usage() {
+    cat <<EOF
+Simple Development Server
+
+USAGE:
+    dev-server [OPTIONS]
+
+OPTIONS:
+    -n, --dry-run   Show what would be started without executing
+    -i, --info      Show project info and available dev command
+    -h, --help      Show this help message
+
+EXAMPLES:
+    dev-server      # Start dev server for current project
+    dev-server -n   # Show what would be started (dry run)
+    dev-server -i   # Show project info
+
+SUPPORTED PROJECTS:
+    • Node.js (npm run dev/start)
+    • Python (Django runserver, Flask/FastAPI apps)
+    • Go (go run)
+    • Rust (cargo run for web projects)
+    • Static sites (Python HTTP server)
+    • Make (make dev/serve targets)
+EOF
+}
+
+# Main function
+main() {
+    case "${1:-}" in
+        -n|--dry-run)
+            start_server true
+            ;;
+        -i|--info)
+            show_info
+            ;;
+        -h|--help)
+            usage
+            ;;
+        "")
+            start_server false
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            usage
+            exit 1
+            ;;
+    esac
+}
+
+# Only run main if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

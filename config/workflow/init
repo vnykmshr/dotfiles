@@ -1,0 +1,138 @@
+#!/usr/bin/env zsh
+# Workflow Automation Initialization
+# Sets up development workflow tools and integrations
+
+# Get the directory where this script is located
+local workflow_dir="${0:A:h}"
+
+# Source workflow aliases
+if [[ -f "$workflow_dir/aliases" ]]; then
+    source "$workflow_dir/aliases"
+fi
+
+# Add workflow tools to PATH if not already there
+if [[ -d "$workflow_dir" && ":$PATH:" != *":$workflow_dir:"* ]]; then
+    export PATH="$workflow_dir:$PATH"
+fi
+
+# Workflow status check function
+workflow_check() {
+    echo "Workflow Automation Tools Status"
+    echo "================================"
+
+    local tools=(
+        "test-runner:Smart test detection and execution"
+        "project-init:Project template initialization"
+        "git-helpers:Enhanced git workflow operations"
+        "dev-server:Development server auto-detection"
+    )
+
+    for tool_info in "${tools[@]}"; do
+        local tool="${tool_info%%:*}"
+        local description="${tool_info##*:}"
+
+        if [[ -x "$workflow_dir/$tool" ]]; then
+            echo "✓ $tool ($description)"
+        else
+            echo "✗ $tool ($description) - not found"
+        fi
+    done
+
+    echo ""
+    echo "Available commands:"
+    echo "  t, test         - Run tests for current project"
+    echo "  dev, serve      - Start development server"
+    echo "  pinit           - Initialize new project"
+    echo "  gw              - Git workflow helpers"
+    echo "  quickstart      - Create and setup new project"
+    echo "  projmenu        - Interactive project menu"
+    echo "  devstatus       - Show development status"
+}
+
+# Auto-completion for workflow tools
+if command -v compdef >/dev/null 2>&1; then
+    # Test runner completion
+    _test_runner_completion() {
+        local -a options
+        options=(
+            '--interactive:Show available test commands and let user choose'
+            '--auto:Auto-run the most appropriate test command'
+            '--watch:Run tests in watch mode'
+            '--list:List detected project types and available commands'
+            '--help:Show help message'
+        )
+        _describe 'test-runner options' options
+    }
+    compdef _test_runner_completion test-runner
+    compdef _test_runner_completion t
+    compdef _test_runner_completion test
+
+    # Project init completion
+    _project_init_completion() {
+        local -a templates
+        templates=(
+            'nodejs:Node.js project with modern tooling'
+            'react:React application with TypeScript'
+            'python:Python project with modern packaging'
+            'rust:Rust project with Cargo'
+            'go:Go module project'
+            'static:Static website project'
+        )
+
+        if [[ $words[CURRENT-1] == (-t|--template) ]]; then
+            _describe 'templates' templates
+        else
+            local -a options
+            options=(
+                '--template:Use specific template'
+                '--list:List available templates'
+                '--directory:Create project in specific directory'
+                '--help:Show help message'
+            )
+            _describe 'project-init options' options
+        fi
+    }
+    compdef _project_init_completion project-init
+    compdef _project_init_completion pinit
+
+    # Git helpers completion
+    _git_helpers_completion() {
+        local -a commands
+        commands=(
+            'status:Show comprehensive project status'
+            'add:Smart file staging'
+            'commit:Smart commit with generated messages'
+            'push:Smart push with upstream handling'
+            'pull:Smart pull with rebase'
+            'branch:Branch management'
+            'interactive:Interactive workflow menu'
+        )
+        _describe 'git-helpers commands' commands
+    }
+    compdef _git_helpers_completion git-helpers
+    compdef _git_helpers_completion gw
+
+    # Dev server completion
+    _dev_server_completion() {
+        local -a options
+        options=(
+            '--interactive:Show available servers and let user choose'
+            '--auto:Auto-start the most appropriate server'
+            '--list:List detected servers without starting'
+            '--port:Check if port is available'
+            '--help:Show help message'
+        )
+        _describe 'dev-server options' options
+    }
+    compdef _dev_server_completion dev-server
+    compdef _dev_server_completion dev
+    compdef _dev_server_completion serve
+fi
+
+# Add helpful aliases for the check function
+alias workcheck='workflow_check'
+alias workflow='workflow_check'
+alias devtools='workflow_check'
+
+# Export the check function
+export -f workflow_check 2>/dev/null || true

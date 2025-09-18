@@ -1,0 +1,404 @@
+#!/usr/bin/env bash
+# Simple Project Initializer
+# Creates basic project templates for common types
+
+set -euo pipefail
+
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils"
+
+# Available templates
+get_templates() {
+    echo "nodejs python go static"
+}
+
+# Create Node.js project
+create_nodejs_project() {
+    local name="$1"
+    local dir="$2"
+
+    cat > "$dir/package.json" <<EOF
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "type": "module"
+}
+EOF
+
+    mkdir -p "$dir/src"
+    cat > "$dir/src/index.js" <<EOF
+console.log('Hello from $name!');
+
+export function greet(name) {
+    return \`Hello, \${name}!\`;
+}
+
+if (import.meta.main) {
+    console.log(greet('World'));
+}
+EOF
+
+    cat > "$dir/.gitignore" <<EOF
+node_modules/
+dist/
+*.log
+.env
+EOF
+}
+
+# Create Python project
+create_python_project() {
+    local name="$1"
+    local dir="$2"
+
+    cat > "$dir/pyproject.toml" <<EOF
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "$name"
+version = "0.1.0"
+description = ""
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+EOF
+
+    mkdir -p "$dir/src"
+    cat > "$dir/src/main.py" <<EOF
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+def main() -> None:
+    print(greet("World"))
+    print(f"Welcome to {name}!")
+
+if __name__ == "__main__":
+    main()
+EOF
+
+    cat > "$dir/.gitignore" <<EOF
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+.venv/
+EOF
+}
+
+# Create Go project
+create_go_project() {
+    local name="$1"
+    local dir="$2"
+
+    cat > "$dir/go.mod" <<EOF
+module $name
+
+go 1.21
+EOF
+
+    cat > "$dir/main.go" <<EOF
+package main
+
+import "fmt"
+
+func greet(name string) string {
+    return fmt.Sprintf("Hello, %s!", name)
+}
+
+func main() {
+    fmt.Println(greet("World"))
+    fmt.Printf("Welcome to %s!\\n", "$name")
+}
+EOF
+
+    cat > "$dir/.gitignore" <<EOF
+$name
+*.exe
+*.test
+EOF
+}
+
+# Create static website project
+create_static_project() {
+    local name="$1"
+    local dir="$2"
+
+    cat > "$dir/index.html" <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$name</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>$name</h1>
+    <p>Welcome to your new static website!</p>
+    <script src="script.js"></script>
+</body>
+</html>
+EOF
+
+    cat > "$dir/style.css" <<EOF
+body {
+    font-family: system-ui, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #333;
+}
+EOF
+
+    cat > "$dir/script.js" <<EOF
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('$name loaded!');
+});
+EOF
+
+    cat > "$dir/.gitignore" <<EOF
+.DS_Store
+Thumbs.db
+EOF
+}
+
+# Create project with template
+create_project() {
+    local template="$1"
+    local name="$2"
+    local target_dir="${3:-$(pwd)}"
+    local dry_run="${4:-false}"
+    local project_dir="$target_dir/$name"
+
+    # Validate project name
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+        log_error "Invalid project name. Use only letters, numbers, hyphens, and underscores."
+        return 1
+    fi
+
+    # Check if directory exists
+    if [[ -d "$project_dir" ]]; then
+        log_error "Directory already exists: $project_dir"
+        return 1
+    fi
+
+    if [[ "$dry_run" == "true" ]]; then
+        log_info "[DRY RUN] Would create $template project: $name"
+        log_info "[DRY RUN] Project directory: $project_dir"
+        log_info "[DRY RUN] Would create files and initialize git repository"
+        return 0
+    fi
+
+    # Create directory
+    mkdir -p "$project_dir"
+
+    # Create project based on template
+    case "$template" in
+        nodejs)
+            create_nodejs_project "$name" "$project_dir"
+            ;;
+        python)
+            create_python_project "$name" "$project_dir"
+            ;;
+        go)
+            create_go_project "$name" "$project_dir"
+            ;;
+        static)
+            create_static_project "$name" "$project_dir"
+            ;;
+        *)
+            log_error "Unknown template: $template"
+            return 1
+            ;;
+    esac
+
+    # Create README
+    cat > "$project_dir/README.md" <<EOF
+# $name
+
+A $template project.
+
+## Getting Started
+
+\`\`\`bash
+cd $name
+EOF
+
+    case "$template" in
+        nodejs)
+            echo "npm install"
+            echo "npm run dev"
+            ;;
+        python)
+            echo "pip install -e ."
+            echo "python src/main.py"
+            ;;
+        go)
+            echo "go run ."
+            ;;
+        static)
+            echo "python -m http.server 8000"
+            ;;
+    esac >> "$project_dir/README.md"
+
+    echo '```' >> "$project_dir/README.md"
+
+    # Initialize git
+    if has_command git; then
+        (cd "$project_dir" && git init && git add . && git commit -m "Initial commit")
+    fi
+
+    log_success "Created $template project: $name"
+}
+
+# Show available templates
+show_templates() {
+    echo "Available Project Templates"
+    echo "=========================="
+    echo "nodejs   - Node.js with modern setup"
+    echo "python   - Python with pyproject.toml"
+    echo "go       - Go module"
+    echo "static   - Static website"
+}
+
+# Interactive template selection
+select_template() {
+    echo "Available templates:"
+    echo "1) nodejs   - Node.js project"
+    echo "2) python   - Python project"
+    echo "3) go       - Go project"
+    echo "4) static   - Static website"
+    echo ""
+
+    read -p "Select template (1-4): " -r choice
+
+    case "$choice" in
+        1) echo "nodejs" ;;
+        2) echo "python" ;;
+        3) echo "go" ;;
+        4) echo "static" ;;
+        *) echo "" ;;
+    esac
+}
+
+# Usage information
+usage() {
+    cat <<EOF
+Simple Project Initializer
+
+USAGE:
+    project-init [OPTIONS] <project-name>
+
+OPTIONS:
+    -t, --template TEMPLATE    Use specific template (nodejs, python, go, static)
+    -n, --dry-run              Show what would be created without executing
+    -l, --list                 List available templates
+    -h, --help                 Show this help message
+
+EXAMPLES:
+    project-init my-app            # Interactive template selection
+    project-init -t nodejs my-app # Create Node.js project
+    project-init -n my-app         # Show what would be created (dry run)
+    project-init -l                # List templates
+
+TEMPLATES:
+    nodejs   - Node.js with package.json and basic structure
+    python   - Python with pyproject.toml and src layout
+    go       - Go module with main.go
+    static   - Static website with HTML/CSS/JS
+EOF
+}
+
+# Main function
+main() {
+    local template=""
+    local name=""
+    local dry_run=false
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -t|--template)
+                template="$2"
+                shift 2
+                ;;
+            -n|--dry-run)
+                dry_run=true
+                shift
+                ;;
+            -l|--list)
+                show_templates
+                exit 0
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            -*)
+                log_error "Unknown option: $1"
+                usage
+                exit 1
+                ;;
+            *)
+                if [[ -z "$name" ]]; then
+                    name="$1"
+                else
+                    log_error "Too many arguments"
+                    usage
+                    exit 1
+                fi
+                shift
+                ;;
+        esac
+    done
+
+    # Require project name
+    if [[ -z "$name" ]]; then
+        log_error "Project name is required"
+        usage
+        exit 1
+    fi
+
+    # Select template if not provided
+    if [[ -z "$template" ]]; then
+        template=$(select_template)
+        if [[ -z "$template" ]]; then
+            log_error "Invalid template selection"
+            exit 1
+        fi
+    fi
+
+    # Validate template
+    local valid_templates
+    valid_templates=$(get_templates)
+    if [[ ! " $valid_templates " =~ \ $template\  ]]; then
+        log_error "Unknown template: $template"
+        show_templates
+        exit 1
+    fi
+
+    # Create project
+    create_project "$template" "$name" "$(pwd)" "$dry_run"
+}
+
+# Only run main if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
