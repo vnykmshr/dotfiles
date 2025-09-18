@@ -110,6 +110,9 @@ load_config "functions"         # Custom functions
 load_config "personal-aliases"  # Personal aliases based on usage patterns
 load_config "personal-functions" # Personal functions based on workflow
 load_config "completions"       # Custom completions
+load_config "environment-detection" # Smart project environment detection
+load_config "direnv-integration" # Direnv integration for environment switching
+load_config "intelligent-history" # Enhanced history management and search
 load_config "prompt"            # Prompt configuration
 load_config "plugins"           # Plugin management
 load_config "alias-reminder"    # Alias reminder system for muscle memory

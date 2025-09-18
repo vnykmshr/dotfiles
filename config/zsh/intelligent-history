@@ -1,0 +1,424 @@
+#!/usr/bin/env zsh
+
+# Intelligent Shell History Management
+# Enhanced history search, statistics, and smart filtering
+
+# =============================================================================
+# Enhanced History Configuration
+# =============================================================================
+
+# Advanced history settings (extending base zshrc settings)
+setopt HIST_FIND_NO_DUPS        # Don't display duplicates when searching
+setopt HIST_IGNORE_ALL_DUPS     # Remove older duplicate entries from history
+setopt HIST_REDUCE_BLANKS       # Remove superfluous blanks from history
+setopt HIST_SAVE_NO_DUPS        # Don't save duplicate entries
+setopt HIST_VERIFY              # Show command with history expansion to user before running it
+
+# Advanced history variables
+export HISTORY_STATS_FILE="$HOME/.zsh_history_stats"
+export HISTORY_SENSITIVE_PATTERNS="$HOME/.config/zsh/sensitive-patterns"
+
+# =============================================================================
+# Sensitive Command Filtering
+# =============================================================================
+
+# Initialize sensitive patterns file
+init_sensitive_patterns() {
+    local patterns_file="$HISTORY_SENSITIVE_PATTERNS"
+
+    if [[ ! -f "$patterns_file" ]]; then
+        mkdir -p "$(dirname "$patterns_file")"
+        cat > "$patterns_file" <<'EOF'
+# Sensitive command patterns to exclude from history
+# One pattern per line, supports regex
+
+# Authentication and secrets
+^.*password.*$
+^.*passwd.*$
+^.*secret.*$
+^.*token.*$
+^.*api[_-]?key.*$
+^.*private[_-]?key.*$
+^.*ssh[_-]?key.*$
+
+# Environment variables with secrets
+^.*export.*SECRET.*$
+^.*export.*TOKEN.*$
+^.*export.*KEY.*$
+^.*export.*PASSWORD.*$
+
+# Database connections
+^.*mysql.*-p.*$
+^.*psql.*password.*$
+^.*mongo.*password.*$
+
+# curl/wget with authentication
+^.*curl.*-H.*Authorization.*$
+^.*curl.*-u.*:.*$
+^.*wget.*password.*$
+
+# Cloud CLI authentication
+^.*aws.*secret.*$
+^.*gcloud.*key.*$
+^.*azure.*password.*$
+
+# SSH with passwords (but not key-based)
+^.*ssh.*password.*$
+^.*sshpass.*$
+
+# Git with embedded credentials
+^.*git.*https://.*:.*@.*$
+
+# Docker with secrets
+^.*docker.*secret.*$
+^.*docker.*password.*$
+EOF
+        echo "📝 Created sensitive patterns file at $patterns_file"
+    fi
+}
+
+# Check if command should be excluded from history
+is_sensitive_command() {
+    local command="$1"
+    local patterns_file="$HISTORY_SENSITIVE_PATTERNS"
+
+    if [[ ! -f "$patterns_file" ]]; then
+        init_sensitive_patterns
+    fi
+
+    # Check against each pattern
+    while IFS= read -r pattern; do
+        # Skip comments and empty lines
+        [[ "$pattern" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${pattern// }" ]] && continue
+
+        # Check if command matches pattern
+        if [[ "$command" =~ $pattern ]]; then
+            return 0  # Is sensitive
+        fi
+    done < "$patterns_file"
+
+    return 1  # Not sensitive
+}
+
+# =============================================================================
+# History Statistics and Analysis
+# =============================================================================
+
+# Update history statistics
+update_history_stats() {
+    local stats_file="$HISTORY_STATS_FILE"
+    local current_time=$(date +%s)
+
+    # Create stats file if it doesn't exist
+    if [[ ! -f "$stats_file" ]]; then
+        echo "# History statistics" > "$stats_file"
+        echo "# Format: timestamp:command_count:unique_commands" >> "$stats_file"
+    fi
+
+    # Get current history stats
+    local total_commands=$(wc -l < "$HISTFILE" 2>/dev/null || echo 0)
+    local unique_commands=$(sort -u "$HISTFILE" 2>/dev/null | wc -l || echo 0)
+
+    # Append current stats
+    echo "$current_time:$total_commands:$unique_commands" >> "$stats_file"
+
+    # Keep only last 100 entries to prevent file growth
+    tail -100 "$stats_file" > "${stats_file}.tmp" && mv "${stats_file}.tmp" "$stats_file"
+}
+
+# Show history statistics
+history_stats() {
+    echo "📊 Shell History Statistics"
+    echo "─────────────────────────────"
+
+    if [[ ! -f "$HISTFILE" ]]; then
+        echo "❌ No history file found"
+        return 1
+    fi
+
+    local total_commands=$(wc -l < "$HISTFILE")
+    local unique_commands=$(sort -u "$HISTFILE" | wc -l)
+    local duplicate_rate=$(( (total_commands - unique_commands) * 100 / total_commands ))
+
+    echo "📈 Total commands: $total_commands"
+    echo "🔍 Unique commands: $unique_commands"
+    echo "🔄 Duplicate rate: ${duplicate_rate}%"
+    echo ""
+
+    echo "🏆 Top 10 Most Used Commands:"
+    echo "───────────────────────────────"
+    if command -v awk >/dev/null 2>&1; then
+        cat "$HISTFILE" | \
+        awk '{print $1}' | \
+        sort | uniq -c | sort -nr | head -10 | \
+        awk '{printf "  %2d. %-12s (%d times)\n", NR, $2, $1}'
+    else
+        echo "awk not available for detailed stats"
+    fi
+
+    echo ""
+    echo "📅 Recent Activity:"
+    echo "─────────────────"
+    if [[ -f "$HISTORY_STATS_FILE" ]]; then
+        tail -5 "$HISTORY_STATS_FILE" | while IFS=':' read -r timestamp total unique; do
+            if [[ "$timestamp" != "#"* ]]; then
+                local date_str=$(date -r "$timestamp" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "Unknown")
+                echo "  $date_str: $total total, $unique unique"
+            fi
+        done
+    else
+        echo "  No historical stats available"
+    fi
+}
+
+# Find most similar commands
+history_suggest() {
+    local query="$1"
+
+    if [[ -z "$query" ]]; then
+        echo "Usage: history_suggest <partial_command>"
+        echo "Example: history_suggest 'git push'"
+        return 1
+    fi
+
+    echo "🔍 Commands similar to '$query':"
+    echo "─────────────────────────────────"
+
+    # Search history for similar commands
+    grep -i "$query" "$HISTFILE" 2>/dev/null | \
+    sort | uniq -c | sort -nr | head -10 | \
+    awk '{$1=""; printf "  %s\n", substr($0,2)}'
+}
+
+# =============================================================================
+# Enhanced History Search
+# =============================================================================
+
+# Smart history search with context
+hsearch() {
+    local query="$1"
+    local context="${2:-5}"  # Lines of context
+
+    if [[ -z "$query" ]]; then
+        echo "Usage: hsearch <pattern> [context_lines]"
+        echo "Example: hsearch 'docker run' 3"
+        return 1
+    fi
+
+    echo "🔍 Searching history for '$query' (±$context lines context):"
+    echo "──────────────────────────────────────────────────────────"
+
+    # Use ripgrep if available, otherwise fall back to grep
+    if command -v rg >/dev/null 2>&1; then
+        rg -i -C "$context" "$query" "$HISTFILE" 2>/dev/null || echo "No matches found"
+    else
+        grep -i -C "$context" "$query" "$HISTFILE" 2>/dev/null || echo "No matches found"
+    fi
+}
+
+# History with timestamps
+history_time() {
+    local count="${1:-20}"
+
+    echo "🕐 Recent History with Timestamps:"
+    echo "──────────────────────────────────"
+
+    # Get last N entries with timestamps
+    fc -lt '%Y-%m-%d %H:%M:%S' -"$count" | \
+    awk '{printf "  %s %s %s\n", $1, $2, substr($0, index($0,$3))}'
+}
+
+# =============================================================================
+# History Cleanup and Maintenance
+# =============================================================================
+
+# Clean duplicate history entries
+history_dedupe() {
+    echo "🧹 Cleaning duplicate history entries..."
+
+    if [[ ! -f "$HISTFILE" ]]; then
+        echo "❌ No history file found"
+        return 1
+    fi
+
+    local backup_file="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
+    local temp_file="${HISTFILE}.tmp"
+
+    # Create backup
+    cp "$HISTFILE" "$backup_file"
+    echo "💾 Created backup: $backup_file"
+
+    # Remove duplicates while preserving order
+    awk '!seen[$0]++' "$HISTFILE" > "$temp_file"
+
+    # Calculate reduction
+    local original_count=$(wc -l < "$HISTFILE")
+    local new_count=$(wc -l < "$temp_file")
+    local removed_count=$((original_count - new_count))
+
+    # Replace original with cleaned version
+    mv "$temp_file" "$HISTFILE"
+
+    echo "✅ Removed $removed_count duplicate entries"
+    echo "📊 History size: $original_count → $new_count entries"
+}
+
+# Remove sensitive commands from history
+history_clean_sensitive() {
+    echo "🔒 Cleaning sensitive commands from history..."
+
+    if [[ ! -f "$HISTFILE" ]]; then
+        echo "❌ No history file found"
+        return 1
+    fi
+
+    init_sensitive_patterns
+
+    local backup_file="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
+    local temp_file="${HISTFILE}.tmp"
+    local patterns_file="$HISTORY_SENSITIVE_PATTERNS"
+
+    # Create backup
+    cp "$HISTFILE" "$backup_file"
+    echo "💾 Created backup: $backup_file"
+
+    # Filter out sensitive commands
+    local removed_count=0
+    while IFS= read -r line; do
+        if ! is_sensitive_command "$line"; then
+            echo "$line" >> "$temp_file"
+        else
+            ((removed_count++))
+        fi
+    done < "$HISTFILE"
+
+    # Replace original with cleaned version
+    mv "$temp_file" "$HISTFILE"
+
+    echo "✅ Removed $removed_count sensitive entries"
+    echo "🔒 History cleaned for security"
+}
+
+# =============================================================================
+# Intelligent Command Suggestions
+# =============================================================================
+
+# Suggest commands based on current directory and context
+smart_suggest() {
+    local current_dir="$(basename $(pwd))"
+
+    echo "💡 Smart suggestions for current context:"
+    echo "─────────────────────────────────────────"
+    echo "📁 Directory: $current_dir"
+    echo ""
+
+    # Suggest based on current directory
+    if [[ -f "package.json" ]]; then
+        echo "📦 Node.js project detected:"
+        echo "  npm install    # Install dependencies"
+        echo "  npm run dev    # Start development server"
+        echo "  npm test       # Run tests"
+        echo "  npm run build  # Build project"
+    fi
+
+    if [[ -f "Cargo.toml" ]]; then
+        echo "🦀 Rust project detected:"
+        echo "  cargo build    # Build project"
+        echo "  cargo run      # Run project"
+        echo "  cargo test     # Run tests"
+        echo "  cargo check    # Check for errors"
+    fi
+
+    if [[ -f "go.mod" ]]; then
+        echo "🐹 Go project detected:"
+        echo "  go run .       # Run project"
+        echo "  go build       # Build project"
+        echo "  go test        # Run tests"
+        echo "  go mod tidy    # Clean dependencies"
+    fi
+
+    if [[ -d ".git" ]]; then
+        echo "📂 Git repository detected:"
+        echo "  git status     # Check status"
+        echo "  git add .      # Stage all changes"
+        echo "  git commit -m  # Commit changes"
+        echo "  git push       # Push to remote"
+    fi
+
+    echo ""
+    echo "🔍 Most used in this directory:"
+    # Show commands most used in current directory
+    if [[ -f "$HISTFILE" ]]; then
+        pwd_pattern="$(pwd | sed 's/[[\.*^$()+?{|]/\\&/g')"
+        grep "$pwd_pattern" "$HISTFILE" 2>/dev/null | \
+        awk '{print $1}' | sort | uniq -c | sort -nr | head -5 | \
+        awk '{printf "  %s (%d times)\n", $2, $1}' 2>/dev/null || echo "  No history for this directory"
+    fi
+}
+
+# =============================================================================
+# History Hooks and Automation
+# =============================================================================
+
+# Pre-command hook to filter sensitive commands
+preexec_history_filter() {
+    local command="$1"
+
+    # Check if command should be excluded
+    if is_sensitive_command "$command"; then
+        echo "🔒 Command excluded from history (contains sensitive data)"
+        # Remove from current session history
+        fc -R  # Re-read history file to reset
+    fi
+}
+
+# Post-command hook for statistics
+precmd_history_stats() {
+    # Update stats periodically (every 50 commands)
+    if (( HISTCMD % 50 == 0 )); then
+        update_history_stats
+    fi
+}
+
+# =============================================================================
+# Aliases and Shortcuts
+# =============================================================================
+
+# History analysis aliases
+alias hstats='history_stats'
+alias hsuggest='history_suggest'
+alias htime='history_time'
+alias hfind='hsearch'
+alias hclean='history_dedupe'
+alias hpriv='history_clean_sensitive'
+alias suggest='smart_suggest'
+
+# Quick history operations
+alias h='history'
+alias hg='history | grep'
+alias h10='history -10'
+alias h50='history -50'
+
+# =============================================================================
+# Advanced History Bindings
+# =============================================================================
+
+# Bind keys for enhanced history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+
+# Add hooks
+autoload -U add-zsh-hook
+add-zsh-hook preexec preexec_history_filter
+add-zsh-hook precmd precmd_history_stats
+
+# =============================================================================
+# Initialization
+# =============================================================================
+
+# Initialize on first load
+if [[ -z "$INTELLIGENT_HISTORY_LOADED" ]]; then
+    init_sensitive_patterns
+    export INTELLIGENT_HISTORY_LOADED=1
+fi
