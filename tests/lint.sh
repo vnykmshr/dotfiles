@@ -3,7 +3,7 @@
 # Simple Shell Script Linting
 # Basic syntax checking and style validation
 
-set -euo pipefail
+set -eo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -20,10 +20,10 @@ check_file() {
     local file="$1"
     if bash -n "$file" 2>/dev/null; then
         log_success "$(basename "$file")"
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     else
         log_error "$(basename "$file")"
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     fi
 }
 
