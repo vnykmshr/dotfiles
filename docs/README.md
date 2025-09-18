@@ -100,9 +100,14 @@ config/
 - `testinfo` to show available test options
 - Automatic loading when entering supported project directories
 
-**Not implemented yet**:
+**Environment Version Management**:
 
-- Automatic .nvmrc/.python-version activation
+- Automatic .nvmrc/.python-version activation with mise
+- .env file loading for environment variables
+- `envup` to manually trigger detection
+- `use_node` and `use_python` helpers to create version files
+
+All core development automation is now complete.
 
 ## Getting Started
 
