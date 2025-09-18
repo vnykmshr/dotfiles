@@ -84,21 +84,27 @@ test_git_config() {
     log_info "Testing Git configuration..."
 
     local git_config="$PROJECT_ROOT/config/git/gitconfig"
+    local git_template="$PROJECT_ROOT/config/git/gitconfig.template"
 
-    if [[ -f "$git_config" ]]; then
-        # Test git config syntax
-        assert_test "git config --file='$git_config' --list >/dev/null" "Git config syntax valid"
+    # Test template exists (always required)
+    assert_test "test -f '$git_template'" "Git config template exists"
 
-        # Test for required sections
-        assert_test "grep -q '\\[user\\]' '$git_config'" "Git config has [user] section"
-        assert_test "grep -q '\\[core\\]' '$git_config'" "Git config has [core] section"
-        assert_test "grep -q '\\[alias\\]' '$git_config'" "Git config has [alias] section"
+    # Test template syntax and structure
+    if [[ -f "$git_template" ]]; then
+        assert_test "grep -q '\\[user\\]' '$git_template'" "Git template has [user] section"
+        assert_test "grep -q '\\[core\\]' '$git_template'" "Git template has [core] section"
+        assert_test "grep -q '\\[alias\\]' '$git_template'" "Git template has [alias] section"
 
-        # Test for important aliases
+        # Test for important aliases in template
         local important_aliases=("st" "ll" "lg" "aa" "cm")
         for alias_name in "${important_aliases[@]}"; do
-            assert_test "grep -q '$alias_name = ' '$git_config'" "Git alias '$alias_name' defined"
+            assert_test "grep -q '$alias_name = ' '$git_template'" "Git alias '$alias_name' defined"
         done
+    fi
+
+    # Test generated config if it exists (optional in CI)
+    if [[ -f "$git_config" ]]; then
+        assert_test "git config --file='$git_config' --list >/dev/null" "Git config syntax valid"
     fi
 }
 
@@ -203,7 +209,6 @@ test_config_structure() {
     local required_configs=(
         "config/zsh/zshrc"
         "config/zsh/aliases"
-        "config/git/gitconfig"
         "config/git/gitignore_global"
         "config/nvim/init.lua"
         "config/tmux/tmux.conf"
@@ -212,6 +217,18 @@ test_config_structure() {
     for config in "${required_configs[@]}"; do
         local full_path="$PROJECT_ROOT/$config"
         assert_test "test -f '$full_path'" "Required config exists: $config"
+    done
+
+    # Check for required template files (these generate user-specific configs)
+    local required_templates=(
+        "config/git/gitconfig.template"
+        "config/ssh/config.template"
+        "config/zsh/exports.local.template"
+    )
+
+    for template in "${required_templates[@]}"; do
+        local full_path="$PROJECT_ROOT/$template"
+        assert_test "test -f '$full_path'" "Required template exists: $template"
     done
 
     # Check for personal configurations
