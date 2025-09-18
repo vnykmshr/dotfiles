@@ -45,9 +45,9 @@ alias dc="docker-compose"
 alias dcup="docker-compose up -d"
 alias dcdown="docker-compose down"
 
-# Testing
-alias test="npm test"
-alias testw="npm run test:watch"
+# Project automation (builds on universal commands)
+alias devlog="dev 2>&1 | tee dev.log"
+alias testlog="test 2>&1 | tee test.log"
 ```
 
 ### 3. Personal Functions (`config/zsh/personal-functions`)
@@ -161,10 +161,10 @@ make lint
 ### Frontend Developer
 
 ```bash
-# package.json script shortcuts
-alias dev="npm run dev"
+# package.json script shortcuts (universal commands handle dev/test)
 alias build="npm run build"
-alias test="npm run test:watch"
+alias lint="npm run lint"
+alias preview="npm run preview"
 
 # Node version management with existing mise integration
 use_node() {

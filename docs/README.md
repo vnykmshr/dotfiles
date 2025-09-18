@@ -187,9 +187,9 @@ gclean               # Interactively remove merged branches
 
 ```bash
 # Add to config/zsh/personal-aliases
-alias dev="npm run dev"
 alias build="npm run build"
-alias test="npm test"
+alias lint="npm run lint"
+alias deploy="npm run build && npm run deploy"
 
 # Add to config/zsh/personal-functions
 npm_fresh() {

@@ -7,11 +7,11 @@
 
 ## Features
 
-- **Git Workflow**: Smart commit suggestions, branch management, enhanced aliases
-- **Performance**: 76% faster shell startup (0.135s) with lazy loading
-- **Cross-Platform**: Unified experience across macOS, Linux, WSL, containers
+- **Development Automation**: Universal `dev`, `test`, `testwatch` commands for any project
+- **Git Workflow**: Smart commit suggestions, branch management, 45+ aliases
+- **Environment Detection**: Auto-activate .nvmrc/.python-version, load .env files
+- **Performance**: Fast shell startup (0.158s) with lazy loading
 - **Modern Tools**: bat, eza, fd, ripgrep, delta, zoxide integration
-- **Security**: Pre-commit hooks, secret scanning, SSH validation
 - **Quality**: Comprehensive testing with 20+ validation checks
 
 ## Quick Start
@@ -34,7 +34,12 @@ make install        # Install dotfiles
 make test          # Run quality tests
 make help          # Show all options
 
-# Git Workflow (new)
+# Development Automation
+dev                # Start dev server (any project type)
+test               # Run tests (any project type)
+testwatch          # Continuous testing with file watching
+
+# Git Workflow
 gsave              # Smart commit with suggestions
 gnew feature-name  # Create and switch to branch
 gswitch main       # Switch branches
@@ -47,10 +52,11 @@ shell-bench        # Measure startup time
 ## What's Included
 
 - **Shell Environment**: Optimized zsh with intelligent completion
-- **Git Integration**: 40+ aliases, smart workflow helpers, enhanced diffs
+- **Development Automation**: Universal commands for any project type
+- **Environment Detection**: Auto-activation and .env loading
+- **Git Integration**: 45+ aliases, smart workflow helpers, enhanced diffs
 - **Editor Setup**: Neovim configuration with LSP
 - **Terminal**: tmux with sensible defaults
-- **Development Tools**: mise, modern CLI alternatives
 - **Quality Assurance**: Comprehensive testing and validation
 
 ## Documentation
