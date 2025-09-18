@@ -33,6 +33,11 @@ detect_env() {
     [[ -f ".nvmrc" ]] && activate_node
     [[ -f ".python-version" ]] && activate_python
     [[ -f ".env" ]] && load_env
+
+    # Load dev server tools for supported projects
+    if [[ -f "go.mod" || -f "package.json" || -f "manage.py" || -f "Makefile" ]]; then
+        [[ -f "$DOTFILES/config/zsh/dev-server" ]] && source "$DOTFILES/config/zsh/dev-server"
+    fi
 }
 
 # Setup auto-detection
