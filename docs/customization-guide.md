@@ -2,354 +2,200 @@
 
 > Quick reference for adapting dotfiles to your workflow
 
-## Common Customization Patterns
+## Quick Start Customization
 
-### Personal Aliases (`config/zsh/personal-aliases`)
+### 1. Personal Info (`config.json`)
 
-**Development Workflow**:
+Update with your details during installation:
+
+```json
+{
+  "git": {
+    "name": "Your Name",
+    "email": "you@example.com",
+    "editor": "code --wait"
+  },
+  "workspace": "~/projects"
+}
+```
+
+### 2. Personal Aliases (`config/zsh/personal-aliases`)
+
+**Git Workflow Enhancement**:
 
 ```bash
-# Language-specific shortcuts
+# Build on existing git workflow
+alias gpsf="gsave && git push --force-with-lease"
+alias sync="gpull && gsave"
+
+# Project-specific shortcuts
+alias work="cd ~/work && gswitch main"
+alias personal="cd ~/personal && gswitch main"
+```
+
+**Development Shortcuts**:
+
+```bash
+# Language-specific
 alias py="python3"
 alias node="node --trace-warnings"
-alias go_test="go test -v ./..."
 
-# Project navigation
-alias projects="cd ~/projects"
-alias work="cd ~/work"
-alias dotfiles="cd ~/.dotfiles"
-
-# Git workflow (adapt to your style)
-alias gps="git push --set-upstream origin \$(git branch --show-current)"
-alias gpr="gh pr create --web"  # If you use GitHub CLI
-alias cleanup="git branch --merged | grep -v main | xargs -n 1 git branch -d"
-```
-
-**Environment-Specific**:
-
-```bash
-# Docker development
+# Docker workflow
 alias dc="docker-compose"
-alias dps="docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
-alias dclean="docker system prune -f"
+alias dcup="docker-compose up -d"
+alias dcdown="docker-compose down"
 
-# Kubernetes
-alias k="kubectl"
-alias kdebug="kubectl run debug --image=busybox --rm -it --restart=Never -- sh"
-
-# Cloud platforms
-alias awsprofile='export AWS_PROFILE=$(aws configure list-profiles | fzf)'
+# Testing
+alias test="npm test"
+alias testw="npm run test:watch"
 ```
 
-### Git Configuration (`config/git/gitconfig.template`)
+### 3. Personal Functions (`config/zsh/personal-functions`)
 
-**Personal Section** (updated during installation):
-
-```ini
-[user]
-    name = Your Name
-    email = your.email@domain.com
-    signingkey = YOUR_GPG_KEY_ID
-
-[core]
-    editor = nvim  # or code, vim, emacs
-    autocrlf = input  # adjust for Windows: true
-```
-
-**Workflow Customization**:
-
-```ini
-[alias]
-    # Add your preferred aliases
-    sync = !git fetch origin && git rebase origin/main
-    snapshot = !git stash push -m "snapshot: $(date)" && echo "Snapshot saved"
-    unstage = reset HEAD --
-
-    # Team-specific workflows
-    review = !gh pr view --web
-    deploy = push origin main
-
-[branch]
-    autosetupmerge = always
-    autosetuprebase = always
-```
-
-### SSH Configuration (`config/ssh/config.template`)
-
-**Multiple Identity Management**:
-
-```ssh
-# Work identity
-Host work-*
-    User your-work-username
-    IdentityFile ~/.ssh/work_rsa
-    IdentitiesOnly yes
-
-# Personal projects
-Host github.com-personal
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/personal_rsa
-
-# Server shortcuts
-Host prod
-    HostName your-production-server.com
-    User deploy
-    Port 22222
-
-Host staging
-    HostName staging-server.com
-    User deploy
-    ProxyJump bastion-host
-```
-
-### Shell Functions (`config/zsh/functions`)
-
-**Project Management**:
+**Project Utilities**:
 
 ```bash
-# Quick project initialization
+# Quick project setup
 mkproject() {
-    local name="$1"
-    mkdir -p ~/projects/"$name"
-    cd ~/projects/"$name"
+    mkdir -p ~/projects/$1
+    cd ~/projects/$1
     git init
-    echo "# $name" > README.md
-    echo "node_modules/\n.DS_Store\n*.log" > .gitignore
+    gnew main
 }
 
-# Environment switcher
-setenv() {
-    case "$1" in
-        "prod") export APP_ENV=production DATABASE_URL="$PROD_DB" ;;
-        "dev") export APP_ENV=development DATABASE_URL="$DEV_DB" ;;
-        "test") export APP_ENV=test DATABASE_URL="$TEST_DB" ;;
-        *) echo "Usage: setenv [prod|dev|test]" ;;
-    esac
-}
-```
-
-**Utility Functions**:
-
-```bash
-# Extract any archive
-extract() {
-    if [[ -f "$1" ]]; then
-        case "$1" in
-            *.tar.bz2) tar xjf "$1" ;;
-            *.tar.gz) tar xzf "$1" ;;
-            *.zip) unzip "$1" ;;
-            *.rar) unrar x "$1" ;;
-            *) echo "Unknown archive format" ;;
-        esac
-    fi
+# Environment management
+use_node() {
+    export PATH="/usr/local/opt/node@$1/bin:$PATH"
 }
 
-# Find and kill process
-fkill() {
-    local pid
-    pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
-    [[ -n "$pid" ]] && echo "$pid" | xargs kill -9
+# Docker helpers
+dcbash() {
+    docker-compose exec ${1:-app} bash
 }
 ```
 
-## Workflow Tools (`config/workflow/`)
+## Performance Tuning
 
-### Custom Tool Example
-
-Create `config/workflow/deploy-helper`:
+### Skip Unused Features
 
 ```bash
-#!/usr/bin/env bash
+# Add to ~/.zshrc.local or config/zsh/exports.local
+export DOTFILES_SKIP_PROMPT=1        # Use starship/oh-my-zsh instead
+export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip if single platform
+export DOTFILES_SKIP_PERFORMANCE=1    # Skip monitoring tools
+```
 
-set -euo pipefail
+### Measure Impact
 
-deploy_to_staging() {
-    echo "🚀 Deploying to staging..."
-    git push origin develop
-    # Add your deployment commands
-    curl -X POST "$STAGING_WEBHOOK_URL"
-    echo "✅ Deployed to staging"
+```bash
+shell-bench 5           # Benchmark startup time
+make test               # Validate your changes
+```
+
+## Git Workflow Customization
+
+### Extend Smart Commits
+
+```bash
+# Add to personal-functions
+quick_fix() {
+    gsave && git push && echo "Quick fix deployed!"
 }
 
-deploy_to_prod() {
-    echo "🚀 Deploying to production..."
+feature_done() {
+    gsave "feat: complete $1 implementation"
+    gswitch main
+    gclean
+}
+## Environment-Specific Customization
+
+### Work vs Personal Setup
+
+```bash
+# Add to config/zsh/exports.local (created during install)
+if [[ "$HOST" == "work-laptop" ]]; then
+    export WORK_MODE=1
+    alias k="kubectl --context=work"
+    alias vpn="sudo openconnect work-vpn.company.com"
+fi
+
+# Personal laptop
+if [[ "$HOST" == "personal-mbp" ]]; then
+    alias blog="cd ~/projects/blog"
+    alias side="cd ~/projects/side-projects"
+fi
+```
+
+### Team Workflow Integration
+
+```bash
+# Add to personal-functions for team conventions
+deploy() {
+    local env="${1:-staging}"
+    gsave "deploy: $env release $(date +%Y%m%d)"
     git push origin main
-    # Add your deployment commands
-    curl -X POST "$PROD_WEBHOOK_URL"
-    echo "✅ Deployed to production"
+    echo "Deployed to $env"
 }
 
-rollback() {
-    echo "⏪ Rolling back..."
-    # Add rollback logic
-    curl -X POST "$ROLLBACK_WEBHOOK_URL"
-    echo "✅ Rollback complete"
+standup() {
+    echo "Yesterday: $(git log --oneline --since='1 day ago' --author='$(git config user.name)')"
+    echo "Today: Working on $(git branch --show-current | sed 's/feature\///')"
 }
-
-case "${1:-}" in
-    "staging") deploy_to_staging ;;
-    "prod") deploy_to_prod ;;
-    "rollback") rollback ;;
-    *) echo "Usage: deploy-helper [staging|prod|rollback]" ;;
-esac
 ```
 
-Make it executable:
+## Testing Your Changes
 
 ```bash
-chmod +x config/workflow/deploy-helper
-```
-
-### Environment-Aware Tools
-
-Create `config/workflow/project-setup`:
-
-```bash
-#!/usr/bin/env bash
-
-detect_project_type() {
-    [[ -f "package.json" ]] && echo "nodejs"
-    [[ -f "Cargo.toml" ]] && echo "rust"
-    [[ -f "requirements.txt" ]] && echo "python"
-    [[ -f "go.mod" ]] && echo "golang"
-    [[ -f "pom.xml" ]] && echo "maven"
-}
-
-setup_nodejs() {
-    npm install
-    [[ -f ".nvmrc" ]] && nvm use
-    echo "Node.js project ready"
-}
-
-setup_python() {
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    echo "Python project ready"
-}
-
-# Main setup logic
-main() {
-    local project_type
-    project_type=$(detect_project_type)
-
-    case "$project_type" in
-        "nodejs") setup_nodejs ;;
-        "python") setup_python ;;
-        *) echo "Unknown project type" ;;
-    esac
-}
-
-main "$@"
-```
-
-## Editor Integration
-
-### Neovim Configuration (`config/nvim/init.lua`)
-
-**Language-Specific Setup**:
-
-```lua
--- Customize for your primary languages
-local lsp_servers = {
-    'typescript-language-server',  -- Your main language
-    'rust-analyzer',               -- If you use Rust
-    'python-lsp-server',           -- If you use Python
-}
-
--- Key mappings for your workflow
-vim.keymap.set('n', '<leader>ff', ':Telescope find_files<CR>')
-vim.keymap.set('n', '<leader>fg', ':Telescope live_grep<CR>')
-vim.keymap.set('n', '<leader>gt', ':LazyGit<CR>')  -- If you use LazyGit
-```
-
-## Testing Your Customizations
-
-Always test changes:
-
-```bash
-# Test syntax
-make lint
-
-# Test functionality
+# Validate configuration
 make test
 
-# Test in isolation
-DRY_RUN=true ./install/setup.sh
+# Check performance impact
+shell-bench 3
+
+# Lint shell scripts
+make lint
 ```
 
-## Environment Variables
+## Common Patterns
 
-Add to `config/zsh/zshrc` or create `~/.zshrc.local`:
-
-```bash
-# Development tools
-export EDITOR="nvim"
-export BROWSER="firefox"
-export TERM="xterm-256color"
-
-# Language-specific
-export NODE_ENV="development"
-export PYTHONPATH="$HOME/projects/python-libs"
-export GOPATH="$HOME/go"
-
-# Personal workflow
-export PROJECTS_DIR="$HOME/projects"
-export WORK_DIR="$HOME/work"
-export NOTES_DIR="$HOME/notes"
-```
-
-## Integration with External Tools
-
-### GitHub CLI Configuration
+### Frontend Developer
 
 ```bash
-# Add to personal-aliases
-alias pr="gh pr create --web"
-alias issues="gh issue list"
-alias clone="gh repo clone"
-```
+# package.json script shortcuts
+alias dev="npm run dev"
+alias build="npm run build"
+alias test="npm run test:watch"
 
-### Docker Development
-
-```bash
-# Add to functions
-dexec() {
-    local container="$1"
-    shift
-    docker exec -it "$container" "${@:-bash}"
-}
-
-dlogs() {
-    docker logs -f "${1:-$(docker ps -q | head -1)}"
+# Node version management with existing mise integration
+use_node() {
+    mise use node@$1
 }
 ```
 
-## Maintenance
-
-### Regular Updates
+### Backend Developer
 
 ```bash
-# Keep your setup current
-cd ~/.dotfiles
-git pull origin main
-make test  # Ensure everything still works
+# Database shortcuts
+alias db_reset="docker-compose down && docker-compose up -d postgres"
+alias db_migrate="npm run migrate"
+
+# API testing
+api_test() {
+    curl -s "http://localhost:3000/$1" | jq
+}
 ```
 
-### Backup Important Customizations
+### DevOps Engineer
 
 ```bash
-# Keep track of your changes
-git add config/zsh/personal-aliases
-git add config/git/gitconfig.template
-git commit -m "Personal customizations update"
+# Kubernetes shortcuts (builds on existing k alias)
+alias pods="kubectl get pods"
+alias logs="kubectl logs -f"
+
+# Infrastructure
+tf_plan() {
+    terraform plan -var-file="envs/$1.tfvars"
+}
 ```
 
-### Share Improvements
-
-Consider contributing useful patterns back to the main project or sharing with your team.
-
----
-
-**Pro Tip**: Start small with a few key aliases and functions, then gradually build your customizations as you identify repetitive tasks in your workflow.
+Remember: Start small, test changes, and build your personal development identity gradually.

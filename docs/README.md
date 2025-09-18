@@ -4,9 +4,9 @@
 
 ## Philosophy
 
-**Your development environment should reflect you as a developer.**
+**Build your development identity, don't copy mine.**
 
-This project provides a solid foundation and practical examples, but the real value comes from understanding the patterns and adapting them to your unique workflow. Great developers don't just copy configurations—they understand, modify, and evolve them.
+This project provides a solid foundation and practical examples. The real value comes from understanding the patterns and adapting them to your unique workflow. Great developers don't just copy configurations—they understand, modify, and evolve them.
 
 ## Design Principles
 
@@ -40,57 +40,56 @@ config/
 - Comprehensive test coverage ensuring reliability
 - Cross-platform compatibility (macOS, Linux, WSL)
 
-## Core Components
+## What's Actually Implemented
 
 ### Shell Environment (Zsh)
 
-**Purpose**: Professional terminal experience with intelligent defaults
+**What you get**:
+- 76% faster startup (0.135s average) with lazy loading
+- Smart completion system with caching
+- Cross-platform compatibility (macOS, Linux, WSL)
+- Modern CLI tool integration (bat, eza, fd, ripgrep, zoxide)
 
-**Key Features**:
+**Performance features**:
+- Lazy loading for mise and fzf
+- Conditional module loading with DOTFILES_SKIP_* variables
+- Optimized PATH management
+- Performance monitoring with `shell-bench`
 
-- Smart history management and completion
-- Git-aware prompt with status indicators
-- Efficient PATH management for development tools
-- Function library for common development tasks
+**Customization**:
+- `config/zsh/personal-aliases` - Your shortcuts
+- `config/zsh/personal-functions` - Your utilities
+- Skip modules you don't need with environment variables
 
-**Customization Points**:
+### Git Workflow Enhancement
 
-- `config/zsh/personal-aliases` - Your personal shortcuts
-- `config/zsh/functions` - Custom shell functions
-- Prompt themes and color schemes
+**Smart commit workflow**:
+- Context-aware commit message suggestions
+- Interactive numbered selection or custom messages
+- Suggestions based on file changes (docs, tests, config, etc.)
 
-### Version Control (Git)
+**Branch management**:
+- `gnew feature-name` - Create and switch to branch
+- `gswitch main` - Switch branches (shows all if no name)
+- `gclean` - Interactive cleanup of merged branches
 
-**Purpose**: Streamlined git workflow with powerful aliases
+**Aliases**:
+- `gsave` - Add, commit with suggestions, push
+- `gpull` - Pull with rebase
+- Traditional git aliases (g, ga, gc, gd, etc.)
 
-**Template System**:
+### Development Tools
 
-- `config/git/gitconfig.template` - Base configuration
-- Installation generates personalized `.gitconfig`
-- Separates personal info from shared settings
+**What's included**:
+- Modern CLI alternatives with fallbacks
+- mise integration for version management
+- tmux configuration with sensible defaults
+- Neovim setup with LSP support
 
-**Power User Features**:
-
-- Intelligent aliases (`st`, `ll`, `lg`, `aa`, `cm`)
-- Global gitignore patterns for clean repositories
-- Delta integration for enhanced diffs
-
-### Development Workflow
-
-**Purpose**: Automation tools for common development tasks
-
-**Workflow Tools** (`config/workflow/`):
-
-- `project-init` - Quick project scaffolding
-- `git-helpers` - Advanced git operations
-- `dev-server` - Development server management
-- `test-runner` - Testing automation
-
-**Integration Points**:
-
-- Easily extensible with your own scripts
-- Environment-aware (detects project types)
-- Composable for complex workflows
+**Not implemented yet**:
+- Automatic .nvmrc/.python-version activation
+- Development server automation
+- Test command detection
 
 ## Getting Started
 
@@ -107,17 +106,18 @@ cat install/setup.sh
 
 ```bash
 # See what will happen
-DRY_RUN=true ./install/setup.sh
+make install-dry-run
 
 # Install with control
-./install/setup.sh
+make install
 ```
 
 ### 3. **Customize Immediately**
 
-- Edit `config/git/gitconfig.template` with your preferences
-- Add personal aliases to `config/zsh/personal-aliases`
-- Modify `config/nvim/init.lua` for your editor workflow
+- Review and edit `config.json` with your personal info
+- Add aliases to `config/zsh/personal-aliases`
+- Create functions in `config/zsh/personal-functions`
+- Customize prompt in `config/zsh/prompt` or skip with DOTFILES_SKIP_PROMPT=1
 
 ## Customization Philosophy
 
@@ -143,18 +143,42 @@ Your dotfiles should answer these questions:
 - How do you organize projects and navigate code?
 - What repetitive tasks can you automate?
 
-### **Examples of Personal Adaptation**
+### **Current Git Workflow Enhancement**
+
+**Smart commit suggestions work like this**:
+
+```bash
+# When you run gsave, you get context-aware suggestions
+gsave
+# Suggestions:
+# 1. 📚 Update documentation
+# 2. feat: add new feature
+# 3. fix: resolve bug
+# 4. Update performance.md
+# Commit message (or number): 1
+
+# Creates commit: "📚 Update documentation"
+```
+
+**Branch management**:
+
+```bash
+gnew feature/auth     # Create and switch to branch
+gswitch              # Shows all branches to choose from
+gclean               # Interactively remove merged branches
+```
+
+### **Personal Adaptation Examples**
 
 **Frontend Developer**:
 
 ```bash
-# Add to personal-aliases
+# Add to config/zsh/personal-aliases
 alias dev="npm run dev"
 alias build="npm run build"
 alias test="npm test"
-alias lint="npm run lint"
 
-# Add to functions
+# Add to config/zsh/personal-functions
 npm_fresh() {
     rm -rf node_modules package-lock.json
     npm install
@@ -164,91 +188,79 @@ npm_fresh() {
 **Backend Developer**:
 
 ```bash
-# Docker-focused workflow
+# Docker-focused in personal-aliases
 alias dc="docker-compose"
 alias dcu="docker-compose up -d"
-alias dcd="docker-compose down"
 alias logs="docker-compose logs -f"
 
-# Database shortcuts for your stack
-alias pgstart="pg_ctl -D /usr/local/var/postgres start"
-alias rediscli="redis-cli"
-```
-
-**DevOps Engineer**:
-
-```bash
-# Infrastructure tools
-alias k="kubectl"
-alias tf="terraform"
-alias awsprofile="export AWS_PROFILE="
-
-# Monitoring shortcuts
-alias logs="stern"
-alias pods="kubectl get pods"
+# Add to personal-functions
+db_reset() {
+    docker-compose down
+    docker-compose up -d postgres
+    npm run migrate
+}
 ```
 
 ## Advanced Customization
 
-### **Template System Usage**
+### **Performance Customization**
 
 ```bash
-# SSH config for multiple environments
-# Edit config/ssh/config.template:
-Host work-*
-    User your-work-username
-    IdentityFile ~/.ssh/work_key
+# Skip features you don't need
+export DOTFILES_SKIP_PROMPT=1        # Use your own prompt
+export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip platform detection
+export DOTFILES_SKIP_PERFORMANCE=1    # Skip performance tools
 
-Host personal-*
-    User your-personal-username
-    IdentityFile ~/.ssh/personal_key
+# Measure your changes
+shell-bench 5    # Benchmark startup time
 ```
 
-### **Workflow Tool Creation**
+### **Git Workflow Customization**
 
 ```bash
-# Create your own workflow tool
-# config/workflow/deploy-helper
-#!/usr/bin/env bash
-
-deploy_staging() {
-    git push origin develop
-    echo "Deployed to staging"
-}
-
-deploy_prod() {
-    git push origin main
+# Extend git-helpers for your workflow
+# Add to config/zsh/personal-functions
+deploy() {
+    gsave && git push origin main
     echo "Deployed to production"
 }
+
+feature() {
+    gnew "feature/$1"
+    echo "Created feature branch: feature/$1"
+}
 ```
 
-### **Environment Detection**
+### **Environment-Specific Setup**
 
 ```bash
-# Adapt behavior based on context
-# Add to zshrc for work laptop:
-if [[ "$HOST" == "work-macbook" ]]; then
-    export WORK_MODE=true
-    alias ssh="ssh -F ~/.ssh/work_config"
+# Add to config/zsh/personal-aliases for work
+if [[ "$HOST" == "work-laptop" ]]; then
+    alias vpn="sudo openconnect work-vpn.company.com"
+    alias k="kubectl --context=work"
+fi
+
+# Personal laptop
+if [[ "$HOST" == "personal-mbp" ]]; then
+    alias blog="cd ~/projects/blog && code ."
 fi
 ```
 
-## Quality Standards
+## Quality & Testing
 
-### **Why This Approach Works**
+### **Current Quality Measures**
 
-- **Maintainable**: Clean separation of concerns
-- **Reliable**: Comprehensive testing ensures stability
-- **Flexible**: Template system supports any workflow
-- **Professional**: Enterprise-grade practices
+- **Performance**: Sub-200ms shell startup with lazy loading
+- **Testing**: 20+ pre-commit validation checks
+- **Security**: Secret scanning, SSH validation, private key detection
+- **Cross-Platform**: Tested on macOS, Linux, WSL
 
-### **Testing Your Changes**
+### **Test Your Customizations**
 
 ```bash
-# Always test modifications
-make test           # Run full test suite
-make validate       # Check file structure
-make lint           # Verify script syntax
+make test           # Full test suite
+make lint           # Shellcheck validation
+shell-bench         # Performance impact
 ```
 
 ## Contributing Your Improvements
