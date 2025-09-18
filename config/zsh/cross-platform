@@ -1,0 +1,297 @@
+#!/usr/bin/env zsh
+# Cross-Platform Compatibility & Environment Detection
+
+# =============================================================================
+# Platform Detection
+# =============================================================================
+
+# Detect current platform and environment
+detect_platform() {
+    export DOTFILES_OS="unknown"
+    export DOTFILES_ENV="native"
+
+    # Operating System Detection
+    case "$OSTYPE" in
+        darwin*)
+            export DOTFILES_OS="macos"
+            ;;
+        linux*)
+            export DOTFILES_OS="linux"
+            # Check for specific Linux environments
+            if [[ -n "$WSL_DISTRO_NAME" || -n "$WSL_INTEROP" ]]; then
+                export DOTFILES_ENV="wsl"
+            elif [[ -f "/.dockerenv" ]] || [[ -n "$DOCKER_CONTAINER" ]]; then
+                export DOTFILES_ENV="docker"
+            elif [[ -n "$CONTAINER" ]]; then
+                export DOTFILES_ENV="container"
+            fi
+            ;;
+        cygwin*|msys*|mingw*)
+            export DOTFILES_OS="windows"
+            export DOTFILES_ENV="cygwin"
+            ;;
+    esac
+
+    # Additional environment detection
+    if [[ -n "$CODESPACES" ]]; then
+        export DOTFILES_ENV="codespaces"
+    elif [[ -n "$GITPOD_WORKSPACE_ID" ]]; then
+        export DOTFILES_ENV="gitpod"
+    elif [[ -n "$REPLIT_DB_URL" ]]; then
+        export DOTFILES_ENV="replit"
+    fi
+}
+
+# =============================================================================
+# Platform-Specific Configurations
+# =============================================================================
+
+# Configure clipboard commands
+setup_clipboard() {
+    case "$DOTFILES_OS" in
+        macos)
+            alias pbcopy='pbcopy'
+            alias pbpaste='pbpaste'
+            ;;
+        linux)
+            if command -v xclip >/dev/null 2>&1; then
+                alias pbcopy='xclip -selection clipboard'
+                alias pbpaste='xclip -selection clipboard -o'
+            elif command -v xsel >/dev/null 2>&1; then
+                alias pbcopy='xsel --clipboard --input'
+                alias pbpaste='xsel --clipboard --output'
+            elif [[ "$DOTFILES_ENV" == "wsl" ]]; then
+                alias pbcopy='clip.exe'
+                alias pbpaste='powershell.exe -command "Get-Clipboard"'
+            fi
+            ;;
+    esac
+}
+
+# Configure open command
+setup_open_command() {
+    case "$DOTFILES_OS" in
+        macos)
+            alias open='open'
+            ;;
+        linux)
+            if command -v xdg-open >/dev/null 2>&1; then
+                alias open='xdg-open'
+            elif [[ "$DOTFILES_ENV" == "wsl" ]]; then
+                alias open='explorer.exe'
+            fi
+            ;;
+    esac
+}
+
+# Platform-specific PATH adjustments
+setup_platform_paths() {
+    case "$DOTFILES_OS" in
+        macos)
+            # macOS specific paths
+            [[ -d "/opt/homebrew/bin" ]] && export PATH="/opt/homebrew/bin:$PATH"
+            [[ -d "/opt/homebrew/sbin" ]] && export PATH="/opt/homebrew/sbin:$PATH"
+            ;;
+        linux)
+            # Linux specific paths
+            [[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
+
+            if [[ "$DOTFILES_ENV" == "wsl" ]]; then
+                # WSL specific adjustments
+                # Remove Windows paths that can cause issues
+                export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "/mnt/c" | tr '\n' ':' | sed 's/:$//')
+
+                # Add Windows interop if needed
+                [[ -d "/mnt/c/Windows/System32" ]] && export PATH="$PATH:/mnt/c/Windows/System32"
+            fi
+            ;;
+    esac
+}
+
+# =============================================================================
+# Unified Keybindings
+# =============================================================================
+
+# Set up consistent keybindings across platforms
+setup_unified_keybindings() {
+    # Word movement (Ctrl+Left/Right or Alt+Left/Right)
+    case "$DOTFILES_OS" in
+        macos)
+            # macOS uses Option (Alt) for word movement
+            bindkey '^[[1;3D' backward-word      # Alt+Left
+            bindkey '^[[1;3C' forward-word       # Alt+Right
+            bindkey '^[[1;9D' backward-word      # Alt+Left (alternative)
+            bindkey '^[[1;9C' forward-word       # Alt+Right (alternative)
+            ;;
+        *)
+            # Linux/WSL uses Ctrl for word movement
+            bindkey '^[[1;5D' backward-word      # Ctrl+Left
+            bindkey '^[[1;5C' forward-word       # Ctrl+Right
+            ;;
+    esac
+
+    # Line editing (consistent across platforms)
+    bindkey '^A' beginning-of-line           # Ctrl+A
+    bindkey '^E' end-of-line                 # Ctrl+E
+    bindkey '^K' kill-line                   # Ctrl+K
+    bindkey '^U' backward-kill-line          # Ctrl+U
+    bindkey '^W' backward-kill-word          # Ctrl+W
+
+    # History navigation
+    bindkey '^R' history-incremental-search-backward
+    bindkey '^S' history-incremental-search-forward
+}
+
+# =============================================================================
+# Container and Cloud Environment Optimizations
+# =============================================================================
+
+# Optimize for container environments
+optimize_for_containers() {
+    [[ "$DOTFILES_ENV" != "docker" && "$DOTFILES_ENV" != "container" ]] && return
+
+    # Reduce startup time in containers
+    export DISABLE_AUTO_UPDATE="true"
+    export DISABLE_UPDATE_PROMPT="true"
+
+    # Minimal prompt for containers
+    export CONTAINER_MODE="true"
+
+    # Skip expensive operations
+    export SKIP_SLOW_OPERATIONS="true"
+
+    echo "🐳 Container environment detected - optimized configuration loaded"
+}
+
+# WSL specific optimizations
+optimize_for_wsl() {
+    [[ "$DOTFILES_ENV" != "wsl" ]] && return
+
+    # Fix WSL interop issues
+    export WSLENV="$WSLENV:USERPROFILE/p"
+
+    # Optimize for WSL performance
+    unsetopt HIST_VERIFY  # Skip verification for better performance
+
+    # WSL-specific aliases
+    alias cmd='cmd.exe'
+    alias powershell='powershell.exe'
+    alias explorer='explorer.exe'
+
+    # Fix npm/node in WSL
+    if command -v npm >/dev/null 2>&1; then
+        export NPM_CONFIG_CACHE="$HOME/.npm"
+    fi
+
+    echo "🖥️  WSL environment detected - Windows integration enabled"
+}
+
+# Cloud IDE optimizations
+optimize_for_cloud() {
+    case "$DOTFILES_ENV" in
+        codespaces)
+            export CLOUD_IDE="codespaces"
+            echo "☁️  GitHub Codespaces detected"
+            ;;
+        gitpod)
+            export CLOUD_IDE="gitpod"
+            echo "☁️  Gitpod workspace detected"
+            ;;
+        replit)
+            export CLOUD_IDE="replit"
+            echo "☁️  Replit environment detected"
+            ;;
+    esac
+
+    if [[ -n "$CLOUD_IDE" ]]; then
+        # Cloud IDE optimizations
+        export DISABLE_AUTO_TITLE="true"
+        export FAST_MODE="true"
+
+        # Use simplified prompt
+        export CLOUD_MODE="true"
+    fi
+}
+
+# =============================================================================
+# Font and Terminal Detection
+# =============================================================================
+
+# Detect terminal capabilities
+detect_terminal_features() {
+    # Check for 256 color support
+    if [[ "$TERM" == *"256color"* ]] || [[ "$COLORTERM" == "truecolor" ]]; then
+        export TERMINAL_256_COLOR="true"
+    fi
+
+    # Check for true color support
+    if [[ "$COLORTERM" == "truecolor" ]] || [[ "$COLORTERM" == "24bit" ]]; then
+        export TERMINAL_TRUE_COLOR="true"
+    fi
+
+    # Check for Nerd Font support (common Nerd Font characters)
+    if [[ "$TERM_PROGRAM" == "iTerm.app" ]] || [[ "$TERMINAL_EMULATOR" == "JetBrains-JediTerm" ]] || echo -e "\ue0b0" | wc -c | grep -q "4"; then
+        export NERD_FONT_AVAILABLE="true"
+    fi
+
+    # Terminal-specific optimizations
+    case "$TERM_PROGRAM" in
+        "iTerm.app")
+            export TERMINAL_TYPE="iterm"
+            ;;
+        "Apple_Terminal")
+            export TERMINAL_TYPE="terminal"
+            ;;
+        "vscode")
+            export TERMINAL_TYPE="vscode"
+            export FAST_MODE="true"  # Optimize for VS Code terminal
+            ;;
+    esac
+}
+
+# =============================================================================
+# Environment Information
+# =============================================================================
+
+# Show current environment info
+env_info() {
+    echo "🌍 Environment Information:"
+    echo "  OS: $DOTFILES_OS"
+    echo "  Environment: $DOTFILES_ENV"
+    echo "  Terminal: ${TERMINAL_TYPE:-unknown}"
+    echo "  256 Colors: ${TERMINAL_256_COLOR:-false}"
+    echo "  True Color: ${TERMINAL_TRUE_COLOR:-false}"
+    echo "  Nerd Font: ${NERD_FONT_AVAILABLE:-false}"
+
+    if [[ -n "$CLOUD_IDE" ]]; then
+        echo "  Cloud IDE: $CLOUD_IDE"
+    fi
+
+    if [[ "$DOTFILES_ENV" == "wsl" ]]; then
+        echo "  WSL Distro: ${WSL_DISTRO_NAME:-unknown}"
+    fi
+}
+
+# =============================================================================
+# Initialization
+# =============================================================================
+
+# Initialize cross-platform features
+init_cross_platform() {
+    detect_platform
+    detect_terminal_features
+    setup_clipboard
+    setup_open_command
+    setup_platform_paths
+    setup_unified_keybindings
+    optimize_for_containers
+    optimize_for_wsl
+    optimize_for_cloud
+}
+
+# Commands
+alias envinfo='env_info'
+alias platform='echo "OS: $DOTFILES_OS, ENV: $DOTFILES_ENV"'
+
+# Auto-initialize
+init_cross_platform
