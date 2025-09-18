@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+# macOS system defaults for developer productivity
+
+set -euo pipefail
+
+# Source utilities for dry-run support and logging
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Set default values for required variables
+: "${DRY_RUN:=false}"
+: "${VERBOSE:=false}"
+
+# shellcheck source=../../lib/utils.sh
+source "$DOTFILES_DIR/lib/utils.sh"
+# shellcheck source=../../lib/logging.sh
+source "$DOTFILES_DIR/lib/logging.sh"
+
+# Wrapper for defaults commands with dry-run support
+defaults_cmd() {
+    local cmd="defaults $*"
+    run_cmd "$cmd"
+}
+
+# Apply system-wide keyboard and input settings
+configure_keyboard_input() {
+    log_info "Configuring keyboard and input settings"
+
+    # Enable fast key repeat for coding
+    defaults_cmd write NSGlobalDomain KeyRepeat -int 2
+    defaults_cmd write NSGlobalDomain InitialKeyRepeat -int 15
+
+    # Disable text transformations that interfere with code
+    defaults_cmd write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+    defaults_cmd write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+    defaults_cmd write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+    defaults_cmd write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+}
+
+# Configure save and print dialogs
+configure_dialogs() {
+    log_info "Configuring dialogs for expanded view"
+
+    # Always show expanded save and print dialogs
+    defaults_cmd write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+    defaults_cmd write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+    defaults_cmd write NSGlobalDomain PMPrintingExpandedStateForPrint -bool true
+    defaults_cmd write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+}
+
+# Configure Finder for development workflow
+configure_finder() {
+    log_info "Configuring Finder for development workflow"
+
+    # Show file extensions and hidden files
+    defaults_cmd write NSGlobalDomain AppleShowAllExtensions -bool true
+    defaults_cmd write com.apple.finder AppleShowAllFiles -bool true
+
+    # Show path bar and status bar
+    defaults_cmd write com.apple.finder ShowPathbar -bool true
+    defaults_cmd write com.apple.finder ShowStatusBar -bool true
+
+    # Keep folders on top and use list view
+    defaults_cmd write com.apple.finder _FXSortFolderFirst -bool true
+    defaults_cmd write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
+    # Search current folder by default
+    defaults_cmd write com.apple.finder FXDefaultSearchScope -string "SCcf"
+
+    # Disable .DS_Store files on network and USB volumes
+    defaults_cmd write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+    defaults_cmd write com.apple.desktopservices DSDontWriteUSBStores -bool true
+}
+
+# Configure Dock for productivity
+configure_dock() {
+    log_info "Configuring Dock for productivity"
+
+    # Enable auto-hide with fast response
+    defaults_cmd write com.apple.dock autohide -bool true
+    defaults_cmd write com.apple.dock autohide-delay -float 0
+    defaults_cmd write com.apple.dock autohide-time-modifier -float 0.5
+
+    # Set reasonable icon size and minimize behavior
+    defaults_cmd write com.apple.dock tilesize -int 48
+    defaults_cmd write com.apple.dock minimize-to-application -bool true
+
+    # Hide recent applications
+    defaults_cmd write com.apple.dock show-recents -bool false
+}
+
+# Configure security and privacy settings
+configure_security() {
+    log_info "Configuring security settings"
+
+    # Disable automatic app termination to prevent data loss
+    defaults_cmd write NSGlobalDomain NSDisableAutomaticTermination -bool true
+
+    # Require password immediately after sleep
+    defaults_cmd write com.apple.screensaver askForPassword -int 1
+    defaults_cmd write com.apple.screensaver askForPasswordDelay -int 0
+}
+
+# Configure performance settings
+configure_performance() {
+    log_info "Configuring performance settings"
+
+    # Reduce transparency effects
+    defaults_cmd write com.apple.universalaccess reduceTransparency -bool true
+
+    # Faster Mission Control animations
+    defaults_cmd write com.apple.dock expose-animation-duration -float 0.1
+
+    # Always show scrollbars
+    defaults_cmd write NSGlobalDomain AppleShowScrollBars -string "Always"
+
+    # Disable Resume system-wide
+    defaults_cmd write com.apple.systempreferences NSQuitAlwaysKeepsWindows -bool false
+}
+
+# Configure development-friendly settings
+configure_development() {
+    log_info "Configuring development-friendly settings"
+
+    # Set TextEdit to plain text mode
+    defaults_cmd write com.apple.TextEdit RichText -int 0
+    defaults_cmd write com.apple.TextEdit PlainTextEncoding -int 4
+    defaults_cmd write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+
+    # Configure screenshots
+    run_cmd "mkdir -p ~/Screenshots"
+    defaults_cmd write com.apple.screencapture location ~/Screenshots
+    defaults_cmd write com.apple.screencapture type jpg
+    defaults_cmd write com.apple.screencapture disable-shadow -bool true
+
+    # Terminal security and encoding
+    defaults_cmd write com.apple.terminal SecureKeyboardEntry -bool true
+    defaults_cmd write com.apple.terminal StringEncodings -array 4
+}
+
+# Restart affected applications
+restart_applications() {
+    log_info "Restarting applications to apply changes"
+
+    if [[ "$DRY_RUN" != "true" ]]; then
+        # Kill applications to force reload of preferences
+        killall Finder 2>/dev/null || true
+        killall Dock 2>/dev/null || true
+        killall SystemUIServer 2>/dev/null || true
+        sleep 2
+        log_info "Applications restarted successfully"
+    else
+        log_info "[DRY RUN] Would restart: Finder, Dock, SystemUIServer"
+    fi
+}
+
+# Main execution
+main() {
+    log_step "Applying macOS defaults"
+
+    # Check if running on macOS
+    if [[ "$(uname)" != "Darwin" ]]; then
+        log_error "This script is only for macOS"
+        exit 1
+    fi
+
+    # Apply configurations
+    configure_keyboard_input
+    configure_dialogs
+    configure_finder
+    configure_dock
+    configure_security
+    configure_performance
+    configure_development
+
+    # Restart applications to apply changes
+    restart_applications
+
+    log_success "macOS defaults applied successfully"
+    log_info "Some changes may require a logout/login to take full effect"
+}
+
+# Execute main function
+main "$@"
