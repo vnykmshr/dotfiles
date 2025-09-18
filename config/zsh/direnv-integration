@@ -1,4 +1,3 @@
-#!/usr/bin/env zsh
 # Direnv Integration - Clean Version
 
 # Initialize direnv if available

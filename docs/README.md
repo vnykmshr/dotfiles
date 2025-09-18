@@ -45,18 +45,21 @@ config/
 ### Shell Environment (Zsh)
 
 **What you get**:
+
 - 76% faster startup (0.135s average) with lazy loading
 - Smart completion system with caching
 - Cross-platform compatibility (macOS, Linux, WSL)
 - Modern CLI tool integration (bat, eza, fd, ripgrep, zoxide)
 
 **Performance features**:
+
 - Lazy loading for mise and fzf
 - Conditional module loading with DOTFILES_SKIP_* variables
 - Optimized PATH management
 - Performance monitoring with `shell-bench`
 
 **Customization**:
+
 - `config/zsh/personal-aliases` - Your shortcuts
 - `config/zsh/personal-functions` - Your utilities
 - Skip modules you don't need with environment variables
@@ -64,16 +67,19 @@ config/
 ### Git Workflow Enhancement
 
 **Smart commit workflow**:
+
 - Context-aware commit message suggestions
 - Interactive numbered selection or custom messages
 - Suggestions based on file changes (docs, tests, config, etc.)
 
 **Branch management**:
+
 - `gnew feature-name` - Create and switch to branch
 - `gswitch main` - Switch branches (shows all if no name)
 - `gclean` - Interactive cleanup of merged branches
 
 **Aliases**:
+
 - `gsave` - Add, commit with suggestions, push
 - `gpull` - Pull with rebase
 - Traditional git aliases (g, ga, gc, gd, etc.)
@@ -81,12 +87,14 @@ config/
 ### Development Tools
 
 **What's included**:
+
 - Modern CLI alternatives with fallbacks
 - mise integration for version management
 - tmux configuration with sensible defaults
 - Neovim setup with LSP support
 
 **Not implemented yet**:
+
 - Automatic .nvmrc/.python-version activation
 - Development server automation
 - Test command detection
