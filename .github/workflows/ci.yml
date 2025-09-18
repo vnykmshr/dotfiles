@@ -17,8 +17,17 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -y shellcheck zsh
 
+    - name: Validate file permissions
+      run: |
+        chmod +x tests/test-all.sh
+        chmod +x tests/lint.sh
+        chmod +x install/setup.sh
+
     - name: Run comprehensive tests
       run: ./tests/test-all.sh
+
+    - name: Run linting
+      run: ./tests/lint.sh
 
     - name: Test installation dry-run
       run: DRY_RUN=true ./install/setup.sh
@@ -36,6 +45,22 @@ jobs:
       run: |
         sudo apt-get update -q
         sudo apt-get install -y shellcheck zsh
+
+    - name: Install tools (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        # macOS already has zsh, just ensure permissions
+        chmod +x tests/test-all.sh tests/lint.sh install/setup.sh
+
+    - name: Validate file permissions (Ubuntu)
+      if: runner.os == 'Linux'
+      run: |
+        chmod +x tests/test-all.sh
+        chmod +x tests/lint.sh
+        chmod +x install/setup.sh
+
+    - name: Run comprehensive tests
+      run: ./tests/test-all.sh
 
     - name: Test dry-run install
       run: DRY_RUN=true ./install/setup.sh
