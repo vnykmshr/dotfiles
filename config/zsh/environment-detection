@@ -34,9 +34,10 @@ detect_env() {
     [[ -f ".python-version" ]] && activate_python
     [[ -f ".env" ]] && load_env
 
-    # Load dev server tools for supported projects
-    if [[ -f "go.mod" || -f "package.json" || -f "manage.py" || -f "Makefile" ]]; then
+    # Load dev tools for supported projects
+    if [[ -f "go.mod" || -f "package.json" || -f "manage.py" || -f "Makefile" || -f "Cargo.toml" ]]; then
         [[ -f "$DOTFILES/config/zsh/dev-server" ]] && source "$DOTFILES/config/zsh/dev-server"
+        [[ -f "$DOTFILES/config/zsh/test-automation" ]] && source "$DOTFILES/config/zsh/test-automation"
     fi
 }
 

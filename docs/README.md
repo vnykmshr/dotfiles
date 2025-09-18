@@ -93,11 +93,16 @@ config/
 - tmux configuration with sensible defaults
 - Neovim setup with LSP support
 
+**Test Command Detection**:
+
+- Universal `test` command that auto-detects Go, Node.js, Python, Rust, and Makefile projects
+- `testwatch` for continuous testing (requires entr)
+- `testinfo` to show available test options
+- Automatic loading when entering supported project directories
+
 **Not implemented yet**:
 
 - Automatic .nvmrc/.python-version activation
-- Development server automation
-- Test command detection
 
 ## Getting Started
 

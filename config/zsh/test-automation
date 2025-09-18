@@ -1,0 +1,109 @@
+# Test Command Automation
+
+# Detect and run tests
+test() {
+    # Go projects
+    if [[ -f "go.mod" ]]; then
+        go test ./...
+        return
+    fi
+
+    # Node.js projects
+    if [[ -f "package.json" ]]; then
+        if command -v jq >/dev/null && jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+            npm test
+        else
+            echo "No test script in package.json"
+            return 1
+        fi
+        return
+    fi
+
+    # Python projects
+    if [[ -f "pyproject.toml" || -f "requirements.txt" || -f "setup.py" ]]; then
+        if command -v pytest >/dev/null 2>&1 || [[ -f "pytest.ini" ]]; then
+            pytest
+        else
+            python -m unittest discover
+        fi
+        return
+    fi
+
+    # Rust projects
+    if [[ -f "Cargo.toml" ]]; then
+        cargo test
+        return
+    fi
+
+    # Makefile projects
+    if [[ -f "Makefile" ]]; then
+        if grep -q "^test:" Makefile; then
+            make test
+        else
+            echo "No test target in Makefile"
+            return 1
+        fi
+        return
+    fi
+
+    echo "No test configuration found"
+    return 1
+}
+
+# Watch tests (requires entr or similar)
+testwatch() {
+    if ! command -v entr >/dev/null; then
+        echo "testwatch requires 'entr' (brew install entr)"
+        return 1
+    fi
+
+    # Go projects
+    if [[ -f "go.mod" ]]; then
+        find . -name "*.go" | entr -c go test ./...
+        return
+    fi
+
+    # Node.js projects
+    if [[ -f "package.json" ]]; then
+        find . -name "*.js" -o -name "*.ts" -o -name "*.json" | entr -c npm test
+        return
+    fi
+
+    # Python projects
+    if [[ -f "pyproject.toml" || -f "requirements.txt" || -f "setup.py" ]]; then
+        find . -name "*.py" | entr -c pytest
+        return
+    fi
+
+    echo "No supported project for test watching"
+    return 1
+}
+
+# Show available test options
+testinfo() {
+    echo "Test automation options:"
+
+    [[ -f "go.mod" ]] && echo "  Go: go test ./..."
+
+    if [[ -f "package.json" ]] && command -v jq >/dev/null; then
+        if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+            echo "  Node.js: npm test"
+        fi
+    fi
+
+    if [[ -f "pyproject.toml" || -f "requirements.txt" || -f "setup.py" ]]; then
+        if command -v pytest >/dev/null 2>&1 || [[ -f "pytest.ini" ]]; then
+            echo "  Python: pytest"
+        else
+            echo "  Python: python -m unittest discover"
+        fi
+    fi
+
+    [[ -f "Cargo.toml" ]] && echo "  Rust: cargo test"
+
+    if [[ -f "Makefile" ]]; then
+        if grep -q "^test:" Makefile; then
+            echo "  Make: make test"
+        fi
+    fi
+}
