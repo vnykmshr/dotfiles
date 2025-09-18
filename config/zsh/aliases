@@ -89,6 +89,14 @@ alias gp='git push'
 alias gs='git status'
 alias gst='git status'
 
+# Enhanced git workflow aliases
+alias gh='$DOTFILES/config/workflow/git-helpers'
+alias gsave='$DOTFILES/config/workflow/git-helpers save'
+alias gpull='$DOTFILES/config/workflow/git-helpers pull'
+alias gnew='$DOTFILES/config/workflow/git-helpers new'
+alias gswitch='$DOTFILES/config/workflow/git-helpers switch'
+alias gclean='$DOTFILES/config/workflow/git-helpers clean'
+
 # Modern alternatives
 if command -v bat >/dev/null 2>&1; then
     alias cat='bat --style=plain'

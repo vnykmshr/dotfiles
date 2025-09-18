@@ -16,6 +16,63 @@ ensure_git_repo() {
     fi
 }
 
+# Generate smart commit message suggestions
+suggest_commit_message() {
+    local staged_files suggestions=()
+
+    # Get staged changes
+    staged_files=$(git diff --cached --name-only)
+    if [[ -z $staged_files ]]; then
+        echo "No staged changes found"
+        return 1
+    fi
+
+    # Analyze changes for smart suggestions
+    if echo "$staged_files" | grep -q "README\|\.md$"; then
+        suggestions+=("📚 Update documentation")
+    fi
+
+    if echo "$staged_files" | grep -q "test\|spec\|\.test\."; then
+        suggestions+=("✅ Add tests" "🔧 Fix tests")
+    fi
+
+    if echo "$staged_files" | grep -q "package\.json\|Cargo\.toml\|requirements\.txt\|go\.mod"; then
+        suggestions+=("⬆️ Update dependencies" "📦 Add dependency")
+    fi
+
+    if echo "$staged_files" | grep -q "config\|\.env\|\.yml$\|\.yaml$"; then
+        suggestions+=("🔧 Update configuration")
+    fi
+
+    if echo "$staged_files" | grep -q "\.sh$\|Makefile\|bin/"; then
+        suggestions+=("🔧 Update build scripts")
+    fi
+
+    # Generic suggestions based on git status
+    if git diff --cached --name-only | wc -l | grep -q "^1$"; then
+        local file_name
+        file_name=$(git diff --cached --name-only)
+        suggestions+=("Update ${file_name##*/}")
+    fi
+
+    # Common conventional commit types
+    suggestions+=(
+        "feat: add new feature"
+        "fix: resolve bug"
+        "refactor: improve code structure"
+        "style: format code"
+        "chore: maintenance tasks"
+    )
+
+    # Display suggestions
+    echo "Suggested commit messages:"
+    for i in "${!suggestions[@]}"; do
+        printf "%2d. %s\n" $((i + 1)) "${suggestions[$i]}"
+    done
+
+    echo "Or type custom message:"
+}
+
 # Quick add, commit, and push
 quick_save() {
     local dry_run="${1:-false}"
@@ -23,7 +80,7 @@ quick_save() {
 
     if [[ $dry_run == "true" ]]; then
         log_info "[DRY RUN] Would add all changes: git add ."
-        log_info "[DRY RUN] Would prompt for commit message"
+        log_info "[DRY RUN] Would show commit message suggestions"
         log_info "[DRY RUN] Would commit and push to current branch"
         return 0
     fi
@@ -32,11 +89,32 @@ quick_save() {
     git add .
     log_success "Staged all changes"
 
+    # Show suggestions
+    suggest_commit_message
+
     # Get commit message
-    read -p "Commit message: " -r message
-    if [[ -z $message ]]; then
+    echo
+    read -p "Commit message (or number): " -r input
+    if [[ -z $input ]]; then
         log_error "Commit message required"
         return 1
+    fi
+
+    # Parse input - number or custom message
+    local message
+    if [[ $input =~ ^[0-9]+$ ]]; then
+        # User selected a number - get fresh suggestions
+        local temp_suggestions
+        mapfile -t temp_suggestions < <(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //')
+        local index=$((input - 1))
+        if [[ $index -ge 0 && $index -lt ${#temp_suggestions[@]} ]]; then
+            message="${temp_suggestions[$index]}"
+        else
+            log_error "Invalid selection"
+            return 1
+        fi
+    else
+        message="$input"
     fi
 
     # Commit
@@ -109,6 +187,60 @@ quick_status() {
     fi
 }
 
+# Branch management utilities
+branch_new() {
+    local branch_name="$1"
+    if [[ -z $branch_name ]]; then
+        log_error "Branch name required"
+        return 1
+    fi
+
+    ensure_git_repo
+
+    git checkout -b "$branch_name"
+    log_success "Created and switched to branch: $branch_name"
+}
+
+branch_switch() {
+    local branch_name="$1"
+    if [[ -z $branch_name ]]; then
+        # Show available branches
+        echo "Available branches:"
+        git branch -a | sed 's/^[* ] //'
+        return 0
+    fi
+
+    ensure_git_repo
+
+    if git checkout "$branch_name"; then
+        log_success "Switched to branch: $branch_name"
+    else
+        log_error "Failed to switch to branch: $branch_name"
+    fi
+}
+
+branch_clean() {
+    ensure_git_repo
+
+    echo "Cleaning merged branches..."
+    local merged_branches
+    merged_branches=$(git branch --merged | grep -v "\*\|main\|master" | xargs -n 1)
+
+    if [[ -z $merged_branches ]]; then
+        log_info "No merged branches to clean"
+        return 0
+    fi
+
+    echo "Merged branches to delete:"
+    echo "$merged_branches"
+
+    read -p "Delete these branches? (y/N): " -r confirm
+    if [[ $confirm =~ ^[Yy]$ ]]; then
+        echo "$merged_branches" | xargs -n 1 git branch -d
+        log_success "Deleted merged branches"
+    fi
+}
+
 # Usage information
 usage() {
     cat <<EOF
@@ -118,19 +250,25 @@ USAGE:
     git-helpers [COMMAND] [OPTIONS]
 
 COMMANDS:
-    save        Quick add, commit, and push workflow
+    save        Quick add, commit, and push workflow with smart suggestions
     pull        Pull with rebase and conflict guidance
     status      Show simple repository status
+    new         Create and switch to new branch
+    switch      Switch to existing branch (no args shows all branches)
+    clean       Delete merged branches interactively
     help        Show this help message
 
 OPTIONS:
     -n, --dry-run   Show what would be done without executing
 
 EXAMPLES:
-    git-helpers save         # Add all, commit with message, push
+    git-helpers save         # Add all, commit with smart suggestions, push
     git-helpers save -n      # Show what save would do (dry run)
     git-helpers pull         # Pull with rebase
     git-helpers status       # Show branch and sync status
+    git-helpers new feature  # Create and switch to 'feature' branch
+    git-helpers switch main  # Switch to main branch
+    git-helpers clean        # Clean up merged branches
 
 SHORTCUTS:
     These commands provide simple workflows for common git operations.
@@ -157,6 +295,15 @@ main() {
             ;;
         status | st)
             quick_status
+            ;;
+        new)
+            branch_new "${2:-}"
+            ;;
+        switch | sw)
+            branch_switch "${2:-}"
+            ;;
+        clean)
+            branch_clean
             ;;
         help | --help | -h)
             usage
