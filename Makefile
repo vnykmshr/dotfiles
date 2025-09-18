@@ -28,36 +28,20 @@ install-force: ## Force install (overwrite existing)
 
 test: ## Run all tests
 	$(call blue,"Running tests...")
-	@./tests/test-configs.sh
-	@./tests/test-install.sh
-
-test-configs: ## Test configurations only
-	@./tests/test-configs.sh
-
-test-install: ## Test installation only
-	@./tests/test-install.sh
+	@./tests/test-all.sh
 
 validate: ## Validate structure
 	$(call blue,"Validating structure...")
 	@test -f install/setup.sh || (echo "❌ Missing setup.sh" && exit 1)
 	@test -f config/zsh/zshrc || (echo "❌ Missing zshrc" && exit 1)
-	@test -f config/git/gitconfig || (echo "❌ Missing gitconfig" && exit 1)
+	@test -f config/git/gitconfig.template || (echo "❌ Missing gitconfig template" && exit 1)
 	@echo "✅ Validation passed"
 
 lint: ## Lint shell scripts
 	$(call blue,"Linting scripts...")
-	@./tests/lint-scripts.sh
+	@./tests/lint.sh
 
-lint-fix: ## Auto-fix linting issues
-	@./tests/lint-scripts.sh --fix
-
-format: ## Check formatting
-	@./tests/format-check.sh
-
-format-fix: ## Auto-fix formatting
-	@./tests/format-check.sh --fix
-
-quality: validate lint format test ## Run all quality checks
+quality: validate lint test ## Run all quality checks
 
 status: ## Show status
 	@echo "📁 $(shell pwd)"
