@@ -97,6 +97,14 @@ alias gnew='$DOTFILES/config/workflow/git-helpers new'
 alias gswitch='$DOTFILES/config/workflow/git-helpers switch'
 alias gclean='$DOTFILES/config/workflow/git-helpers clean'
 
+# Go development aliases
+alias go.build='go build ./...'
+alias go.test='go test ./...'
+alias go.run='go run .'
+alias go.fmt='go fmt ./...'
+alias go.vet='go vet ./...'
+alias go.tidy='go mod tidy'
+
 # Modern alternatives
 if command -v bat >/dev/null 2>&1; then
     alias cat='bat --style=plain'

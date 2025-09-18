@@ -48,7 +48,7 @@ load_config() {
 }
 
 # Load core modules (always needed)
-for module in aliases functions; do
+for module in aliases functions go-dev; do
     load_config "$module"
 done
 

@@ -28,6 +28,16 @@ load_env() {
     done < .env
 }
 
+# Go environment setup
+activate_go() {
+    [[ ! -f "go.mod" ]] && return
+
+    # Set up Go environment
+    export GOPATH="$HOME/workspace/gocode"
+    [[ -d "$GOPATH/bin" && ":$PATH:" != *":$GOPATH/bin:"* ]] && export PATH="$GOPATH/bin:$PATH"
+    [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
+}
+
 # Auto-detection on directory change
 auto_environment() {
     local current_dir="$(pwd)"
@@ -35,6 +45,7 @@ auto_environment() {
 
     activate_node
     activate_python
+    activate_go
     load_env
 
     export LAST_ENV_DIR="$current_dir"
