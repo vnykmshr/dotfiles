@@ -50,11 +50,10 @@
 	# Color moved lines differently
 	colorMoved = zebra
 	# Use delta for better diffs (if available)
-	external = delta
 
 [interactive]
 	# Use delta for interactive diffs
-	diffFilter = delta --color-only
+	diffFilter = ~/.local/share/mise/shims/delta --color-only --features=interactive
 
 [delta]
 	# Delta configuration for enhanced git diffs
@@ -276,3 +275,7 @@
 
 [protocol "ssh"]
 	allow = always
+[pager]
+	diff = ~/.local/share/mise/shims/delta
+	log = ~/.local/share/mise/shims/delta
+	show = ~/.local/share/mise/shims/delta
