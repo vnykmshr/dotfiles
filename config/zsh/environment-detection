@@ -1,123 +1,57 @@
-# Smart Development Environment Detection
+# Environment Detection
 
-# =============================================================================
-# Project Detection Utilities
-# =============================================================================
-
-# Get project type based on files present
-get_project_type() {
-    if [[ -f "package.json" ]]; then
-        echo "node"
-    elif [[ -f "requirements.txt" || -f "pyproject.toml" || -f "setup.py" ]]; then
-        echo "python"
-    elif [[ -f "go.mod" ]]; then
-        echo "go"
-    elif [[ -f "Cargo.toml" ]]; then
-        echo "rust"
-    elif [[ -f "docker-compose.yml" || -f "Dockerfile" ]]; then
-        echo "docker"
-    else
-        echo "generic"
-    fi
-}
-
-# Handle version switching for Node.js
-detect_node_version() {
+# Auto-activate project versions
+activate_node() {
     [[ ! -f ".nvmrc" ]] && return
     local version=$(cat .nvmrc | tr -d '[:space:]')
 
     if command -v mise >/dev/null 2>&1; then
-        mise use node@"$version" 2>/dev/null
-    elif command -v nvm >/dev/null 2>&1; then
-        nvm use 2>/dev/null
+        mise use node@"$version" 2>/dev/null && echo "Activated node@$version"
     fi
 }
 
-# Handle version switching for Python
-detect_python_version() {
+activate_python() {
     [[ ! -f ".python-version" ]] && return
     local version=$(cat .python-version | tr -d '[:space:]')
 
     if command -v mise >/dev/null 2>&1; then
-        mise use python@"$version" 2>/dev/null
-    elif command -v pyenv >/dev/null 2>&1; then
-        pyenv local "$version" 2>/dev/null || pyenv install "$version" && pyenv local "$version"
+        mise use python@"$version" 2>/dev/null && echo "Activated python@$version"
     fi
 }
 
-# Setup Go environment
-detect_go_environment() {
-    [[ ! -f "go.mod" ]] && return
-    [[ -z "$GOPATH" ]] && export GOPATH="$HOME/go"
-    [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
+# Load .env file
+load_env() {
+    [[ ! -f ".env" ]] && return
+    while IFS= read -r line; do
+        [[ "$line" =~ ^[[:space:]]*# || -z "${line// }" ]] && continue
+        [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]] && export "$line"
+    done < .env
 }
 
-# Setup Rust environment
-detect_rust_environment() {
-    [[ ! -f "Cargo.toml" ]] && return
-    [[ -d "$HOME/.cargo/bin" && ":$PATH:" != *":$HOME/.cargo/bin:"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
-    [[ -d "target/release" && ":$PATH:" != *":$(pwd)/target/release:"* ]] && export PATH="$(pwd)/target/release:$PATH"
-}
-
-# Setup Docker aliases
-detect_docker_environment() {
-    [[ ! -f "docker-compose.yml" && ! -f "docker-compose.yaml" && ! -f "Dockerfile" ]] && return
-    ! alias dc >/dev/null 2>&1 && {
-        alias dc='docker-compose'
-        alias dcu='docker-compose up'
-        alias dcd='docker-compose down'
-        alias dcb='docker-compose build'
-    }
-}
-
-# Load .env files
-detect_env_files() {
-    for env_file in ".env" ".env.local" ".env.development"; do
-        [[ -f "$env_file" ]] && {
-            while IFS= read -r line; do
-                [[ "$line" =~ ^[[:space:]]*# || -z "${line// }" ]] && continue
-                [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]] && export "$line"
-            done < "$env_file"
-        }
-    done
-}
-
-# Create npm script aliases
-detect_npm_scripts() {
-    [[ ! -f "package.json" ]] && return
-    ! command -v jq >/dev/null 2>&1 && return
-    jq -r '.scripts | keys[]' package.json 2>/dev/null | while read -r script; do
-        [[ -n "$script" ]] && alias "npm:$script"="npm run $script"
-    done
-}
-
-# Main environment detection
-activate_project_environment() {
+# Auto-detection on directory change
+auto_environment() {
     local current_dir="$(pwd)"
-    [[ "$LAST_PROJECT_DIR" == "$current_dir" ]] && return
+    [[ "$LAST_ENV_DIR" == "$current_dir" ]] && return
 
-    detect_node_version
-    detect_python_version
-    detect_go_environment
-    detect_rust_environment
-    detect_docker_environment
-    detect_env_files
-    detect_npm_scripts
+    activate_node
+    activate_python
+    load_env
 
-    export LAST_PROJECT_DIR="$current_dir"
+    export LAST_ENV_DIR="$current_dir"
 }
 
-# Setup hooks and commands
+# Setup auto-detection
 autoload -U add-zsh-hook
-add-zsh-hook chpwd activate_project_environment
-[[ -z "$LAST_PROJECT_DIR" ]] && activate_project_environment
+add-zsh-hook chpwd auto_environment
 
-# Manual commands
-envdetect() { unset LAST_PROJECT_DIR; activate_project_environment; }
+# Commands
+envup() { unset LAST_ENV_DIR; auto_environment; }
 envinfo() {
-    echo "Project: $(get_project_type) in $(basename $(pwd))"
-    [[ -f ".nvmrc" ]] && echo "Node: $(cat .nvmrc)" && command -v node >/dev/null && echo "  Current: $(node --version)"
-    [[ -f ".python-version" ]] && echo "Python: $(cat .python-version)" && command -v python3 >/dev/null && echo "  Current: $(python3 --version)"
-    [[ -f "go.mod" ]] && echo "Go: $(grep '^go ' go.mod | awk '{print $2}')"
-    [[ -f "Cargo.toml" ]] && command -v rustc >/dev/null && echo "Rust: $(rustc --version | awk '{print $2}')"
+    [[ -f ".nvmrc" ]] && echo "Node: $(cat .nvmrc)"
+    [[ -f ".python-version" ]] && echo "Python: $(cat .python-version)"
+    [[ -f ".env" ]] && echo "Environment: .env loaded"
 }
+
+# Create version files
+use_node() { echo "$1" > .nvmrc && activate_node; }
+use_python() { echo "$1" > .python-version && activate_python; }
