@@ -1,247 +1,79 @@
 #!/usr/bin/env zsh
-# Direnv Integration
-
-# =============================================================================
-# Setup
-# =============================================================================
+# Direnv Integration - Clean Version
 
 # Initialize direnv if available
-if command -v direnv >/dev/null 2>&1; then
-    # Hook direnv into shell
-    eval "$(direnv hook zsh)"
-
-    # Configure direnv settings
-    export DIRENV_LOG_FORMAT=""  # Reduce noise in output
-fi
-
-# =============================================================================
-# Enhanced Direnv Functions
-# =============================================================================
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)" && export DIRENV_LOG_FORMAT=""
 
 # Smart .envrc creation
 create_envrc() {
-    local project_type="$1"
-    local envrc_file=".envrc"
+    local type="${1:-generic}"
+    [[ -f ".envrc" ]] && { read -p ".envrc exists. Overwrite? [y/N]: " -r; [[ ! $REPLY =~ ^[Yy]$ ]] && return 1; }
 
-    if [[ -f "$envrc_file" ]]; then
-        echo "⚠️  .envrc already exists in current directory"
-        read -p "Overwrite? [y/N]: " -r
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "Cancelled."
-            return 1
-        fi
-    fi
-
-    echo "Creating .envrc for $project_type project..."
-
-    case "$project_type" in
-        "node"|"nodejs"|"npm")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Node.js project environment
-
-# Load .nvmrc if it exists
-if [[ -f ".nvmrc" ]]; then
-    echo "🔄 Loading Node.js version from .nvmrc..."
-    use node $(cat .nvmrc)
-fi
-
-# Load environment variables from .env files
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-dotenv_if_exists .env.development
-
-# Add node_modules/.bin to PATH
+    case "$type" in
+        node*)
+            cat > .envrc <<'EOF'
+[[ -f ".nvmrc" ]] && use node $(cat .nvmrc)
+dotenv_if_exists .env .env.local .env.development
 PATH_add node_modules/.bin
-
-# Project-specific settings
-export NODE_ENV=development
-export DEBUG=app:*
-
-echo "✅ Node.js environment loaded"
+export NODE_ENV=development DEBUG=app:*
 EOF
             ;;
-
-        "python"|"py")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Python project environment
-
-# Load Python version from .python-version
-if [[ -f ".python-version" ]]; then
-    echo "🐍 Loading Python version from .python-version..."
-    use python $(cat .python-version)
-fi
-
-# Activate virtual environment if it exists
-if [[ -d "venv" ]]; then
-    echo "🔄 Activating virtual environment..."
-    source venv/bin/activate
-elif [[ -d ".venv" ]]; then
-    echo "🔄 Activating virtual environment..."
-    source .venv/bin/activate
-fi
-
-# Load environment variables
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-
-# Python-specific settings
-export PYTHONPATH="$(pwd):$PYTHONPATH"
-export PYTHONDONTWRITEBYTECODE=1
-
-echo "✅ Python environment loaded"
+        python|py)
+            cat > .envrc <<'EOF'
+[[ -f ".python-version" ]] && use python $(cat .python-version)
+[[ -d "venv" ]] && source venv/bin/activate
+[[ -d ".venv" ]] && source .venv/bin/activate
+dotenv_if_exists .env .env.local
+export PYTHONPATH="$(pwd):$PYTHONPATH" PYTHONDONTWRITEBYTECODE=1
 EOF
             ;;
-
-        "go"|"golang")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Go project environment
-
-# Set GOPATH if not set
-if [[ -z "$GOPATH" ]]; then
-    export GOPATH="$HOME/go"
-fi
-
-# Add project bin to PATH
-PATH_add bin
-
-# Add GOPATH/bin to PATH
-PATH_add "$GOPATH/bin"
-
-# Load environment variables
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-
-# Go-specific settings
-export GO111MODULE=on
-export GOPROXY=https://proxy.golang.org,direct
-
-echo "✅ Go environment loaded"
+        go*)
+            cat > .envrc <<'EOF'
+[[ -z "$GOPATH" ]] && export GOPATH="$HOME/go"
+PATH_add bin "$GOPATH/bin"
+dotenv_if_exists .env .env.local
+export GO111MODULE=on GOPROXY=https://proxy.golang.org,direct
 EOF
             ;;
-
-        "rust"|"cargo")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Rust project environment
-
-# Add cargo bin to PATH
-PATH_add "$HOME/.cargo/bin"
-
-# Add project target directories to PATH
-PATH_add target/release
-PATH_add target/debug
-
-# Load environment variables
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-
-# Rust-specific settings
+        rust|cargo)
+            cat > .envrc <<'EOF'
+PATH_add "$HOME/.cargo/bin" target/release target/debug
+dotenv_if_exists .env .env.local
 export RUST_BACKTRACE=1
-
-echo "✅ Rust environment loaded"
 EOF
             ;;
-
-        "docker")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Docker project environment
-
-# Load environment variables
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-dotenv_if_exists .env.development
-
-# Docker-specific settings
-export COMPOSE_DOCKER_CLI_BUILD=1
-export DOCKER_BUILDKIT=1
-
-echo "✅ Docker environment loaded"
+        docker)
+            cat > .envrc <<'EOF'
+dotenv_if_exists .env .env.local .env.development
+export COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1
 EOF
             ;;
-
-        "generic"|"*")
-            cat > "$envrc_file" <<'EOF'
-#!/usr/bin/env bash
-# Generic project environment
-
-# Load environment variables from common files
-dotenv_if_exists .env
-dotenv_if_exists .env.local
-
-# Add common directories to PATH if they exist
-PATH_add bin
-PATH_add scripts
-
-echo "✅ Project environment loaded"
-EOF
-            ;;
-
         *)
-            echo "❌ Unknown project type: $project_type"
-            echo "Available types: node, python, go, rust, docker, generic"
-            return 1
+            cat > .envrc <<'EOF'
+dotenv_if_exists .env .env.local
+PATH_add bin scripts
+EOF
             ;;
     esac
 
-    # Make .envrc executable
-    chmod +x "$envrc_file"
-
-    # Allow the .envrc file
-    if command -v direnv >/dev/null 2>&1; then
-        direnv allow .
-        echo ".envrc created and allowed"
-    else
-        echo ".envrc created (direnv not available for auto-allow)"
-    fi
-
-    # Add to .gitignore if not already there
-    if [[ -f ".gitignore" ]] && ! grep -q "^\.envrc$" .gitignore; then
-        echo ".envrc" >> .gitignore
-        echo "Added .envrc to .gitignore"
-    fi
+    chmod +x .envrc
+    command -v direnv >/dev/null 2>&1 && direnv allow .
+    ! grep -q "^\.envrc$" .gitignore 2>/dev/null && echo ".envrc" >> .gitignore
 }
 
-# Auto-detect and create .envrc
+# Auto-detect project type and create .envrc
 smart_envrc() {
-    # Source environment detection if available
-    if declare -f get_project_type >/dev/null 2>&1; then
-        local project_type=$(get_project_type)
-    else
-        # Fallback detection
-        local project_type="generic"
-        [[ -f "package.json" ]] && project_type="node"
-        [[ -f "requirements.txt" || -f "pyproject.toml" || -f "setup.py" ]] && project_type="python"
-        [[ -f "go.mod" ]] && project_type="go"
-        [[ -f "Cargo.toml" ]] && project_type="rust"
-        [[ -f "docker-compose.yml" || -f "Dockerfile" ]] && project_type="docker"
-    fi
-    create_envrc "$project_type"
-}
-
-# Helper functions
-direnv_status() {
-    ! command -v direnv >/dev/null 2>&1 && { echo "direnv not installed"; return 1; }
-    echo "Direnv: $(direnv version) in $(pwd)"
-    [[ -f ".envrc" ]] && echo "Status: $(direnv status | head -1)" || echo "No .envrc file"
-}
-
-direnv_reload() {
-    command -v direnv >/dev/null 2>&1 && direnv reload || echo "direnv not available"
-}
-
-direnv_list() {
-    command -v direnv >/dev/null 2>&1 && direnv status | grep -E "^Found.*allowed" || echo "direnv not available"
+    local type="generic"
+    [[ -f "package.json" ]] && type="node"
+    [[ -f "requirements.txt" || -f "pyproject.toml" ]] && type="python"
+    [[ -f "go.mod" ]] && type="go"
+    [[ -f "Cargo.toml" ]] && type="rust"
+    [[ -f "Dockerfile" ]] && type="docker"
+    create_envrc "$type"
 }
 
 # Aliases
-alias denv='direnv_status'
-alias dereload='direnv_reload'
-alias deallow='direnv allow .'
-alias dedeny='direnv deny .'
-alias delist='direnv_list'
 alias envrc='smart_envrc'
 alias mkenvrc='create_envrc'
+alias denv='direnv status'
+alias deallow='direnv allow .'

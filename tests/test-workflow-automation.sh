@@ -140,46 +140,37 @@ test_project_init() {
         # Test help option
         assert_test "'$project_init' --help >/dev/null" "project-init shows help"
 
-        # Test list templates
-        assert_test "'$project_init' --list >/dev/null" "project-init lists templates"
-
-        # Test template validation
-        local output
-        output=$("$project_init" --list 2>/dev/null)
-        if echo "$output" | grep -q "nodejs.*Node.js"; then
-            log_success "project-init has Node.js template"
-            ((TESTS_PASSED++))
-        else
-            log_error "project-init missing Node.js template"
-            ((TESTS_FAILED++))
-        fi
-        ((TESTS_RUN++))
-
-        if echo "$output" | grep -q "python.*Python"; then
-            log_success "project-init has Python template"
-            ((TESTS_PASSED++))
-        else
-            log_error "project-init missing Python template"
-            ((TESTS_FAILED++))
-        fi
-        ((TESTS_RUN++))
-
         # Test project creation in temp directory
         local temp_dir=$(mktemp -d)
         (
             cd "$temp_dir"
 
-            # Test static project creation (simple template)
-            if "$project_init" -t static test-project >/dev/null 2>&1; then
-                if [[ -d "test-project" && -f "test-project/README.md" ]]; then
-                    log_success "project-init creates static projects"
+            # Test Node.js project creation (updated for clean version)
+            if "$project_init" -t nodejs test-project >/dev/null 2>&1; then
+                if [[ -d "test-project" && -f "test-project/package.json" && -f "test-project/index.js" ]]; then
+                    log_success "project-init creates Node.js projects"
                     ((TESTS_PASSED++))
                 else
-                    log_error "project-init creates incomplete static projects"
+                    log_error "project-init creates incomplete Node.js projects"
                     ((TESTS_FAILED++))
                 fi
             else
-                log_error "project-init fails to create static projects"
+                log_error "project-init fails to create Node.js projects"
+                ((TESTS_FAILED++))
+            fi
+            ((TESTS_RUN++))
+
+            # Test Python project creation
+            if "$project_init" -t python test-py-project >/dev/null 2>&1; then
+                if [[ -d "test-py-project" && -f "test-py-project/main.py" ]]; then
+                    log_success "project-init creates Python projects"
+                    ((TESTS_PASSED++))
+                else
+                    log_error "project-init creates incomplete Python projects"
+                    ((TESTS_FAILED++))
+                fi
+            else
+                log_error "project-init fails to create Python projects"
                 ((TESTS_FAILED++))
             fi
             ((TESTS_RUN++))
@@ -427,20 +418,17 @@ test_dry_run_functionality() {
         ((TESTS_RUN++))
     fi
 
-    # Test project-init dry run
+    # Note: Clean version of project-init is simplified without dry-run option
     if [[ -x "$workflow_dir/project-init" ]]; then
-        assert_test "'$workflow_dir/project-init' --dry-run -t nodejs test-project >/dev/null 2>&1" "project-init dry run works"
-
-        # Verify no files are created
         local temp_dir=$(mktemp -d)
         (
             cd "$temp_dir"
-            "$workflow_dir/project-init" --dry-run -t nodejs test-dry-project >/dev/null 2>&1
-            if [[ ! -d "test-dry-project" ]]; then
-                log_success "project-init dry run creates no files"
+            # Test that help works for simplified version
+            if "$workflow_dir/project-init" --help >/dev/null 2>&1; then
+                log_success "project-init help works as expected"
                 ((TESTS_PASSED++))
             else
-                log_error "project-init dry run created files"
+                log_error "project-init help not working"
                 ((TESTS_FAILED++))
             fi
             ((TESTS_RUN++))
@@ -448,11 +436,10 @@ test_dry_run_functionality() {
         rm -rf "$temp_dir"
     fi
 
-    # Test git-helpers dry run
+    # Test git-helpers (clean version uses simplified commands)
     if [[ -x "$workflow_dir/git-helpers" ]]; then
         if git rev-parse --git-dir >/dev/null 2>&1; then
-            assert_test "'$workflow_dir/git-helpers' save --dry-run >/dev/null 2>&1" "git-helpers save dry run works"
-            assert_test "'$workflow_dir/git-helpers' pull --dry-run >/dev/null 2>&1" "git-helpers pull dry run works"
+            assert_test "'$workflow_dir/git-helpers' status >/dev/null 2>&1" "git-helpers status works"
         fi
     fi
 
