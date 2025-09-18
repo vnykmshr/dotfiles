@@ -1,0 +1,63 @@
+# Development Automation
+
+# Universal development server
+dev() {
+    # Go projects
+    if [[ -f "go.mod" ]]; then
+        [[ -f "main.go" ]] && go run . || go run ./cmd/...
+    # Node.js projects
+    elif [[ -f "package.json" ]] && command -v jq >/dev/null; then
+        if jq -e '.scripts.dev' package.json >/dev/null 2>&1; then
+            npm run dev
+        elif jq -e '.scripts.start' package.json >/dev/null 2>&1; then
+            npm start
+        else
+            echo "No dev script found"; return 1
+        fi
+    # Python Django
+    elif [[ -f "manage.py" ]]; then
+        python manage.py runserver
+    # Makefile
+    elif [[ -f "Makefile" ]] && grep -q "^dev:" Makefile; then
+        make dev
+    else
+        echo "No dev server found"; return 1
+    fi
+}
+
+# Universal test runner
+test() {
+    # Go projects
+    if [[ -f "go.mod" ]]; then
+        go test ./...
+    # Node.js projects
+    elif [[ -f "package.json" ]] && command -v jq >/dev/null && jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+        npm test
+    # Python projects
+    elif [[ -f "pyproject.toml" || -f "requirements.txt" || -f "setup.py" ]]; then
+        command -v pytest >/dev/null && pytest || python -m unittest discover
+    # Rust projects
+    elif [[ -f "Cargo.toml" ]]; then
+        cargo test
+    # Makefile
+    elif [[ -f "Makefile" ]] && grep -q "^test:" Makefile; then
+        make test
+    else
+        echo "No test command found"; return 1
+    fi
+}
+
+# Watch tests
+testwatch() {
+    command -v entr >/dev/null || { echo "Requires entr (brew install entr)"; return 1; }
+
+    if [[ -f "go.mod" ]]; then
+        find . -name "*.go" | entr -c go test ./...
+    elif [[ -f "package.json" ]]; then
+        find . -name "*.js" -o -name "*.ts" | entr -c npm test
+    elif [[ -f "pyproject.toml" || -f "requirements.txt" || -f "setup.py" ]]; then
+        find . -name "*.py" | entr -c pytest
+    else
+        echo "No watch support for this project"; return 1
+    fi
+}

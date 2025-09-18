@@ -46,7 +46,7 @@ config/
 
 **What you get**:
 
-- 76% faster startup (0.135s average) with lazy loading
+- Fast startup (0.158s) with lazy loading
 - Smart completion system with caching
 - Cross-platform compatibility (macOS, Linux, WSL)
 - Modern CLI tool integration (bat, eza, fd, ripgrep, zoxide)
@@ -84,30 +84,25 @@ config/
 - `gpull` - Pull with rebase
 - Traditional git aliases (g, ga, gc, gd, etc.)
 
-### Development Tools
+### Development Automation
 
-**What's included**:
+**Universal commands**:
+
+- `dev` - Start development server for any project type
+- `test` - Run tests for any project type
+- `testwatch` - Continuous testing with file watching
+
+**Environment detection**:
+
+- Auto-activate .nvmrc/.python-version files with mise
+- Load .env files automatically
+- Trigger with `envup` or automatic on directory change
+
+**Other tools**:
 
 - Modern CLI alternatives with fallbacks
-- mise integration for version management
-- tmux configuration with sensible defaults
-- Neovim setup with LSP support
-
-**Test Command Detection**:
-
-- Universal `test` command that auto-detects Go, Node.js, Python, Rust, and Makefile projects
-- `testwatch` for continuous testing (requires entr)
-- `testinfo` to show available test options
-- Automatic loading when entering supported project directories
-
-**Environment Version Management**:
-
-- Automatic .nvmrc/.python-version activation with mise
-- .env file loading for environment variables
-- `envup` to manually trigger detection
-- `use_node` and `use_python` helpers to create version files
-
-All core development automation is now complete.
+- Git workflow enhancement with smart commits
+- tmux and Neovim configurations
 
 ## Getting Started
 
@@ -268,7 +263,7 @@ fi
 
 ### **Current Quality Measures**
 
-- **Performance**: Sub-200ms shell startup with lazy loading
+- **Performance**: Fast shell startup with lazy loading
 - **Testing**: 20+ pre-commit validation checks
 - **Security**: Secret scanning, SSH validation, private key detection
 - **Cross-Platform**: Tested on macOS, Linux, WSL
