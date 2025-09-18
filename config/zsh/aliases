@@ -70,7 +70,7 @@ alias ping='ping -c 5'
 alias fastping='ping -c 100 -s 2'
 
 # Weather (requires curl)
-alias weather='curl -s "https://wttr.in/?format=3"'
+# Note: weather() function is defined in functions file instead of alias
 alias forecast='curl -s "https://wttr.in/"'
 
 # =============================================================================
@@ -170,10 +170,7 @@ alias get='curl --location --progress-bar'
 alias post='curl --location --progress-bar --data'
 alias header='curl --location --head'
 
-# JSON formatting
-if command -v jq >/dev/null 2>&1; then
-    alias json='jq .'
-fi
+# Note: json() function is defined in functions file instead of alias
 
 # Web server
 alias serve='python3 -m http.server'

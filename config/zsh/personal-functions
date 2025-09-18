@@ -16,21 +16,8 @@ acp() {
     git push
 }
 
-# Smart dev server - detects project type
-dev() {
-    if [[ -f "package.json" ]]; then
-        npm run dev 2>/dev/null || npm start 2>/dev/null || node server.js
-    elif [[ -f "Cargo.toml" ]]; then
-        cargo run
-    elif [[ -f "go.mod" ]]; then
-        go run .
-    elif [[ -f "Makefile" ]]; then
-        make dev 2>/dev/null || make run 2>/dev/null || make
-    else
-        echo "Unknown project type"
-        return 1
-    fi
-}
+# Note: 'dev' function moved to workflow automation tools
+# Use 'dev' alias which points to the enhanced dev-server tool
 
 # Enhanced status - git + system info
 status() {

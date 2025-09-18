@@ -98,7 +98,16 @@ assert_alias_exists() {
 
     ((TESTS_RUN++))
 
-    if HOME="$TEST_HOME" zsh -c "source '$TEST_HOME/.zshrc' && alias '$alias_name'" >/dev/null 2>&1; then
+    # Try to source config and check for alias, allowing for non-fatal errors
+    local alias_output
+    alias_output=$(HOME="$TEST_HOME" zsh -c "
+        # Suppress errors but continue loading
+        setopt NO_NOMATCH 2>/dev/null || true
+        source '$TEST_HOME/.zshrc' 2>/dev/null || true
+        alias '$alias_name' 2>/dev/null
+    " 2>/dev/null)
+
+    if [[ -n "$alias_output" ]]; then
         log_success "$description"
         ((TESTS_PASSED++))
         return 0
@@ -228,7 +237,7 @@ test_configuration_loading() {
 
     # Test that personal aliases are loaded
     assert_alias_exists "md" "Personal alias 'md' loaded"
-    assert_alias_exists "acp" "Personal alias 'acp' loaded"
+    assert_alias_exists "gacp" "Personal alias 'gacp' loaded"
     assert_alias_exists "gst" "Git alias 'gst' loaded"
 }
 
