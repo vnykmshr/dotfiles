@@ -1,0 +1,278 @@
+[user]
+	# Set your identity
+	name = Vinayak Mishra
+	email = viks@vnykmshr.com
+	# Automatically sign commits
+	signingkey = ~/.ssh/id_ed25519.pub
+
+[init]
+	# Use 'main' as default branch name
+	defaultBranch = main
+
+[core]
+	# Use global gitignore
+	excludesfile = ~/.gitignore_global
+	# Set default editor
+	editor = zed
+	# Handle line endings properly
+	autocrlf = input
+	# Improve performance on large repos
+	preloadindex = true
+	fscache = true
+
+[pull]
+	# Avoid merge commits when pulling
+	rebase = true
+
+[push]
+	# Push current branch to upstream
+	default = simple
+	# Push tags along with commits
+	followTags = true
+
+[rebase]
+	# Automatically stash and unstash when rebasing
+	autoStash = true
+	# Show a diffstat of what changed after rebase
+	stat = true
+
+[merge]
+	# Use nvim for merge conflicts
+	tool = zed
+	# Include summaries of merged commits in merge commit messages
+	log = true
+
+[diff]
+	# Use better diff algorithm
+	algorithm = histogram
+	# Show renames and copies
+	renames = copies
+	# Color moved lines differently
+	colorMoved = zebra
+	# Use delta for better diffs (if available)
+	external = delta
+
+[interactive]
+	# Use delta for interactive diffs
+	diffFilter = delta --color-only
+
+[delta]
+	# Delta configuration for enhanced git diffs
+	navigate = true
+	light = false
+	side-by-side = true
+	line-numbers = true
+	decorations = true
+	file-style = bold yellow ul
+	file-decoration-style = none
+	hunk-header-decoration-style = cyan box ul
+	plus-style = syntax "#003800"
+	minus-style = syntax "#3f0001"
+	syntax-theme = Monokai Extended
+	line-numbers-left-style = cyan
+	line-numbers-right-style = cyan
+	line-numbers-minus-style = 124
+	line-numbers-plus-style = 28
+
+[color]
+	# Enable colors
+	ui = auto
+	branch = auto
+	diff = auto
+	status = auto
+
+[color "diff"]
+	meta = yellow
+	frag = magenta bold
+	old = red
+	new = green
+	whitespace = red reverse
+
+[color "status"]
+	added = green
+	changed = yellow
+	untracked = red
+
+[status]
+	# Show untracked files in directories
+	showUntrackedFiles = all
+
+[log]
+	# Show dates in relative format
+	date = relative
+
+[blame]
+	# Show dates in relative format
+	date = relative
+
+[branch]
+	# Automatically set up tracking when creating branches
+	autosetupmerge = always
+	autosetupRebase = always
+
+[rerere]
+	# Remember how conflicts were resolved
+	enabled = true
+
+[help]
+	# Autocorrect typos in git commands
+	autocorrect = 1
+
+# =============================================================================
+# Aliases
+# =============================================================================
+
+[alias]
+	# Basic shortcuts
+	a = add
+	b = branch
+	c = commit
+	co = checkout
+	dt = difftool
+	f = fetch
+	g = grep
+	m = merge
+	p = push
+	r = rebase
+	s = status
+
+	# Enhanced commands
+	aa = add --all
+	ap = add --patch
+	ca = commit --amend
+	cm = commit --message
+	pu = push --set-upstream origin HEAD
+	rh = reset --hard
+	rs = reset --soft
+
+	# Status and log
+	st = status --short --branch
+	ss = status
+	sl = log --oneline --graph --decorate -20
+	ll = log --graph --pretty=format:'%C(yellow)%h%Creset -%C(red)%d%Creset %s %C(green)(%cr) %C(cyan)<%an>%Creset' --abbrev-commit --date=relative
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit
+
+	# Diff shortcuts
+	d = diff
+	dc = diff --cached
+	ds = diff --stat
+	dw = diff --word-diff
+
+	# Branch management
+	ba = branch -a
+	br = branch -r
+	bd = branch -d
+	bD = branch -D
+
+	# Stash operations
+	sl = stash list
+	sa = stash apply
+	ss = stash save
+	sp = stash pop
+	sd = stash drop
+
+	# Remote operations
+	pl = pull
+	ps = push
+	pom = push origin main
+	pod = push origin develop
+
+	# Reset operations
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	visual = !gitk
+
+	# Useful utilities
+	aliases = config --get-regexp alias
+	contrib = shortlog --summary --numbered
+	ignored = ls-files --others --ignored --exclude-standard
+	untracked = ls-files --others --exclude-standard
+
+	# Find commits
+	find-merge = "!sh -c 'commit=$0 && branch=${1:-HEAD} && (git rev-list $commit..$branch --ancestry-path | cat -n; git rev-list $commit..$branch --first-parent | cat -n) | sort -k2 -s | uniq -f1 -d | sort -n | tail -1 | cut -f2'"
+	find-branch = "!sh -c 'git branch -a --contains $1' --"
+
+	# Cleanup
+	cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"
+	prune-all = !git remote | xargs -n 1 git remote prune
+
+	# Workflow shortcuts
+	wip = commit -am "WIP"
+	unwip = reset HEAD~1
+	assume = update-index --assume-unchanged
+	unassume = update-index --no-assume-unchanged
+	assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+
+	# GitHub/GitLab shortcuts
+	pr = "!gh pr create"
+	issue = "!gh issue create"
+
+[commit]
+	# GPG sign commits
+	gpgsign = false
+	# Show diff when writing commit message
+	verbose = true
+	# Use commit template if available
+	template = ~/.gitmessage
+
+[tag]
+	# GPG sign tags
+	gpgsign = false
+
+# =============================================================================
+# URL Shortcuts
+# =============================================================================
+
+[url "git@github.com:"]
+	insteadOf = gh:
+	pushInsteadOf = github:
+	pushInsteadOf = git://github.com/
+
+[url "git://github.com/"]
+	insteadOf = github:
+
+[url "git@gist.github.com:"]
+	insteadOf = gst:
+	pushInsteadOf = gist:
+	pushInsteadOf = git://gist.github.com/
+
+[url "git://gist.github.com/"]
+	insteadOf = gist:
+
+# =============================================================================
+# Platform Specific
+# =============================================================================
+
+# Include platform-specific config
+[includeIf "gitdir:~/work/"]
+	path = ~/.gitconfig-work
+
+[includeIf "gitdir:~/personal/"]
+	path = ~/.gitconfig-personal
+
+# =============================================================================
+# Modern Git Features
+# =============================================================================
+
+[feature]
+	# Enable experimental features
+	experimental = false
+	# Use new default for git init
+	manyFiles = false
+
+[maintenance]
+	# Enable background maintenance
+	auto = false
+
+[protocol]
+	# Security: disable certain protocols
+	allow = never
+
+[protocol "https"]
+	allow = always
+
+[protocol "git"]
+	allow = always
+
+[protocol "ssh"]
+	allow = always
