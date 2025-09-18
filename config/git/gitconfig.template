@@ -49,12 +49,17 @@
 	renames = copies
 	# Color moved lines differently
 	colorMoved = zebra
-	# Use delta for better diffs (if available)
-	external = delta
+
+[pager]
+	# Use delta as pager for git commands (if available)
+	diff = {{DELTA_COMMAND}}
+	log = {{DELTA_COMMAND}}
+	reflog = {{DELTA_COMMAND}}
+	show = {{DELTA_COMMAND}}
 
 [interactive]
-	# Use delta for interactive diffs
-	diffFilter = delta --color-only
+	# Use delta for interactive diffs (if available)
+	diffFilter = {{DELTA_COMMAND}} --color-only --features=interactive
 
 [delta]
 	# Delta configuration for enhanced git diffs

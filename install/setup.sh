@@ -336,6 +336,14 @@ process_gitconfig_template() {
     local editor=$(get_config_value '.user.editor' 'nvim')
     local git_gpg_sign=$(get_config_value '.git.gpg_sign' 'false')
 
+    # Detect delta command path
+    local delta_command="delta"
+    if command -v mise >/dev/null 2>&1 && mise which delta >/dev/null 2>&1; then
+        delta_command="$(mise which delta)"
+    elif command -v delta >/dev/null 2>&1; then
+        delta_command="$(command -v delta)"
+    fi
+
     # Prompt for user details if using defaults and not in dry run
     if [[ "$git_user_name" == "Your Name" ]] && [[ "$DRY_RUN" != "true" ]]; then
         read -rp "Enter your name for Git commits: " git_user_name
@@ -364,7 +372,8 @@ process_gitconfig_template() {
         "GIT_USER_EMAIL" "$git_user_email" \
         "GIT_SIGNING_KEY" "$git_signing_key" \
         "EDITOR" "$editor" \
-        "GIT_GPG_SIGN" "$git_gpg_sign"
+        "GIT_GPG_SIGN" "$git_gpg_sign" \
+        "DELTA_COMMAND" "$delta_command"
 }
 
 # Process SSH config template
