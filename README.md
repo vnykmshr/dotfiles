@@ -1,18 +1,20 @@
-# Professional Dotfiles
+# Professional Dotfiles (v2.1)
 
-> Clean, minimal dotfiles for productive development workflows
+> Clean, intelligent dotfiles with smart environment detection and automation
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
 
 ## Features
 
-- **🎯 Modern Tools**: Neovim, modern CLI tools (bat, eza, fd, ripgrep)
-- **🔄 Cross-Platform**: macOS, Linux, WSL2
+- **🎯 Modern Tools**: Neovim, modern CLI tools (bat, eza, fd, ripgrep, delta, zoxide)
+- **🚀 Smart Environment**: Auto-detects and activates project versions (Node.js, Python, Go, Rust)
+- **📋 Intelligent History**: Enhanced search, filtering, and security for shell history
+- **🔄 Auto-Environment**: Seamless direnv integration with smart .envrc templates
+- **⚡ Workflow Automation**: Smart test runners, dev servers, and project initialization
 - **📦 Smart Install**: Dry-run, OS detection, automatic backups
-- **⚡ Fast**: Optimized for speed and efficiency
 - **🧠 Smart Reminders**: Learn aliases through periodic suggestions
-- **🔧 Extensible**: Easy to customize and extend
+- **🔧 Extensible**: Clean, modular configuration that's easy to customize
 
 ## Quick Start
 
@@ -38,29 +40,75 @@ make validate      # Check setup
 make status        # Show info
 ```
 
-## Alias Highlights
+## Smart Commands
 
-Based on actual usage patterns:
+Phase 2.1 introduces intelligent project management:
 
 ```bash
-# Development (most used)
-md                  # make dev
-acp                 # git add -u && git commit && git push
-gst                 # git status --short --branch
+# Environment Detection (automatic)
+envdetect           # Manual environment detection
+envinfo             # Show current project environment
 
-# Navigation
-ws                  # cd ~/workspace
-proj                # cd ~/workspace/projects
+# Smart History
+hstats              # History statistics and analysis
+hsuggest <query>    # Find similar commands
+hclean              # Remove duplicate history entries
+hpriv               # Clean sensitive commands from history
 
-# Workflow
-dev                 # smart project dev server
-qc                  # quick commit with auto-message
-status              # enhanced git + system status
+# Direnv Integration
+envrc               # Smart .envrc creation (auto-detects project type)
+mkenvrc <type>      # Create .envrc for specific type (node/python/go/rust)
+denv                # Show direnv status
+
+# Workflow Automation
+dev                 # Smart project dev server
+test                # Auto-detect and run tests
+qc                  # Quick commit with auto-message
+status              # Enhanced git + system status
 ```
 
-## Smart Features
+### Development Aliases (most used)
+```bash
+md                  # make dev
+gacp                # git add -u && git commit && git push
+gst                 # git status --short --branch
+```
 
-### Alias Reminders
+## Smart Features (Phase 2.1)
+
+### 🎯 Automatic Environment Detection
+Changes directory → Automatically activates the right tools:
+- **Node.js**: Detects `.nvmrc` and switches versions with mise/nvm
+- **Python**: Reads `.python-version` and activates with mise/pyenv
+- **Go**: Sets up `GOPATH` and adds project `bin/` to PATH
+- **Rust**: Configures cargo and adds `target/release/` to PATH
+- **npm scripts**: Creates dynamic aliases (`npm:dev`, `npm:build`, etc.)
+
+```bash
+cd my-node-project/     # Automatically switches to Node 18.17.0
+npm:dev                 # Runs npm run dev (auto-created alias)
+```
+
+### 📋 Intelligent History Management
+Enhanced shell history with security and analytics:
+- **Smart filtering**: Excludes sensitive commands (passwords, tokens, keys)
+- **Advanced search**: `hsearch "docker run"` with context
+- **Statistics**: `hstats` shows usage patterns and top commands
+- **Suggestions**: `hsuggest git` finds similar commands
+- **Cleanup**: `hclean` removes duplicates, `hpriv` removes sensitive entries
+
+### 🔄 Smart Direnv Integration
+Seamless environment switching with template generation:
+- **Auto-detection**: `envrc` creates appropriate .envrc for your project
+- **Templates**: Pre-built configurations for Node.js, Python, Go, Rust, Docker
+- **Security**: Automatically adds .envrc to .gitignore
+
+```bash
+cd new-project/
+envrc                   # Detects package.json → creates Node.js .envrc
+```
+
+### 🧠 Alias Reminders
 Shows helpful aliases every 10 shell sessions to build muscle memory:
 
 ```bash
@@ -69,12 +117,11 @@ ar-level beginner   # Set skill level
 ar-off              # Disable reminders
 ```
 
-### Project Detection
-The `dev` command automatically detects project type:
-- Node.js → `npm run dev`
-- Rust → `cargo run`
-- Go → `go run .`
-- Make → `make dev`
+### ⚡ Workflow Automation
+Smart project commands that adapt to your environment:
+- `dev` → Detects and runs appropriate dev server
+- `test` → Finds and runs project tests
+- `quickstart` → Interactive project creation
 
 ## Structure
 
