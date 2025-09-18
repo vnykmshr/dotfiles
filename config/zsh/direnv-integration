@@ -1,10 +1,8 @@
 #!/usr/bin/env zsh
-
-# Direnv Integration for Automatic Environment Switching
-# Provides enhanced direnv functionality with smart defaults
+# Direnv Integration
 
 # =============================================================================
-# Direnv Setup and Configuration
+# Setup
 # =============================================================================
 
 # Initialize direnv if available
@@ -34,7 +32,7 @@ create_envrc() {
         fi
     fi
 
-    echo "📝 Creating .envrc for $project_type project..."
+    echo "Creating .envrc for $project_type project..."
 
     case "$project_type" in
         "node"|"nodejs"|"npm")
@@ -165,7 +163,7 @@ echo "✅ Docker environment loaded"
 EOF
             ;;
 
-        "generic"|"")
+        "generic"|"*")
             cat > "$envrc_file" <<'EOF'
 #!/usr/bin/env bash
 # Generic project environment
@@ -195,129 +193,55 @@ EOF
     # Allow the .envrc file
     if command -v direnv >/dev/null 2>&1; then
         direnv allow .
-        echo "✅ .envrc created and allowed"
+        echo ".envrc created and allowed"
     else
-        echo "✅ .envrc created (direnv not available for auto-allow)"
+        echo ".envrc created (direnv not available for auto-allow)"
     fi
 
     # Add to .gitignore if not already there
     if [[ -f ".gitignore" ]] && ! grep -q "^\.envrc$" .gitignore; then
         echo ".envrc" >> .gitignore
-        echo "📝 Added .envrc to .gitignore"
+        echo "Added .envrc to .gitignore"
     fi
 }
 
-# Auto-detect project type and create appropriate .envrc
+# Auto-detect and create .envrc
 smart_envrc() {
-    local project_type="generic"
-
-    # Detect project type
-    if [[ -f "package.json" ]]; then
-        project_type="node"
-    elif [[ -f "requirements.txt" ]] || [[ -f "pyproject.toml" ]] || [[ -f "setup.py" ]]; then
-        project_type="python"
-    elif [[ -f "go.mod" ]]; then
-        project_type="go"
-    elif [[ -f "Cargo.toml" ]]; then
-        project_type="rust"
-    elif [[ -f "docker-compose.yml" ]] || [[ -f "Dockerfile" ]]; then
-        project_type="docker"
+    # Source environment detection if available
+    if declare -f get_project_type >/dev/null 2>&1; then
+        local project_type=$(get_project_type)
+    else
+        # Fallback detection
+        local project_type="generic"
+        [[ -f "package.json" ]] && project_type="node"
+        [[ -f "requirements.txt" || -f "pyproject.toml" || -f "setup.py" ]] && project_type="python"
+        [[ -f "go.mod" ]] && project_type="go"
+        [[ -f "Cargo.toml" ]] && project_type="rust"
+        [[ -f "docker-compose.yml" || -f "Dockerfile" ]] && project_type="docker"
     fi
-
-    echo "🔍 Detected project type: $project_type"
     create_envrc "$project_type"
 }
 
-# =============================================================================
-# Direnv Helper Functions
-# =============================================================================
-
-# Show current direnv status
+# Helper functions
 direnv_status() {
-    if ! command -v direnv >/dev/null 2>&1; then
-        echo "❌ direnv is not installed"
-        echo "Install with: brew install direnv"
-        return 1
-    fi
-
-    echo "📋 Direnv Status"
-    echo "──────────────────"
-    echo "Version: $(direnv version)"
-    echo "Current directory: $(pwd)"
-
-    if [[ -f ".envrc" ]]; then
-        echo "✅ .envrc file exists"
-        echo "Status: $(direnv status | head -1)"
-        echo ""
-        echo "📝 .envrc contents:"
-        cat .envrc | head -10
-        if [[ $(wc -l < .envrc) -gt 10 ]]; then
-            echo "... (truncated)"
-        fi
-    else
-        echo "❌ No .envrc file in current directory"
-        echo "Run 'smart_envrc' or 'create_envrc <type>' to create one"
-    fi
+    ! command -v direnv >/dev/null 2>&1 && { echo "direnv not installed"; return 1; }
+    echo "Direnv: $(direnv version) in $(pwd)"
+    [[ -f ".envrc" ]] && echo "Status: $(direnv status | head -1)" || echo "No .envrc file"
 }
 
-# Reload direnv
 direnv_reload() {
-    if command -v direnv >/dev/null 2>&1; then
-        direnv reload
-        echo "🔄 Direnv reloaded"
-    else
-        echo "❌ direnv not available"
-    fi
+    command -v direnv >/dev/null 2>&1 && direnv reload || echo "direnv not available"
 }
 
-# List all allowed direnv directories
 direnv_list() {
-    if command -v direnv >/dev/null 2>&1; then
-        echo "📁 Allowed direnv directories:"
-        direnv status | grep -E "^Found.*allowed" || echo "No allowed directories found"
-    else
-        echo "❌ direnv not available"
-    fi
+    command -v direnv >/dev/null 2>&1 && direnv status | grep -E "^Found.*allowed" || echo "direnv not available"
 }
 
-# =============================================================================
-# Aliases and Shortcuts
-# =============================================================================
-
-# Convenient aliases
+# Aliases
 alias denv='direnv_status'
 alias dereload='direnv_reload'
 alias deallow='direnv allow .'
 alias dedeny='direnv deny .'
 alias delist='direnv_list'
-
-# Project setup aliases
 alias envrc='smart_envrc'
 alias mkenvrc='create_envrc'
-
-# =============================================================================
-# Integration with Environment Detection
-# =============================================================================
-
-# Function to check if direnv should be used instead of built-in detection
-use_direnv_if_available() {
-    if command -v direnv >/dev/null 2>&1 && [[ -f ".envrc" ]]; then
-        echo "🔄 Using direnv for environment management"
-        return 0
-    else
-        return 1
-    fi
-}
-
-# =============================================================================
-# Automatic Setup
-# =============================================================================
-
-# Show direnv status on shell startup if in a project directory
-if [[ -f ".envrc" ]] && command -v direnv >/dev/null 2>&1; then
-    # Only show if not already processed
-    if [[ -z "$DIRENV_STARTUP_SHOWN" ]]; then
-        echo "📁 direnv environment detected in $(basename $(pwd))"
-        export DIRENV_STARTUP_SHOWN=1
-    fi
-fi

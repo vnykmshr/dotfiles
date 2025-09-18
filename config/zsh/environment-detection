@@ -1,186 +1,102 @@
 #!/usr/bin/env zsh
-
 # Smart Development Environment Detection
-# Automatically detects and activates project-specific environments
 
 # =============================================================================
-# Core Environment Detection Functions
+# Project Detection Utilities
 # =============================================================================
 
-# Detect and activate Node.js version from .nvmrc
+# Get project type based on files present
+get_project_type() {
+    if [[ -f "package.json" ]]; then
+        echo "node"
+    elif [[ -f "requirements.txt" || -f "pyproject.toml" || -f "setup.py" ]]; then
+        echo "python"
+    elif [[ -f "go.mod" ]]; then
+        echo "go"
+    elif [[ -f "Cargo.toml" ]]; then
+        echo "rust"
+    elif [[ -f "docker-compose.yml" || -f "Dockerfile" ]]; then
+        echo "docker"
+    else
+        echo "generic"
+    fi
+}
+
+# Handle version switching for Node.js
 detect_node_version() {
-    if [[ -f ".nvmrc" ]]; then
-        local nvmrc_version=$(cat .nvmrc | tr -d '[:space:]')
-        local current_version=""
+    [[ ! -f ".nvmrc" ]] && return
+    local version=$(cat .nvmrc | tr -d '[:space:]')
 
-        # Check if nvm is available
-        if command -v nvm >/dev/null 2>&1; then
-            current_version=$(nvm current 2>/dev/null)
-            if [[ "$current_version" != "v$nvmrc_version" && "$current_version" != "$nvmrc_version" ]]; then
-                echo "🔄 Switching to Node.js $nvmrc_version (from .nvmrc)"
-                nvm use
-            fi
-        # Check if mise is available and has node
-        elif command -v mise >/dev/null 2>&1; then
-            echo "📦 Using mise for Node.js version management"
-            mise install node@"$nvmrc_version" 2>/dev/null || true
-            mise use node@"$nvmrc_version"
-        else
-            echo "ℹ️  Found .nvmrc ($nvmrc_version) but no version manager available"
-        fi
+    if command -v mise >/dev/null 2>&1; then
+        mise use node@"$version" 2>/dev/null
+    elif command -v nvm >/dev/null 2>&1; then
+        nvm use 2>/dev/null
     fi
 }
 
-# Detect and activate Python version from .python-version
+# Handle version switching for Python
 detect_python_version() {
-    if [[ -f ".python-version" ]]; then
-        local python_version=$(cat .python-version | tr -d '[:space:]')
+    [[ ! -f ".python-version" ]] && return
+    local version=$(cat .python-version | tr -d '[:space:]')
 
-        # Check if pyenv is available
-        if command -v pyenv >/dev/null 2>&1; then
-            local current_version=$(pyenv version-name 2>/dev/null)
-            if [[ "$current_version" != "$python_version" ]]; then
-                echo "🐍 Switching to Python $python_version (from .python-version)"
-                pyenv local "$python_version" 2>/dev/null || {
-                    echo "ℹ️  Python $python_version not installed, installing..."
-                    pyenv install "$python_version"
-                    pyenv local "$python_version"
-                }
-            fi
-        # Check if mise is available
-        elif command -v mise >/dev/null 2>&1; then
-            echo "📦 Using mise for Python version management"
-            mise install python@"$python_version" 2>/dev/null || true
-            mise use python@"$python_version"
-        else
-            echo "ℹ️  Found .python-version ($python_version) but no version manager available"
-        fi
+    if command -v mise >/dev/null 2>&1; then
+        mise use python@"$version" 2>/dev/null
+    elif command -v pyenv >/dev/null 2>&1; then
+        pyenv local "$version" 2>/dev/null || pyenv install "$version" && pyenv local "$version"
     fi
 }
 
-# Detect Go project and set GOPATH if needed
+# Setup Go environment
 detect_go_environment() {
-    if [[ -f "go.mod" ]]; then
-        # Extract module name from go.mod
-        local module_name=$(grep "^module " go.mod 2>/dev/null | awk '{print $2}')
-        if [[ -n "$module_name" ]]; then
-            echo "🐹 Go module detected: $module_name"
-
-            # Set Go-specific environment if not already set
-            if [[ -z "$GOPATH" ]]; then
-                export GOPATH="$HOME/go"
-            fi
-
-            # Add project bin to PATH if it exists
-            local project_bin="$(pwd)/bin"
-            if [[ -d "$project_bin" && ":$PATH:" != *":$project_bin:"* ]]; then
-                export PATH="$project_bin:$PATH"
-                echo "📁 Added $project_bin to PATH"
-            fi
-        fi
-    fi
+    [[ ! -f "go.mod" ]] && return
+    [[ -z "$GOPATH" ]] && export GOPATH="$HOME/go"
+    [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
 }
 
-# Detect Rust project and set up Cargo environment
+# Setup Rust environment
 detect_rust_environment() {
-    if [[ -f "Cargo.toml" ]]; then
-        # Extract package name from Cargo.toml
-        local package_name=$(grep "^name =" Cargo.toml 2>/dev/null | sed 's/name = "\(.*\)"/\1/')
-        if [[ -n "$package_name" ]]; then
-            echo "🦀 Rust project detected: $package_name"
-
-            # Add cargo bin to PATH if not already there
-            local cargo_bin="$HOME/.cargo/bin"
-            if [[ -d "$cargo_bin" && ":$PATH:" != *":$cargo_bin:"* ]]; then
-                export PATH="$cargo_bin:$PATH"
-            fi
-
-            # Add project target/release to PATH if it exists
-            local target_bin="$(pwd)/target/release"
-            if [[ -d "$target_bin" && ":$PATH:" != *":$target_bin:"* ]]; then
-                export PATH="$target_bin:$PATH"
-                echo "📁 Added $target_bin to PATH"
-            fi
-        fi
-    fi
+    [[ ! -f "Cargo.toml" ]] && return
+    [[ -d "$HOME/.cargo/bin" && ":$PATH:" != *":$HOME/.cargo/bin:"* ]] && export PATH="$HOME/.cargo/bin:$PATH"
+    [[ -d "target/release" && ":$PATH:" != *":$(pwd)/target/release:"* ]] && export PATH="$(pwd)/target/release:$PATH"
 }
 
-# Detect Docker environment
+# Setup Docker aliases
 detect_docker_environment() {
-    if [[ -f "docker-compose.yml" ]] || [[ -f "docker-compose.yaml" ]] || [[ -f "Dockerfile" ]]; then
-        echo "🐳 Docker environment detected"
-
-        # Set useful Docker aliases if not already set
-        if ! alias dc >/dev/null 2>&1; then
-            alias dc='docker-compose'
-            alias dcu='docker-compose up'
-            alias dcd='docker-compose down'
-            alias dcb='docker-compose build'
-        fi
-    fi
+    [[ ! -f "docker-compose.yml" && ! -f "docker-compose.yaml" && ! -f "Dockerfile" ]] && return
+    ! alias dc >/dev/null 2>&1 && {
+        alias dc='docker-compose'
+        alias dcu='docker-compose up'
+        alias dcd='docker-compose down'
+        alias dcb='docker-compose build'
+    }
 }
 
-# Detect and load .env files securely
+# Load .env files
 detect_env_files() {
     for env_file in ".env" ".env.local" ".env.development"; do
-        if [[ -f "$env_file" ]]; then
-            echo "⚙️  Loading environment from $env_file"
-
-            # Source .env file while filtering out comments and empty lines
+        [[ -f "$env_file" ]] && {
             while IFS= read -r line; do
-                # Skip comments and empty lines
-                [[ "$line" =~ ^[[:space:]]*# ]] && continue
-                [[ -z "${line// }" ]] && continue
-
-                # Export valid environment variables
-                if [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
-                    export "$line"
-                fi
+                [[ "$line" =~ ^[[:space:]]*# || -z "${line// }" ]] && continue
+                [[ "$line" =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]] && export "$line"
             done < "$env_file"
-        fi
+        }
     done
 }
 
-# =============================================================================
-# Project-Specific Configuration Detection
-# =============================================================================
-
-# Detect package.json scripts and create aliases
+# Create npm script aliases
 detect_npm_scripts() {
-    if [[ -f "package.json" ]]; then
-        # Create dynamic aliases for npm scripts
-        if command -v jq >/dev/null 2>&1; then
-            local scripts=$(jq -r '.scripts | keys[]' package.json 2>/dev/null)
-            if [[ -n "$scripts" ]]; then
-                echo "📦 npm scripts detected:"
-                echo "$scripts" | while read -r script; do
-                    if [[ -n "$script" ]]; then
-                        alias "npm:$script"="npm run $script"
-                        echo "  npm:$script -> npm run $script"
-                    fi
-                done
-            fi
-        fi
-    fi
+    [[ ! -f "package.json" ]] && return
+    ! command -v jq >/dev/null 2>&1 && return
+    jq -r '.scripts | keys[]' package.json 2>/dev/null | while read -r script; do
+        [[ -n "$script" ]] && alias "npm:$script"="npm run $script"
+    done
 }
 
-# =============================================================================
-# Main Environment Detection Function
-# =============================================================================
-
-# Main function to detect and activate project environment
+# Main environment detection
 activate_project_environment() {
-    # Only run if we're in a new directory or forced
     local current_dir="$(pwd)"
+    [[ "$LAST_PROJECT_DIR" == "$current_dir" ]] && return
 
-    # Check if we've already processed this directory
-    if [[ "$LAST_PROJECT_DIR" == "$current_dir" ]]; then
-        return 0
-    fi
-
-    echo "🔍 Detecting project environment..."
-
-    # Run all detection functions
     detect_node_version
     detect_python_version
     detect_go_environment
@@ -189,85 +105,20 @@ activate_project_environment() {
     detect_env_files
     detect_npm_scripts
 
-    # Remember this directory
     export LAST_PROJECT_DIR="$current_dir"
-    echo "✅ Environment detection complete"
 }
 
-# =============================================================================
-# Directory Change Hook
-# =============================================================================
-
-# Hook into directory changes
+# Setup hooks and commands
 autoload -U add-zsh-hook
+add-zsh-hook chpwd activate_project_environment
+[[ -z "$LAST_PROJECT_DIR" ]] && activate_project_environment
 
-# Function to run on directory change
-_environment_detection_chpwd() {
-    activate_project_environment
-}
-
-# Add the hook
-add-zsh-hook chpwd _environment_detection_chpwd
-
-# Run detection on initial load if not already done
-if [[ -z "$LAST_PROJECT_DIR" ]]; then
-    activate_project_environment
-fi
-
-# =============================================================================
-# Manual Commands
-# =============================================================================
-
-# Manual environment detection command
-envdetect() {
-    echo "🔄 Running manual environment detection..."
-    unset LAST_PROJECT_DIR
-    activate_project_environment
-}
-
-# Show current project environment info
+# Manual commands
+envdetect() { unset LAST_PROJECT_DIR; activate_project_environment; }
 envinfo() {
-    echo "📋 Current Project Environment:"
-    echo "────────────────────────────────"
-    echo "Directory: $(pwd)"
-
-    # Node.js info
-    if [[ -f ".nvmrc" ]]; then
-        echo "Node.js: $(cat .nvmrc) (from .nvmrc)"
-        if command -v node >/dev/null 2>&1; then
-            echo "  Current: $(node --version)"
-        fi
-    fi
-
-    # Python info
-    if [[ -f ".python-version" ]]; then
-        echo "Python: $(cat .python-version) (from .python-version)"
-        if command -v python3 >/dev/null 2>&1; then
-            echo "  Current: $(python3 --version)"
-        fi
-    fi
-
-    # Go info
-    if [[ -f "go.mod" ]]; then
-        local go_version=$(grep "^go " go.mod | awk '{print $2}')
-        echo "Go: $go_version (from go.mod)"
-        if command -v go >/dev/null 2>&1; then
-            echo "  Current: $(go version | awk '{print $3}')"
-        fi
-    fi
-
-    # Rust info
-    if [[ -f "Cargo.toml" ]]; then
-        echo "Rust: Cargo project detected"
-        if command -v rustc >/dev/null 2>&1; then
-            echo "  Current: $(rustc --version)"
-        fi
-    fi
-
-    # Environment files
-    for env_file in ".env" ".env.local" ".env.development"; do
-        if [[ -f "$env_file" ]]; then
-            echo "Environment: $env_file found"
-        fi
-    done
+    echo "Project: $(get_project_type) in $(basename $(pwd))"
+    [[ -f ".nvmrc" ]] && echo "Node: $(cat .nvmrc)" && command -v node >/dev/null && echo "  Current: $(node --version)"
+    [[ -f ".python-version" ]] && echo "Python: $(cat .python-version)" && command -v python3 >/dev/null && echo "  Current: $(python3 --version)"
+    [[ -f "go.mod" ]] && echo "Go: $(grep '^go ' go.mod | awk '{print $2}')"
+    [[ -f "Cargo.toml" ]] && command -v rustc >/dev/null && echo "Rust: $(rustc --version | awk '{print $2}')"
 }
