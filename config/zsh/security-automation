@@ -1,256 +1,106 @@
 #!/usr/bin/env zsh
-# Security Automation & Privacy Features
+# Security Automation
 
 # =============================================================================
 # Environment File Security
 # =============================================================================
 
-# Auto-detect and secure .env files
+# Secure .env files
 secure_env_files() {
-    local env_files=(".env" ".env.local" ".env.development" ".env.production" ".env.staging")
-    local gitignore_updated=false
+    local env_files=(".env" ".env.local" ".env.development" ".env.production")
+    local updated=false
 
     for env_file in "${env_files[@]}"; do
-        if [[ -f "$env_file" ]]; then
-            # Check if file has proper permissions
-            local perms=$(stat -f "%Lp" "$env_file" 2>/dev/null || stat -c "%a" "$env_file" 2>/dev/null)
-            if [[ "$perms" != "600" ]]; then
-                echo "🔒 Securing $env_file (setting permissions to 600)"
-                chmod 600 "$env_file"
-            fi
+        [[ ! -f "$env_file" ]] && continue
 
-            # Add to .gitignore if not already there
-            if [[ -f ".gitignore" ]] && ! grep -q "^${env_file}$" .gitignore; then
-                echo "$env_file" >> .gitignore
-                gitignore_updated=true
-            fi
+        # Set secure permissions
+        chmod 600 "$env_file" 2>/dev/null
+
+        # Add to .gitignore if missing
+        if [[ -f ".gitignore" ]] && ! grep -q "^${env_file}$" .gitignore 2>/dev/null; then
+            echo "$env_file" >> .gitignore
+            updated=true
         fi
     done
 
-    if [[ "$gitignore_updated" == "true" ]]; then
-        echo "📝 Updated .gitignore with environment files"
-    fi
+    [[ "$updated" == "true" ]] && echo "Updated .gitignore with environment files"
 }
 
-# Check for secrets in files
-check_secrets() {
-    local file="$1"
-    local secrets_found=false
-
-    # Common secret patterns
-    local patterns=(
-        "password\s*=\s*['\"][^'\"]{8,}['\"]"
-        "secret\s*=\s*['\"][^'\"]{16,}['\"]"
-        "token\s*=\s*['\"][^'\"]{20,}['\"]"
-        "api[_-]?key\s*=\s*['\"][^'\"]{16,}['\"]"
-        "private[_-]?key\s*=\s*['\"][^'\"]{32,}['\"]"
-        "['\"][A-Za-z0-9+/]{40,}={0,2}['\"]"  # Base64 encoded secrets
-    )
-
-    for pattern in "${patterns[@]}"; do
-        if grep -qiE "$pattern" "$file" 2>/dev/null; then
-            echo "⚠️  Potential secret found in $file"
-            secrets_found=true
-        fi
-    done
-
-    return $([[ "$secrets_found" == "true" ]] && echo 1 || echo 0)
+# Basic secret patterns for git hooks
+get_secret_patterns() {
+    echo "password\s*[=:]\s*['\"][^'\"]{8,}['\"]|secret\s*[=:]\s*['\"][^'\"]{16,}['\"]|token\s*[=:]\s*['\"][^'\"]{20,}['\"]|api[_-]?key\s*[=:]\s*['\"][^'\"]{16,}['\"]"
 }
 
-# =============================================================================
-# SSH Key Management
-# =============================================================================
-
-# Check SSH key security
-check_ssh_security() {
-    local ssh_dir="$HOME/.ssh"
-    [[ ! -d "$ssh_dir" ]] && return
-
-    echo "🔐 SSH Security Check:"
-
-    # Check SSH directory permissions
-    local ssh_perms=$(stat -f "%Lp" "$ssh_dir" 2>/dev/null || stat -c "%a" "$ssh_dir" 2>/dev/null)
-    if [[ "$ssh_perms" != "700" ]]; then
-        echo "⚠️  SSH directory permissions: $ssh_perms (should be 700)"
-        echo "   Fix with: chmod 700 ~/.ssh"
-    else
-        echo "✓ SSH directory permissions: OK"
-    fi
-
-    # Check private key permissions
-    for key in "$ssh_dir"/id_*; do
-        [[ ! -f "$key" || "$key" == *".pub" ]] && continue
-
-        local key_perms=$(stat -f "%Lp" "$key" 2>/dev/null || stat -c "%a" "$key" 2>/dev/null)
-        if [[ "$key_perms" != "600" ]]; then
-            echo "⚠️  Key $key permissions: $key_perms (should be 600)"
-            echo "   Fix with: chmod 600 $key"
-        else
-            echo "✓ Key $(basename "$key") permissions: OK"
-        fi
-    done
-
-    # Check for old/weak keys
-    for key in "$ssh_dir"/id_rsa "$ssh_dir"/id_dsa; do
-        if [[ -f "$key" ]]; then
-            echo "⚠️  Consider upgrading from $(basename "$key") to Ed25519"
-            echo "   Generate with: ssh-keygen -t ed25519 -C \"your@email.com\""
-        fi
-    done
-}
-
-# SSH key rotation reminder
-ssh_rotation_check() {
-    local ssh_dir="$HOME/.ssh"
-    local reminder_file="$HOME/.ssh_rotation_reminder"
-
-    # Check if reminder is due (every 6 months)
-    if [[ -f "$reminder_file" ]]; then
-        local last_check=$(cat "$reminder_file")
-        local current_time=$(date +%s)
-        local six_months=15778800  # 6 months in seconds
-
-        if (( current_time - last_check > six_months )); then
-            echo "🔄 SSH Key Rotation Reminder: Consider rotating SSH keys (last check: $(date -r "$last_check" '+%Y-%m-%d'))"
-            echo "   Generate new key: ssh-keygen -t ed25519 -C \"your@email.com\""
-            echo "   Add to GitHub/GitLab and remove old keys"
-            echo "$current_time" > "$reminder_file"
-        fi
-    else
-        echo "$(date +%s)" > "$reminder_file"
-    fi
-}
-
-# =============================================================================
-# Git Security Hooks
-# =============================================================================
-
-# Install security-focused git hooks
+# Install basic git security hook
 install_security_hooks() {
     local git_dir
     git_dir=$(git rev-parse --git-dir 2>/dev/null) || return
-    local hooks_dir="$git_dir/hooks"
+    local hook="$git_dir/hooks/pre-commit"
 
-    # Pre-commit hook for secret scanning
-    cat > "$hooks_dir/pre-commit" <<'EOF'
+    [[ -f "$hook" ]] && return
+
+    cat > "$hook" <<'EOF'
 #!/bin/bash
-# Git pre-commit hook - Security checks
-
-# Check for potential secrets in staged files
-git diff --cached --name-only | while read -r file; do
-    if [[ -f "$file" ]]; then
-        # Skip binary files
-        if file "$file" | grep -q "text"; then
-            # Basic secret patterns
-            if grep -iE "(password|secret|token|api[_-]?key)\s*[=:]\s*['\"][^'\"]{8,}['\"]" "$file"; then
-                echo "❌ Potential secret detected in $file"
-                echo "   Please review and remove sensitive data before committing"
-                exit 1
-            fi
-
-            # Check for common secret patterns
-            if grep -E "['\"][A-Za-z0-9+/]{40,}={0,2}['\"]" "$file"; then
-                echo "⚠️  Potential base64 encoded secret in $file"
-                echo "   Please verify this is not sensitive data"
-            fi
-        fi
-    fi
-done
-
-# Check for .env files being committed
-if git diff --cached --name-only | grep -E "\.(env|secret|key)(\.|$)"; then
-    echo "❌ Environment/secret files detected in commit"
-    echo "   Add to .gitignore: git rm --cached <file> && echo '<file>' >> .gitignore"
+# Basic security check
+patterns="password\s*[=:]\s*['\"][^'\"]{8,}['\"]|secret\s*[=:]\s*['\"][^'\"]{16,}['\"]|token\s*[=:]\s*['\"][^'\"]{20,}['\"]"
+if git diff --cached --name-only | xargs grep -lE "$patterns" 2>/dev/null; then
+    echo "Potential secrets detected in commit"
+    echo "Review files and remove sensitive data"
     exit 1
 fi
-
-echo "✓ Security checks passed"
 EOF
 
-    chmod +x "$hooks_dir/pre-commit"
-    echo "🔒 Installed git security hooks"
+    chmod +x "$hook"
 }
 
 # =============================================================================
-# System Security Status
+# SSH Security
 # =============================================================================
 
-# Check basic security status
-security_status() {
-    echo "🛡️  Security Status:"
+# Check SSH key permissions
+check_ssh_security() {
+    [[ ! -d "$HOME/.ssh" ]] && return
 
-    # Firewall status (macOS/Linux)
-    if command -v ufw >/dev/null 2>&1; then
-        local ufw_status=$(ufw status | head -1)
-        echo "  Firewall: $ufw_status"
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        local fw_status=$(sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate 2>/dev/null | awk '{print $3}')
-        echo "  Firewall: ${fw_status:-unknown}"
-    fi
+    echo "SSH Security Check:"
 
-    # VPN status (basic check)
-    if ifconfig | grep -q "tun\|tap\|ppp"; then
-        echo "  VPN: Active"
-    else
-        echo "  VPN: Not detected"
-    fi
+    # Check directory permissions
+    local ssh_perms=$(stat -f "%Lp" "$HOME/.ssh" 2>/dev/null || stat -c "%a" "$HOME/.ssh" 2>/dev/null)
+    [[ "$ssh_perms" != "700" ]] && echo "  Fix SSH dir: chmod 700 ~/.ssh"
 
-    # SSH agent status
-    if [[ -n "$SSH_AUTH_SOCK" ]]; then
-        local key_count=$(ssh-add -l 2>/dev/null | wc -l)
-        echo "  SSH Agent: $key_count keys loaded"
-    else
-        echo "  SSH Agent: Not running"
-    fi
-
-    # Check for unencrypted private keys
-    if find ~/.ssh -name "id_*" -not -name "*.pub" -exec grep -l "BEGIN.*PRIVATE KEY" {} \; 2>/dev/null | grep -v "ENCRYPTED" >/dev/null; then
-        echo "  ⚠️  Unencrypted SSH keys found"
-    fi
+    # Check private key permissions
+    for key in "$HOME/.ssh"/id_*; do
+        [[ ! -f "$key" || "$key" == *".pub" ]] && continue
+        local perms=$(stat -f "%Lp" "$key" 2>/dev/null || stat -c "%a" "$key" 2>/dev/null)
+        [[ "$perms" != "600" ]] && echo "  Fix key $key: chmod 600 $key"
+    done
 }
 
 # =============================================================================
-# Automatic Security Checks
+# Automatic Security
 # =============================================================================
 
 # Run security checks on directory change
 security_check_on_cd() {
-    # Only run in git repositories
     git rev-parse --git-dir >/dev/null 2>&1 || return
 
-    # Check for .env files
-    if ls .env* >/dev/null 2>&1; then
-        secure_env_files
-    fi
+    # Secure .env files if present
+    ls .env* >/dev/null 2>&1 && secure_env_files
 
-    # Install git hooks if not present
-    local git_dir
-    git_dir=$(git rev-parse --git-dir)
-    if [[ ! -f "$git_dir/hooks/pre-commit" ]]; then
-        install_security_hooks
-    fi
+    # Install git hooks if missing
+    install_security_hooks
 }
 
 # =============================================================================
-# Commands and Aliases
+# Commands
 # =============================================================================
 
-# Security command shortcuts
-alias seccheck='security_status'
-alias sshcheck='check_ssh_security'
+alias seccheck='check_ssh_security'
 alias envcheck='secure_env_files'
 alias gitsec='install_security_hooks'
 
 # =============================================================================
-# Hook Integration
+# Setup
 # =============================================================================
 
-# Add to chpwd hook for automatic security checks
 autoload -U add-zsh-hook
 add-zsh-hook chpwd security_check_on_cd
-
-# Run SSH rotation check on shell startup (once per session)
-if [[ -z "$SECURITY_STARTUP_DONE" ]]; then
-    ssh_rotation_check
-    export SECURITY_STARTUP_DONE=1
-fi
