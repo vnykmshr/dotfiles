@@ -337,24 +337,47 @@ test_validation() {
 test_backup_functionality() {
     log_info "Testing backup functionality..."
 
-    # Create a fake existing file
-    echo "existing content" >"$TEST_HOME/.zshrc"
+    # Create a clean test environment specifically for backup testing
+    local backup_test_dir
+    backup_test_dir=$(mktemp -d)
+    cp -r "$TEST_HOME/.dotfiles" "$backup_test_dir/"
 
-    # Run installation with skip flags to avoid slow operations
-    if HOME="$TEST_HOME" FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
-        # Check if backup was created
-        if find "$TEST_HOME" -name "*.backup.*" -type f | grep -q .; then
-            log_success "Backup functionality works"
-            ((TESTS_PASSED++))
+    # Create an existing file that will conflict with dotfiles installation
+    echo "existing content" >"$backup_test_dir/.zshrc"
+
+    # Run first-time installation with FORCE=true to trigger backup
+    if HOME="$backup_test_dir" FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true "$backup_test_dir/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
+        # Check if backup directory was created
+        local backup_dir
+        backup_dir=$(find "$backup_test_dir" -maxdepth 1 -name ".dotfiles-backup-*" -type d 2>/dev/null | head -1)
+
+        if [[ -n "$backup_dir" && -d "$backup_dir" ]]; then
+            # Check if the original file was backed up
+            if [[ -f "$backup_dir/.zshrc" ]]; then
+                local backup_content
+                backup_content=$(cat "$backup_dir/.zshrc" 2>/dev/null)
+                if [[ "$backup_content" == "existing content" ]]; then
+                    log_success "Backup functionality works"
+                    ((TESTS_PASSED++))
+                else
+                    log_error "Backup file content doesn't match: '$backup_content'"
+                    ((TESTS_FAILED++))
+                fi
+            else
+                log_error "Original file not found in backup directory"
+                ((TESTS_FAILED++))
+            fi
         else
-            log_error "Backup was not created"
+            log_error "Backup directory was not created"
             ((TESTS_FAILED++))
         fi
     else
-        log_error "Installation with backup failed"
+        log_error "Installation with backup test failed"
         ((TESTS_FAILED++))
     fi
 
+    # Cleanup
+    rm -rf "$backup_test_dir"
     ((TESTS_RUN++))
 }
 
