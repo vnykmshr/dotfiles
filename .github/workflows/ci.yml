@@ -17,10 +17,10 @@ jobs:
         sudo apt-get update -q
         sudo apt-get install -y shellcheck zsh
 
-    - name: Validate configs
-      run: ./tests/test-configs.sh
+    - name: Run comprehensive tests
+      run: ./tests/test-all.sh
 
-    - name: Test installation
+    - name: Test installation dry-run
       run: DRY_RUN=true ./install/setup.sh
 
   cross-platform:
