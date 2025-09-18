@@ -28,39 +28,23 @@ load_env() {
     done < .env
 }
 
-# Go environment setup
-activate_go() {
-    [[ ! -f "go.mod" ]] && return
-
-    # Set up Go environment
-    export GOPATH="$HOME/workspace/gocode"
-    [[ -d "$GOPATH/bin" && ":$PATH:" != *":$GOPATH/bin:"* ]] && export PATH="$GOPATH/bin:$PATH"
-    [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
-}
-
 # Auto-detection on directory change
-auto_environment() {
-    local current_dir="$(pwd)"
-    [[ "$LAST_ENV_DIR" == "$current_dir" ]] && return
-
-    activate_node
-    activate_python
-    activate_go
-    load_env
-
-    export LAST_ENV_DIR="$current_dir"
+detect_env() {
+    [[ -f ".nvmrc" ]] && activate_node
+    [[ -f ".python-version" ]] && activate_python
+    [[ -f ".env" ]] && load_env
 }
 
 # Setup auto-detection
 autoload -U add-zsh-hook
-add-zsh-hook chpwd auto_environment
+add-zsh-hook chpwd detect_env
 
 # Commands
-envup() { unset LAST_ENV_DIR; auto_environment; }
+envup() { detect_env; }
 envinfo() {
     [[ -f ".nvmrc" ]] && echo "Node: $(cat .nvmrc)"
     [[ -f ".python-version" ]] && echo "Python: $(cat .python-version)"
-    [[ -f ".env" ]] && echo "Environment: .env loaded"
+    [[ -f ".env" ]] && echo ".env loaded"
 }
 
 # Create version files

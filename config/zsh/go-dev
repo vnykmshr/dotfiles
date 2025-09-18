@@ -1,125 +1,58 @@
-# Go Development Automation
+# Go Development Tools
 
-# Go environment setup (matches your local setup)
+# Environment setup
 setup_go_env() {
-    [[ ! -f "go.mod" ]] && return
-
-    # Use existing GOPATH setup
     export GOPATH="$HOME/workspace/gocode"
-
-    # Add GOPATH/bin to PATH
     [[ -d "$GOPATH/bin" && ":$PATH:" != *":$GOPATH/bin:"* ]] && export PATH="$GOPATH/bin:$PATH"
-
-    # Add local bin to PATH for project binaries
     [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
-
-    echo "Go workspace: $GOPATH"
 }
 
-# Go development shortcuts
-gobuild() { go build ./...; }
-gotest() { go test ./...; }
-gorun() { go run .; }
-goclean() { go clean ./... && go mod tidy; }
-gocover() { go test -cover ./...; }
-gofmt() { go fmt ./...; }
-govet() { go vet ./...; }
-
-# Go module management
-goinit() {
-    local module_name="${1:-$(basename $(pwd))}"
-    go mod init "$module_name" && echo "Initialized Go module: $module_name"
-}
-
-gotidy() { go mod tidy && echo "Dependencies tidied"; }
+# Module management
+goinit() { go mod init "${1:-$(basename $(pwd))}"; }
+gotidy() { go mod tidy; }
 goget() { go get "$@" && go mod tidy; }
 
-# Testing helpers
+# Testing and building
 gowatch() {
-    command -v entr >/dev/null 2>&1 || { echo "Install entr for file watching"; return 1; }
+    command -v entr >/dev/null || { echo "Install entr"; return 1; }
     find . -name "*.go" | entr -c go test ./...
 }
 
-# Build for multiple platforms
-gobuildall() {
+gobuild-all() {
     local binary="${1:-$(basename $(pwd))}"
-    echo "Building $binary for multiple platforms..."
-
-    GOOS=linux GOARCH=amd64 go build -o "bin/${binary}-linux-amd64" .
-    GOOS=darwin GOARCH=amd64 go build -o "bin/${binary}-darwin-amd64" .
-    GOOS=windows GOARCH=amd64 go build -o "bin/${binary}-windows-amd64.exe" .
-
-    echo "Built binaries in bin/"
+    mkdir -p bin
+    GOOS=linux GOARCH=amd64 go build -o "bin/${binary}-linux" .
+    GOOS=darwin GOARCH=amd64 go build -o "bin/${binary}-darwin" .
+    GOOS=windows GOARCH=amd64 go build -o "bin/${binary}-windows.exe" .
 }
 
-# Go project structure (in workspace)
+# Project creation
 gonew() {
     local project="$1"
-    [[ -z "$project" ]] && { echo "Usage: gonew <project-name>"; return 1; }
+    [[ -z "$project" ]] && { echo "Usage: gonew <project>"; return 1; }
 
-    # Create in workspace/github for consistency
-    local project_path="$HOME/workspace/github/$project"
-    mkdir -p "$project_path"/{cmd,internal,pkg}
-    cd "$project_path"
-
+    mkdir -p "$HOME/workspace/github/$project" && cd "$_"
     go mod init "github.com/vnykmshr/$project"
-
-    cat > main.go <<'EOF'
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}
-EOF
-
-    cat > .gitignore <<'EOF'
-# Binaries
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-/bin/
-/dist/
-
-# Test binary
-*.test
-
-# Output of the go coverage tool
-*.out
-
-# Go workspace file
-go.work
-EOF
-
+    echo 'package main\nimport "fmt"\nfunc main() { fmt.Println("Hello!") }' > main.go
     git init
-    echo "Created Go project: $project_path"
 }
 
-# Quick navigation to Go workspace
+# Navigation
 cdgo() {
     local project="$1"
     if [[ -n "$project" ]]; then
-        cd "$HOME/workspace/github/$project" 2>/dev/null || cd "$HOME/workspace/gocode/src/$project" 2>/dev/null || echo "Project not found"
+        cd "$HOME/workspace/github/$project" 2>/dev/null || echo "Not found"
     else
         cd "$HOME/workspace/gocode"
     fi
 }
 
-# Go environment info
+# Environment info
 goinfo() {
-    echo "Go Environment:"
-    echo "==============="
-    command -v go >/dev/null && echo "Version: $(go version | awk '{print $3}')"
+    command -v go >/dev/null && echo "$(go version)"
     echo "GOPATH: ${GOPATH:-not set}"
-    echo "GOROOT: $(go env GOROOT 2>/dev/null || echo 'not found')"
     [[ -f "go.mod" ]] && echo "Module: $(grep '^module ' go.mod | awk '{print $2}')"
-    [[ -f "go.mod" ]] && echo "Go version: $(grep '^go ' go.mod | awk '{print $2}')"
 }
 
-# Add to auto-detection
-if [[ -f "go.mod" ]]; then
-    setup_go_env
-fi
+# Auto-setup in Go projects
+[[ -f "go.mod" ]] && setup_go_env
