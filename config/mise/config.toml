@@ -2,14 +2,17 @@
 # Modern version manager for development tools
 
 [settings]
-# Automatically activate when entering directories with .tool-versions
-auto_activate = true
-
 # Show verbose output
 verbose = false
 
 # Automatically install missing tools
 auto_install = true
+
+# Pushes tools' bin-paths to the front of PATH
+activate_aggressive = false
+
+# Auto-install when command not found
+not_found_auto_install = true
 
 # Use mise for legacy version files (.nvmrc, .ruby-version, etc.)
 legacy_version_file = true
