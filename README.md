@@ -1,6 +1,6 @@
-# Professional Dotfiles (v2.1)
+# Professional Dotfiles (v2.2)
 
-> Clean, intelligent dotfiles with smart environment detection and automation
+> Secure, intelligent dotfiles with cross-platform compatibility and automation
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
@@ -10,6 +10,8 @@
 - **🎯 Modern Tools**: Neovim, modern CLI tools (bat, eza, fd, ripgrep, delta, zoxide)
 - **🚀 Smart Environment**: Auto-detects and activates project versions (Node.js, Python, Go, Rust)
 - **📋 Intelligent History**: Enhanced search, filtering, and security for shell history
+- **🛡️ Security Automation**: Automatic .env protection, secret scanning, SSH validation
+- **🌍 Cross-Platform**: Seamless experience across macOS, Linux, WSL, containers, cloud IDEs
 - **🔄 Auto-Environment**: Seamless direnv integration with smart .envrc templates
 - **⚡ Workflow Automation**: Smart test runners, dev servers, and project initialization
 - **📦 Smart Install**: Dry-run, OS detection, automatic backups
@@ -42,12 +44,18 @@ make status        # Show info
 
 ## Smart Commands
 
-Phase 2.1 introduces intelligent project management:
+Intelligent automation with security and cross-platform support:
 
 ```bash
 # Environment Detection (automatic)
 envdetect           # Manual environment detection
-envinfo             # Show current project environment
+envinfo             # Show detailed environment info (v2.2+)
+platform            # Quick platform identification
+
+# Security Automation (v2.2+)
+seccheck            # SSH security validation
+envcheck            # Secure .env files automatically
+gitsec              # Install git security hooks
 
 # Smart History
 hstats              # History statistics and analysis
@@ -74,7 +82,35 @@ gacp                # git add -u && git commit && git push
 gst                 # git status --short --branch
 ```
 
-## Smart Features (Phase 2.1)
+## Smart Features (Phase 2.2)
+
+### 🛡️ Security Automation (v2.2+)
+Professional security practices with zero configuration:
+- **Environment File Protection**: Auto-detects .env files, sets 600 permissions, adds to .gitignore
+- **Git Security Hooks**: Automatic pre-commit secret scanning for passwords, tokens, API keys
+- **SSH Security**: Validates key permissions and provides security recommendations
+- **Cross-Platform Security**: Works seamlessly across macOS, Linux, WSL, and containers
+
+```bash
+cd my-project/          # Automatically secures any .env files found
+git commit              # Pre-commit hook scans for secrets
+seccheck                # Manual SSH security validation
+```
+
+### 🌍 Cross-Platform Compatibility (v2.2+)
+Seamless experience across all development environments:
+- **Smart Detection**: Auto-identifies macOS, Linux, WSL, Docker, Codespaces, Gitpod
+- **Unified Commands**: Consistent clipboard (`pbcopy`/`pbpaste`) and open across platforms
+- **Keybinding Harmony**: Word movement works the same on macOS (Alt) and Linux (Ctrl)
+- **Environment Optimization**: Automatic performance tuning for containers and cloud IDEs
+
+```bash
+envinfo                 # Shows: Environment: macos (native)
+pbcopy < file.txt       # Works on all platforms
+platform                # Quick platform check
+```
+
+## Environment Intelligence (Phase 2.1)
 
 ### 🎯 Automatic Environment Detection
 Changes directory → Automatically activates the right tools:
