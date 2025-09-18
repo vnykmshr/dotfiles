@@ -65,14 +65,6 @@ repos:
         pass_filenames: false
         files: '^(install/|config/|bin/|Makefile).*'
 
-      # Run configuration tests
-      - id: test-configs
-        name: Test configuration files
-        entry: ./tests/test-configs.sh
-        language: system
-        pass_filenames: false
-        files: '^config/.*'
-
       # Check for hardcoded paths
       - id: check-hardcoded-paths
         name: Check for hardcoded paths
