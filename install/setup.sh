@@ -498,6 +498,12 @@ link_config() {
 install_packages() {
     log_step "Installing packages"
 
+    # Skip packages if SKIP_PACKAGES is set (useful for CI/testing)
+    if [[ "${SKIP_PACKAGES:-}" == "true" ]]; then
+        log_info "Skipping package installation (SKIP_PACKAGES=true)"
+        return 0
+    fi
+
     local package_file="$DOTFILES_DIR/install/install-packages"
     if [[ -f "$package_file" ]]; then
         # shellcheck disable=SC1090
@@ -570,7 +576,12 @@ install_modern_cli_tools() {
 
     # Ask user if they want to install modern CLI tools
     local install_tools=true
-    if [[ "$DRY_RUN" != "true" ]] && [[ -t 0 ]]; then  # Only prompt if interactive
+
+    # Skip tools if SKIP_TOOLS is set (useful for CI/testing)
+    if [[ "${SKIP_TOOLS:-}" == "true" ]]; then
+        install_tools=false
+        log_info "Skipping CLI tools installation (SKIP_TOOLS=true)"
+    elif [[ "$DRY_RUN" != "true" ]] && [[ -t 0 ]]; then  # Only prompt if interactive
         echo ""
         log_info "Modern CLI tools provide enhanced replacements for common commands:"
         echo "  • eza (better ls with git integration)"

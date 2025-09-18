@@ -169,8 +169,8 @@ test_structure() {
 test_dry_run_install() {
     log_info "Testing dry-run installation..."
 
-    # Test dry-run mode
-    if HOME="$TEST_HOME" DRY_RUN=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
+    # Test dry-run mode with SKIP_TOOLS and SKIP_PACKAGES for faster testing
+    if HOME="$TEST_HOME" DRY_RUN=true SKIP_TOOLS=true SKIP_PACKAGES=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
         log_success "Dry-run installation completed without errors"
         ((TESTS_PASSED++))
     else
@@ -196,8 +196,8 @@ test_dry_run_install() {
 test_installation() {
     log_info "Testing actual installation..."
 
-    # Run installation
-    if HOME="$TEST_HOME" FORCE=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
+    # Run installation with SKIP_TOOLS and SKIP_PACKAGES to avoid slow downloads in tests
+    if HOME="$TEST_HOME" FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
         log_success "Installation completed without errors"
         ((TESTS_PASSED++))
     else
@@ -304,7 +304,7 @@ test_git_configuration() {
 test_makefile_targets() {
     log_info "Testing Makefile targets..."
 
-    local targets=("help" "install" "validate" "test" "status")
+    local targets=("help" "validate" "status")  # Skip 'install' and 'test' to avoid recursion and slow operations
 
     for target in "${targets[@]}"; do
         if HOME="$TEST_HOME" make -C "$TEST_HOME/.dotfiles" "$target" >/dev/null 2>&1; then
@@ -340,8 +340,8 @@ test_backup_functionality() {
     # Create a fake existing file
     echo "existing content" >"$TEST_HOME/.zshrc"
 
-    # Run installation which should backup the file
-    if HOME="$TEST_HOME" FORCE=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
+    # Run installation with skip flags to avoid slow operations
+    if HOME="$TEST_HOME" FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true "$TEST_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1; then
         # Check if backup was created
         if find "$TEST_HOME" -name "*.backup.*" -type f | grep -q .; then
             log_success "Backup functionality works"
