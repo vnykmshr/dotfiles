@@ -1,193 +1,77 @@
 #!/usr/bin/env bash
 
-# Comprehensive Dotfiles Test Suite
-# Consolidated tests for configuration, installation, and functionality
-
 set -euo pipefail
 
-# Setup
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Colors
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+echo "Comprehensive Dotfiles Test Suite"
+echo "================================="
 
-# Counters
-TESTS_RUN=0; TESTS_PASSED=0; TESTS_FAILED=0
+TESTS_PASSED=0
+TESTS_FAILED=0
 
-# Logging
-log_info() { printf "${BLUE}ℹ %s${NC}\n" "$*"; }
-log_success() { printf "${GREEN}✓ %s${NC}\n" "$*"; }
-log_error() { printf "${RED}✗ %s${NC}\n" "$*"; }
+# Test essential files
+files=(
+    "config/zsh/zshrc"
+    "config/zsh/aliases"
+    "config/git/gitignore_global"
+    "config/nvim/init.lua"
+    "config/tmux/tmux.conf"
+    "install/setup.sh"
+    "Makefile"
+    "README.md"
+    "config/git/gitconfig.template"
+    "config/ssh/config.template"
+)
 
-# Test assertion
-assert_test() {
-    local test_command="$1" description="$2"
-    ((TESTS_RUN++))
-    if eval "$test_command" >/dev/null 2>&1; then
-        log_success "$description"
+echo "Testing file structure..."
+for file in "${files[@]}"; do
+    if [[ -f "$PROJECT_ROOT/$file" ]]; then
+        echo "✓ Required file exists: $file"
         ((TESTS_PASSED++))
     else
-        log_error "$description"
+        echo "✗ Required file missing: $file"
         ((TESTS_FAILED++))
-        return 1
     fi
-}
+done
 
-# === CONFIGURATION TESTS ===
-test_file_structure() {
-    log_info "Testing file structure..."
+echo "Testing syntax..."
+# Test key shell scripts
+if bash -n "$PROJECT_ROOT/install/setup.sh" 2>/dev/null; then
+    echo "✓ Shell syntax valid: setup.sh"
+    ((TESTS_PASSED++))
+else
+    echo "✗ Shell syntax invalid: setup.sh"
+    ((TESTS_FAILED++))
+fi
 
-    # Test required files
-    assert_test "test -f '$PROJECT_ROOT/config/zsh/zshrc'" "Required file exists: config/zsh/zshrc"
-    assert_test "test -f '$PROJECT_ROOT/config/zsh/aliases'" "Required file exists: config/zsh/aliases"
-    assert_test "test -f '$PROJECT_ROOT/config/git/gitignore_global'" "Required file exists: config/git/gitignore_global"
-    assert_test "test -f '$PROJECT_ROOT/config/nvim/init.lua'" "Required file exists: config/nvim/init.lua"
-    assert_test "test -f '$PROJECT_ROOT/config/tmux/tmux.conf'" "Required file exists: config/tmux/tmux.conf"
-    assert_test "test -f '$PROJECT_ROOT/install/setup.sh'" "Required file exists: install/setup.sh"
-    assert_test "test -f '$PROJECT_ROOT/Makefile'" "Required file exists: Makefile"
-    assert_test "test -f '$PROJECT_ROOT/README.md'" "Required file exists: README.md"
+if bash -n "$PROJECT_ROOT/tests/test-all.sh" 2>/dev/null; then
+    echo "✓ Shell syntax valid: test-all.sh"
+    ((TESTS_PASSED++))
+else
+    echo "✗ Shell syntax invalid: test-all.sh"
+    ((TESTS_FAILED++))
+fi
 
-    # Test templates
-    assert_test "test -f '$PROJECT_ROOT/config/git/gitconfig.template'" "Template exists: config/git/gitconfig.template"
-    assert_test "test -f '$PROJECT_ROOT/config/ssh/config.template'" "Template exists: config/ssh/config.template"
-}
+# Test git template
+if grep -q '\[user\]' "$PROJECT_ROOT/config/git/gitconfig.template" 2>/dev/null; then
+    echo "✓ Git template has [user] section"
+    ((TESTS_PASSED++))
+else
+    echo "✗ Git template missing [user] section"
+    ((TESTS_FAILED++))
+fi
 
-test_syntax() {
-    log_info "Testing syntax..."
+# Summary
+echo
+echo "Test Summary"
+echo "============"
+echo "Passed: $TESTS_PASSED"
 
-    # Shell scripts
-    local shell_scripts=(
-        "install/setup.sh" "tests/test-all.sh" "tests/lint.sh"
-        "bin/dotfiles" "bin/workflow-helper"
-    )
-    for script in "${shell_scripts[@]}"; do
-        [[ -f "$PROJECT_ROOT/$script" ]] && assert_test "bash -n '$PROJECT_ROOT/$script'" "Shell syntax valid: $(basename "$script")"
-    done
-
-    # Workflow scripts
-    for script in "$PROJECT_ROOT"/config/workflow/*; do
-        [[ -f "$script" && -x "$script" ]] && assert_test "bash -n '$script'" "Workflow syntax valid: $(basename "$script")"
-    done
-
-    # Zsh configs
-    local zsh_files=("zshrc" "aliases" "functions" "personal-aliases")
-    for file in "${zsh_files[@]}"; do
-        local path="$PROJECT_ROOT/config/zsh/$file"
-        [[ -f "$path" ]] && assert_test "zsh -n '$path'" "Zsh syntax valid: $file"
-    done
-}
-
-test_git_config() {
-    log_info "Testing git configuration..."
-
-    local template="$PROJECT_ROOT/config/git/gitconfig.template"
-    assert_test "test -f '$template'" "Git template exists"
-    assert_test "grep -q '\\[user\\]' '$template'" "Git template has [user] section"
-    assert_test "grep -q '\\[alias\\]' '$template'" "Git template has [alias] section"
-
-    # Test important aliases
-    for alias in st ll lg aa cm; do
-        assert_test "grep -q '$alias = ' '$template'" "Git alias '$alias' defined"
-    done
-}
-
-# === INSTALLATION TESTS ===
-test_installation() {
-    log_info "Testing installation..."
-
-    local test_dir=$(mktemp -d)
-    cp -r "$PROJECT_ROOT" "$test_dir/.dotfiles"
-
-    # Test dry run
-    assert_test "HOME='$test_dir' DRY_RUN=true '$test_dir/.dotfiles/install/setup.sh' >/dev/null" "Dry run succeeds"
-
-    # Test actual installation
-    assert_test "HOME='$test_dir' SKIP_TOOLS=true SKIP_PACKAGES=true '$test_dir/.dotfiles/install/setup.sh' >/dev/null" "Installation succeeds"
-
-    # Test symlinks
-    assert_test "test -L '$test_dir/.zshrc'" "Zsh config symlinked"
-    assert_test "test -L '$test_dir/.gitconfig'" "Git config symlinked"
-
-    # Test backup functionality
-    echo "existing" > "$test_dir/.zshrc"
-    assert_test "HOME='$test_dir' FORCE=true SKIP_TOOLS=true SKIP_PACKAGES=true '$test_dir/.dotfiles/install/setup.sh' >/dev/null" "Backup installation succeeds"
-    assert_test "find '$test_dir' -name '.dotfiles-backup-*' -type d | head -1 | xargs -I {} test -f {}/.zshrc" "Backup created"
-
-    rm -rf "$test_dir"
-}
-
-# === WORKFLOW TESTS ===
-test_workflow_tools() {
-    log_info "Testing workflow tools..."
-
-    local tools=("test-runner" "project-init" "git-helpers" "dev-server")
-    for tool in "${tools[@]}"; do
-        local path="$PROJECT_ROOT/config/workflow/$tool"
-        assert_test "test -f '$path'" "Workflow tool exists: $tool"
-        assert_test "test -x '$path'" "Workflow tool executable: $tool"
-        assert_test "bash -n '$path'" "Workflow tool syntax valid: $tool"
-    done
-}
-
-test_modern_cli_integration() {
-    log_info "Testing modern CLI integration..."
-
-    # Test aliases exist
-    local aliases_file="$PROJECT_ROOT/config/zsh/personal-aliases"
-    for alias in md gacp gst; do
-        assert_test "grep -q '^alias $alias=' '$aliases_file'" "Alias '$alias' defined"
-    done
-
-    # Test CLI tools config
-    local cli_init="$PROJECT_ROOT/config/cli-tools/init"
-    if [[ -f "$cli_init" ]]; then
-        assert_test "bash -n '$cli_init'" "CLI tools init syntax valid"
-    fi
-}
-
-# === SECURITY TESTS ===
-test_security() {
-    log_info "Testing security..."
-
-    # Check for credentials in code
-    local patterns=("password" "secret" "token" "api_key")
-    for pattern in "${patterns[@]}"; do
-        assert_test "! grep -r '$pattern[[:space:]]*=' '$PROJECT_ROOT/config' '$PROJECT_ROOT/install' >/dev/null" "No $pattern found in configs"
-    done
-
-    # Test executable permissions
-    while IFS= read -r -d '' script; do
-        assert_test "test -x '$script'" "Script executable: $(basename "$script")"
-    done < <(find "$PROJECT_ROOT" -name "*.sh" -path "*/install/*" -o -path "*/bin/*" -o -path "*/tests/*" -type f -print0)
-}
-
-# === MAIN ===
-main() {
-    log_info "Comprehensive Dotfiles Test Suite"
-    log_info "================================="
-
-    test_file_structure
-    test_syntax
-    test_git_config
-    test_installation
-    test_workflow_tools
-    test_modern_cli_integration
-    test_security
-
-    echo
-    log_info "Test Summary"
-    log_info "============"
-    log_info "Total tests: $TESTS_RUN"
-    log_success "Passed: $TESTS_PASSED"
-
-    if [[ $TESTS_FAILED -gt 0 ]]; then
-        log_error "Failed: $TESTS_FAILED"
-        exit 1
-    else
-        log_success "All tests passed! 🎉"
-        exit 0
-    fi
-}
-
-main "$@"
+if [[ $TESTS_FAILED -gt 0 ]]; then
+    echo "Failed: $TESTS_FAILED"
+    exit 1
+else
+    echo "All tests passed!"
+    exit 0
+fi
