@@ -38,7 +38,7 @@ ff() {
 }
 
 # Find directories by name
-fd() {
+fdir() {
     find . -type d -name "*$1*" 2>/dev/null
 }
 
@@ -57,7 +57,7 @@ git-cleanup() {
 }
 
 # Git log with graph
-glog() {
+gitlog() {
     git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
 }
 

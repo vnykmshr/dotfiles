@@ -43,9 +43,12 @@ alias lm='la | $PAGER'              # pipe through pager
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
-alias chmod='chmod --preserve-root'
-alias chown='chown --preserve-root'
-alias chgrp='chgrp --preserve-root'
+# BSD chmod (macOS) doesn't support --preserve-root
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    alias chmod='chmod --preserve-root'
+    alias chown='chown --preserve-root'
+    alias chgrp='chgrp --preserve-root'
+fi
 
 # Typo protection
 alias shh='ssh'
@@ -105,9 +108,22 @@ alias go.fmt='go fmt ./...'
 alias go.vet='go vet ./...'
 alias go.tidy='go mod tidy'
 
-# Modern alternatives
+# Modern alternatives - Define cat function to use brew-installed bat
+cat() {
+    if command -v bat >/dev/null 2>&1; then
+        # If it looks like help or BSD cat usage, use original cat
+        if [[ "$1" =~ ^-{1,2}(help|h)$ ]] || [[ "$#" -eq 0 && ! -t 0 ]]; then
+            command cat "$@"
+        else
+            command bat --style=plain "$@"
+        fi
+    else
+        command cat "$@"
+    fi
+}
+
+# Set up other bat-related aliases if bat is available
 if command -v bat >/dev/null 2>&1; then
-    alias cat='bat --style=plain'
     alias less='bat --style=plain --paging=always'
 fi
 

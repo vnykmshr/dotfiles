@@ -338,9 +338,7 @@ process_gitconfig_template() {
 
     # Detect delta command path
     local delta_command="delta"
-    if command -v mise >/dev/null 2>&1 && mise which delta >/dev/null 2>&1; then
-        delta_command="$(mise which delta)"
-    elif command -v delta >/dev/null 2>&1; then
+    if command -v delta >/dev/null 2>&1; then
         delta_command="$(command -v delta)"
     fi
 
@@ -553,19 +551,7 @@ configure_shell() {
 setup_development_tools() {
     log_step "Setting up development tools"
 
-    # Install mise for version management
-    if ! command_exists mise; then
-        log_info "Installing mise..."
-        run_cmd "curl https://mise.run | sh"
-
-        # Add mise to PATH for this session
-        export PATH="$HOME/.local/bin:$PATH"
-    else
-        log_info "mise already installed"
-    fi
-
-    # Install modern CLI tools via mise
-    install_modern_cli_tools
+    # Modern CLI tools are now installed via the main package manager (brew/apt/etc)
 
     # Add bin directory to PATH
     local bin_dir="$DOTFILES_DIR/bin"
@@ -574,64 +560,8 @@ setup_development_tools() {
     fi
 }
 
-# Install modern CLI tools
-install_modern_cli_tools() {
-    log_step "Installing modern CLI tools"
-
-    if ! command_exists mise; then
-        log_warn "mise not available, skipping CLI tools installation"
-        return
-    fi
-
-    # Ask user if they want to install modern CLI tools
-    local install_tools=true
-
-    # Skip tools if SKIP_TOOLS is set (useful for CI/testing)
-    if [[ ${SKIP_TOOLS:-} == "true" ]]; then
-        install_tools=false
-        log_info "Skipping CLI tools installation (SKIP_TOOLS=true)"
-    elif [[ $DRY_RUN != "true" ]] && [[ -t 0 ]]; then # Only prompt if interactive
-        echo ""
-        log_info "Modern CLI tools provide enhanced replacements for common commands:"
-        echo "  • eza (better ls with git integration)"
-        echo "  • bat (better cat with syntax highlighting)"
-        echo "  • ripgrep (faster grep with smart defaults)"
-        echo "  • fd (faster find with intuitive syntax)"
-        echo "  • delta (better git diff with side-by-side view)"
-        echo "  • zoxide (smart cd with frequency-based navigation)"
-        echo ""
-
-        read -p "Install modern CLI tools? [Y/n]: " -r
-        if [[ $REPLY =~ ^[Nn]$ ]]; then
-            install_tools=false
-        fi
-    fi
-
-    if [[ $install_tools == "true" ]]; then
-        log_info "Installing modern CLI tools via mise..."
-
-        # Set up mise configuration directory
-        run_cmd "mkdir -p $HOME/.config/mise"
-
-        # Install tools defined in mise config
-        if [[ -f "$DOTFILES_DIR/config/mise/config.toml" ]]; then
-            # Use the project's mise config
-            run_cmd "cd '$DOTFILES_DIR' && mise install"
-
-            # Also install globally for the user
-            run_cmd "mise use -g eza@latest bat@latest ripgrep@latest fd@latest delta@latest zoxide@latest"
-
-            log_success "Modern CLI tools installed successfully!"
-            log_info "Run 'source ~/.zshrc' to activate new aliases and functions"
-        else
-            log_warn "mise config not found, installing tools individually..."
-            run_cmd "mise use -g eza@latest bat@latest ripgrep@latest fd@latest delta@latest zoxide@latest"
-        fi
-    else
-        log_info "Skipping modern CLI tools installation"
-        log_info "You can install them later with: mise install"
-    fi
-}
+# Note: Modern CLI tools are now installed via the main package installation system
+# See install/install-packages for the current implementation
 
 # Apply OS-specific defaults
 apply_os_defaults() {

@@ -6,16 +6,16 @@ shell_time() {
     echo "Measuring zsh startup time ($iterations runs)..."
 
     local total=0
-    for i in {1..$iterations}; do
+    for i in $(seq 1 "$iterations"); do
         local start_time=$(date +%s.%N)
         zsh -i -c exit >/dev/null 2>&1
         local end_time=$(date +%s.%N)
-        local duration=$(echo "$end_time - $start_time" | bc)
-        total=$(echo "$total + $duration" | bc)
+        local duration=$(awk "BEGIN {print $end_time - $start_time}")
+        total=$(awk "BEGIN {print $total + $duration}")
         printf "Run $i: %.3fs\n" "$duration"
     done
 
-    local average=$(echo "scale=3; $total / $iterations" | bc)
+    local average=$(awk "BEGIN {printf \"%.3f\", $total / $iterations}")
     printf "Average: %.3fs\n" "$average"
 }
 

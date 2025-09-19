@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # Essential utility functions
 
 # Check if command exists
@@ -10,7 +9,7 @@ run_cmd() {
     if [[ $DRY_RUN == "true" ]]; then
         echo "[DRY RUN] $1"
     else
-        eval "$1"
+        bash -c "$1"
     fi
 }
 

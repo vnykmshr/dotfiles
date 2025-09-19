@@ -70,7 +70,6 @@ tramp
 .python-version
 .java-version
 .tool-versions
-.mise.toml
 
 # Environment files
 .env*

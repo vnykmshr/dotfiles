@@ -32,7 +32,6 @@ path=(
     "$HOME/bin"
     "$DOTFILES/bin"
     "$HOME/.cargo/bin"
-    "$HOME/.mise/shims"
     $path
 )
 
@@ -69,17 +68,13 @@ load_config "prompt"
 [[ -r "$DOTFILES/config/cli-tools/init" ]] && source "$DOTFILES/config/cli-tools/init"
 [[ -r "$DOTFILES/config/workflow/init" ]] && source "$DOTFILES/config/workflow/init"
 
+# Override any conflicting aliases with our functions (must be after CLI tools)
+unalias cat 2>/dev/null || true
+
 # Tool integrations (lazy load heavy ones)
 command -v brew >/dev/null 2>&1 && eval "$(brew shellenv)"
 
-# Lazy load mise if not already active
-if command -v mise >/dev/null 2>&1 && [[ -z "$MISE_SHELL" ]]; then
-    mise() {
-        unfunction mise
-        eval "$(command mise activate zsh)"
-        mise "$@"
-    }
-fi
+# Note: Removed mise integration - using brew for tool management
 
 # Lazy load fzf
 if command -v fzf >/dev/null 2>&1; then

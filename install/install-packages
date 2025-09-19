@@ -27,16 +27,16 @@ install_core_tools() {
                 tmux
 
                 # Modern CLI tools
-                bat     # Better cat
-                eza     # Better ls
-                fd      # Better find
-                ripgrep # Better grep
-                fzf     # Fuzzy finder
-                zoxide  # Smart cd
+                bat       # Better cat
+                eza       # Better ls
+                fd        # Better find
+                ripgrep   # Better grep
+                fzf       # Fuzzy finder
+                zoxide    # Smart cd
+                git-delta # Better git diff
 
                 # Development tools
                 neovim # Modern vim
-                mise   # Version manager
                 gh     # GitHub CLI
                 jq     # JSON processor
 

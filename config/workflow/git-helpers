@@ -105,12 +105,21 @@ quick_save() {
     if [[ $input =~ ^[0-9]+$ ]]; then
         # User selected a number - get fresh suggestions
         local temp_suggestions
-        mapfile -t temp_suggestions < <(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //')
+        if ! mapfile -t temp_suggestions < <(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //'); then
+            log_error "Failed to generate commit message suggestions"
+            return 1
+        fi
+
+        if [[ ${#temp_suggestions[@]} -eq 0 ]]; then
+            log_error "No suggestions available"
+            return 1
+        fi
+
         local index=$((input - 1))
         if [[ $index -ge 0 && $index -lt ${#temp_suggestions[@]} ]]; then
             message="${temp_suggestions[$index]}"
         else
-            log_error "Invalid selection"
+            log_error "Invalid selection. Please choose 1-${#temp_suggestions[@]}"
             return 1
         fi
     else

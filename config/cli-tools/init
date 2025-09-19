@@ -28,8 +28,7 @@ if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init zsh)"
 fi
 
-# Export functions for use in other scripts
-export -f source_if_exists 2>/dev/null || true
+# Note: export -f not needed in zsh, functions are available by default
 
 # Tool availability check function
 check_modern_tools() {
@@ -57,11 +56,10 @@ check_modern_tools() {
     done
 
     echo ""
-    echo "Run 'mise install' to install missing tools."
+    echo "Run 'brew install <tool>' to install missing tools."
 }
 
-# Export the check function
-export -f check_modern_tools 2>/dev/null || true
+# Note: export -f not needed in zsh, functions are available by default
 
 # Add helpful aliases for the check function
 alias toolcheck='check_modern_tools'

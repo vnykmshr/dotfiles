@@ -27,7 +27,7 @@ status() {
 }
 
 # Workflow automation
-workflow() {
+workflowutil() {
     case "$1" in
         init) git init && git add . && git commit -m "initial commit" ;;
         push) git add -u && git commit -m "${2:-update}" && git push ;;

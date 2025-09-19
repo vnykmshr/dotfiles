@@ -130,8 +130,7 @@ fi
 
 # Add helpful aliases for the check function
 alias workcheck='workflow_check'
-alias workflow='workflow_check'
+# workflow function is defined in personal-functions
 alias devtools='workflow_check'
 
-# Export the check function
-export -f workflow_check 2>/dev/null || true
+# Note: export -f not needed in zsh, functions are available by default

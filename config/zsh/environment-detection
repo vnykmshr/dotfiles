@@ -4,19 +4,17 @@
 activate_node() {
     [[ ! -f ".nvmrc" ]] && return
     local version=$(cat .nvmrc | tr -d '[:space:]')
-
-    if command -v mise >/dev/null 2>&1; then
-        mise use node@"$version" 2>/dev/null && echo "Activated node@$version"
-    fi
+    # Note: Node version management can be added here when needed
+    # For now, just notify about the version file
+    echo "Found .nvmrc with node@$version"
 }
 
 activate_python() {
     [[ ! -f ".python-version" ]] && return
     local version=$(cat .python-version | tr -d '[:space:]')
-
-    if command -v mise >/dev/null 2>&1; then
-        mise use python@"$version" 2>/dev/null && echo "Activated python@$version"
-    fi
+    # Note: Python version management can be added here when needed
+    # For now, just notify about the version file
+    echo "Found .python-version with python@$version"
 }
 
 # Load .env file

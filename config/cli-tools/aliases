@@ -11,9 +11,8 @@ if command -v eza >/dev/null 2>&1; then
     alias ltg='eza --tree --level=2 --color=auto --git'
 fi
 
-# File viewing with bat (better cat)
+# File viewing with bat (better cat) - using wrapper function from main aliases
 if command -v bat >/dev/null 2>&1; then
-    alias cat='bat --style=auto'
     alias less='bat --style=auto --paging=always'
     alias bathelp='bat --list-themes'
 fi
@@ -37,7 +36,7 @@ fi
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init zsh)"
     alias cd='z'
-    alias cdi='zi'  # Interactive mode
+    alias cdi='zoxide_interactive'  # Interactive mode
     alias cdb='z -'  # Go back
 fi
 
@@ -46,24 +45,5 @@ if command -v delta >/dev/null 2>&1; then
     # Delta is configured in git config, but add some useful aliases
     alias gdiff='git diff'
     alias gshow='git show'
-    alias glog='git log --oneline --graph --decorate'
-fi
-
-# Fallback aliases for when tools aren't available
-if ! command -v eza >/dev/null 2>&1; then
-    alias ll='ls -la'
-    alias la='ls -la'
-    alias lt='tree -L 2 2>/dev/null || find . -maxdepth 2 -type d'
-fi
-
-if ! command -v bat >/dev/null 2>&1; then
-    alias cat='cat'
-fi
-
-if ! command -v rg >/dev/null 2>&1; then
-    alias grep='grep --color=auto'
-fi
-
-if ! command -v fd >/dev/null 2>&1; then
-    alias find='find'
+    # glog function is defined in functions file
 fi

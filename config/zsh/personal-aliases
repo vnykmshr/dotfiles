@@ -62,12 +62,3 @@ elif command -v exa >/dev/null 2>&1; then
     alias la='exa -la --group-directories-first'
     alias tree='exa --tree'
 fi
-
-# Enhanced cat (bat)
-command -v bat >/dev/null 2>&1 && alias cat='bat --paging=never'
-
-# Enhanced find (fd)
-command -v fd >/dev/null 2>&1 && alias find='fd'
-
-# Enhanced grep (ripgrep)
-command -v rg >/dev/null 2>&1 && alias grep='rg'
