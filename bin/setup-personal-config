@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# Setup Personal Configuration
+# Creates a personal.local config file from template
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+TEMPLATE_FILE="$DOTFILES/config/zsh/personal.local.template"
+CONFIG_FILE="$DOTFILES/config/zsh/personal.local"
+
+main() {
+    echo "🔧 Setting up personal configuration..."
+
+    # Check if template exists
+    if [[ ! -f $TEMPLATE_FILE ]]; then
+        echo "❌ Template file not found: $TEMPLATE_FILE"
+        exit 1
+    fi
+
+    # Check if config already exists
+    if [[ -f $CONFIG_FILE ]]; then
+        echo "⚠️  Personal config already exists: $CONFIG_FILE"
+        read -r -p "Do you want to overwrite it? (y/N): " choice
+        case "$choice" in
+            [yY] | [yY][eE][sS])
+                echo "📝 Backing up existing config..."
+                cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+                ;;
+            *)
+                echo "✅ Keeping existing config. You can manually copy from:"
+                echo "   Template: $TEMPLATE_FILE"
+                echo "   Current:  $CONFIG_FILE"
+                exit 0
+                ;;
+        esac
+    fi
+
+    # Copy template to config
+    cp "$TEMPLATE_FILE" "$CONFIG_FILE"
+
+    echo "✅ Personal config created: $CONFIG_FILE"
+    echo ""
+    echo "🎯 Next steps:"
+    echo "   1. Edit $CONFIG_FILE"
+    echo "   2. Add your custom PATH entries, aliases, and functions"
+    echo "   3. Restart your shell or run: source ~/.zshrc"
+    echo ""
+    echo "💡 This file is git-ignored, so your personal settings stay private!"
+
+    # Offer to open in editor
+    if command -v "$EDITOR" >/dev/null 2>&1; then
+        read -r -p "Do you want to edit it now? (y/N): " edit_choice
+        case "$edit_choice" in
+            [yY] | [yY][eE][sS])
+                "$EDITOR" "$CONFIG_FILE"
+                ;;
+        esac
+    fi
+}
+
+main "$@"

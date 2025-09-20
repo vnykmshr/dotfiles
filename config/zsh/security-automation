@@ -83,7 +83,9 @@ security_check_on_cd() {
     git rev-parse --git-dir >/dev/null 2>&1 || return
 
     # Secure .env files if present
-    if ls .env* >/dev/null 2>&1; then
+    setopt local_options nullglob
+    local env_files=(.env*)
+    if [[ ${#env_files[@]} -gt 0 ]]; then
         secure_env_files
     fi
 

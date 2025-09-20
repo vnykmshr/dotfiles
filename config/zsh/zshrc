@@ -166,5 +166,8 @@ bindkey '^N' history-search-forward
 # Debug output
 [[ "$DOTFILES_DEBUG" == "true" ]] && zprof
 
+# Personal/work configuration (not tracked by git)
+load_config "personal.local"
+
 # Local overrides
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

@@ -1,0 +1,76 @@
+# Personal/Work Configuration Template
+# Copy this file to 'personal.local' and customize as needed
+# This file will not be tracked by git
+
+# =============================================================================
+# Personal PATH additions
+# =============================================================================
+# Add your custom PATH entries here
+
+# Method 1: Zsh array syntax (recommended - prevents duplicates)
+# path=(
+#     "$HOME/custom-tools/bin"
+#     "$HOME/work/scripts"
+#     "/opt/my-company/bin"
+#     $path
+# )
+
+# Method 2: Traditional PATH syntax (also works)
+# PATH="$HOME/custom-tools/bin:$HOME/work/scripts:$PATH"
+
+# =============================================================================
+# Personal exports and environment variables
+# =============================================================================
+# Add your custom environment variables here
+# Example:
+# export COMPANY_API_KEY="your-key-here"
+# export CUSTOM_WORKSPACE="$HOME/work/projects"
+# export NODE_OPTIONS="--max-old-space-size=8192"
+
+# =============================================================================
+# Personal aliases
+# =============================================================================
+# Add your custom aliases here
+# Example:
+# alias work="cd $HOME/work"
+# alias deploy="ssh production-server"
+# alias localdb="docker-compose up postgres"
+
+# =============================================================================
+# Personal functions
+# =============================================================================
+# Add your custom functions here
+# Example:
+# work_deploy() {
+#     echo "Deploying to production..."
+#     ssh production-server "cd /app && git pull && docker-compose restart"
+# }
+
+# =============================================================================
+# Tool-specific configurations
+# =============================================================================
+# Add tool-specific configurations here
+# Example:
+# # AWS CLI
+# export AWS_PROFILE="work"
+# export AWS_REGION="us-west-2"
+#
+# # Docker
+# export DOCKER_HOST="unix:///var/run/docker.sock"
+#
+# # Company-specific tools
+# eval "$(company-cli completion zsh)"
+
+# =============================================================================
+# Conditional configurations
+# =============================================================================
+# Add configurations that should only load in certain environments
+# Example:
+# if [[ "$PWD" == *"/work/"* ]]; then
+#     export NODE_ENV="development"
+#     alias npm="pnpm"
+# fi
+#
+# if [[ -f "$HOME/.work-env" ]]; then
+#     source "$HOME/.work-env"
+# fi
