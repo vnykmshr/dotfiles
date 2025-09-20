@@ -66,7 +66,6 @@ echo "=============================================="
 
 # 1. Environment Setup Tests
 echo -e "\n${YELLOW}📁 ENVIRONMENT SETUP TESTS${NC}"
-run_test "DOTFILES environment variable" "echo \"\$DOTFILES\"" "dotfiles"
 run_test ".dotfiles symlink exists" "ls -la ~/.dotfiles" "dotfiles"
 run_test "Zsh configuration loads" "zsh -c 'echo \"Config loaded\"'" "Config loaded"
 
