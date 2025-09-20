@@ -98,6 +98,7 @@ main() {
 
     # Installation steps
     install_dependencies
+    create_dotfiles_symlink
     setup_symlinks
     process_templates
     install_packages
@@ -155,6 +156,36 @@ install_homebrew() {
     else
         log_info "Would install Homebrew"
     fi
+}
+
+# Create .dotfiles symlink pointing to this project
+create_dotfiles_symlink() {
+    log_step "Creating .dotfiles symlink"
+
+    local target_link="$HOME/.dotfiles"
+
+    # Check if symlink already exists and points to correct location
+    if [[ -L $target_link && "$(readlink "$target_link")" == "$DOTFILES_DIR" ]]; then
+        log_info ".dotfiles symlink already exists and is correct"
+        return 0
+    fi
+
+    # Handle existing file/directory/symlink
+    if [[ -e $target_link ]]; then
+        if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
+            local backup_name="dotfiles-$(date +%Y%m%d-%H%M%S)"
+            run_cmd "mv \"$target_link\" \"$BACKUP_DIR/$backup_name\""
+            log_info "Backed up existing .dotfiles to $BACKUP_DIR/$backup_name"
+        else
+            log_warn ".dotfiles already exists at $target_link"
+            log_warn "Use --force to overwrite or remove it manually"
+            return 1
+        fi
+    fi
+
+    # Create the symlink
+    run_cmd "ln -sf \"$DOTFILES_DIR\" \"$target_link\""
+    log_success "Created .dotfiles symlink: $target_link -> $DOTFILES_DIR"
 }
 
 # Setup configuration symlinks
