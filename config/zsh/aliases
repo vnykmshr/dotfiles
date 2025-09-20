@@ -13,6 +13,8 @@ alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ~='cd ~'
 alias -- -='cd -'
+alias ws='cd ~/workspace'
+alias proj='cd ~/workspace/projects'
 
 # List files with modern options
 if command -v eza >/dev/null 2>&1; then
@@ -73,6 +75,12 @@ alias ports='netstat -tulanp'
 alias ping='ping -c 5'
 alias fastping='ping -c 100 -s 2'
 
+# Development shortcuts
+alias cls='clear'
+alias h='history'
+alias j='jobs'
+alias path='echo $PATH | tr ":" "\n"'
+
 # Weather (requires curl)
 # Note: weather() function is defined in functions file instead of alias
 alias forecast='curl -s "https://wttr.in/"'
@@ -92,6 +100,8 @@ alias gl='git log --oneline'
 alias gp='git push'
 alias gs='git status'
 alias gst='git status'
+alias gup='git pull && git submodule update'
+alias gcl='git clean -fd && git reset --hard'
 
 # Enhanced git workflow aliases
 alias gh='$DOTFILES/config/workflow/git-helpers'

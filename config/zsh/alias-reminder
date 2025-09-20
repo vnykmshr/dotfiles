@@ -18,8 +18,8 @@ ALIASES=(
     "md"    "make dev (you use this 128 times!)"
     "acp"   "git add -u && git commit && git push"
     "gst"   "git status --short --branch (you use this 558 times!)"
-    "ws"    "cd ~/workspace"
-    "proj"  "cd ~/workspace/projects"
+    "ws"    "cd $HOME/workspace"
+    "proj"  "cd $HOME/workspace/projects"
     "ll"    "ls -la"
     "reload" "source ~/.zshrc"
 
@@ -28,7 +28,9 @@ ALIASES=(
     "gcl"   "git clean -fd && git reset --hard"
     "dev"   "smart project dev server"
     "cpu"   "htop --sort-key PERCENT_CPU"
-    "ports" "lsof -i"
+    "ports" "show open network ports"
+    "cls"   "clear screen"
+    "path"  "show PATH in readable format"
 
     # Advanced
     "workflow" "complete development automation"
