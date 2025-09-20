@@ -30,7 +30,7 @@ export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 
 # Go
-export GOPATH="$HOME/go"
+export GOPATH="$HOME/workspace/gocode"
 export GOBIN="$GOPATH/bin"
 
 # Rust

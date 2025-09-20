@@ -28,7 +28,7 @@ EOF
             ;;
         go*)
             cat > .envrc <<'EOF'
-[[ -z "$GOPATH" ]] && export GOPATH="$HOME/go"
+[[ -z "$GOPATH" ]] && export GOPATH="$HOME/workspace/gocode"
 PATH_add bin "$GOPATH/bin"
 dotenv_if_exists .env .env.local
 export GO111MODULE=on GOPROXY=https://proxy.golang.org,direct
