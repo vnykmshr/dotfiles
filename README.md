@@ -7,8 +7,10 @@
 
 ## Features
 
-- **Development Automation**: Universal `dev`, `test`, `testwatch` commands for any project
+- **Development Automation**: Universal `dev`, `test`, `testwatch` commands for any
+  project
 - **Git Workflow**: Smart commit suggestions, branch management, 45+ aliases
+- **Alias Reminders**: Periodic helpful shortcuts to build muscle memory
 - **Environment Detection**: Auto-activate .nvmrc/.python-version, load .env files
 - **Performance**: Fast shell startup (0.158s) with lazy loading
 - **Modern Tools**: bat, eza, fd, ripgrep, delta, zoxide integration
@@ -74,7 +76,9 @@ shell-bench        # Measure startup time
 
 **Build your development identity, don't copy mine.**
 
-This project provides professional patterns and examples. The real value comes from understanding and adapting them to your workflow. Great developers don't just copy configurations—they evolve them.
+This project provides professional patterns and examples. The real value comes
+from understanding and adapting them to your workflow. Great developers don't
+just copy configurations—they evolve them.
 
 ## License
 
