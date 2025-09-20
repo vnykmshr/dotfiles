@@ -33,9 +33,14 @@ ALIASES=(
     "path"  "show PATH in readable format"
 
     # Advanced
-    "workflow" "complete development automation"
     "qc"    "quick commit with auto messages"
     "status" "enhanced project status"
+    "ga"    "git add"
+    "gc"    "git commit"
+    "gp"    "git push"
+    "gd"    "git diff"
+    ".."    "cd .. (go up one directory)"
+    "serve" "python3 -m http.server"
 )
 
 increment_session_counter() {
