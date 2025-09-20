@@ -54,12 +54,12 @@ is_sensitive_command() {
 # Update stats (called periodically)
 update_history_stats() {
     local stats_file="$HISTORY_STATS_FILE"
-    [[ ! -f "$stats_file" ]] && { mkdir -p "$(dirname "$stats_file")"; echo "# timestamp:total:unique" > "$stats_file"; }
+    [[ ! -f "$stats_file" ]] && { command mkdir -p "$(dirname "$stats_file")"; echo "# timestamp:total:unique" > "$stats_file"; }
 
     local total=$(wc -l < "$HISTFILE" 2>/dev/null || echo 0)
     local unique=$(sort -u "$HISTFILE" 2>/dev/null | wc -l || echo 0)
     echo "$(date +%s):$total:$unique" >> "$stats_file"
-    tail -100 "$stats_file" > "${stats_file}.tmp" && mv "${stats_file}.tmp" "$stats_file"
+    tail -100 "$stats_file" > "${stats_file}.tmp" && command mv "${stats_file}.tmp" "$stats_file"
 }
 
 # Show statistics
@@ -106,7 +106,7 @@ history_time() {
 history_dedupe() {
     [[ ! -f "$HISTFILE" ]] && { echo "No history file"; return 1; }
     local backup="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
-    cp "$HISTFILE" "$backup" && awk '!seen[$0]++' "$HISTFILE" > "${HISTFILE}.tmp" && mv "${HISTFILE}.tmp" "$HISTFILE"
+    command cp "$HISTFILE" "$backup" && awk '!seen[$0]++' "$HISTFILE" > "${HISTFILE}.tmp" && command mv "${HISTFILE}.tmp" "$HISTFILE"
     echo "History deduplicated (backup: $backup)"
 }
 
@@ -115,12 +115,12 @@ history_clean_sensitive() {
     [[ ! -f "$HISTFILE" ]] && { echo "No history file"; return 1; }
     init_sensitive_patterns
     local backup="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
-    cp "$HISTFILE" "$backup"
+    command cp "$HISTFILE" "$backup"
     local removed=0
     while IFS= read -r line; do
         is_sensitive_command "$line" && ((removed++)) || echo "$line" >> "${HISTFILE}.tmp"
     done < "$HISTFILE"
-    mv "${HISTFILE}.tmp" "$HISTFILE"
+    command mv "${HISTFILE}.tmp" "$HISTFILE"
     echo "Removed $removed sensitive entries (backup: $backup)"
 }
 
