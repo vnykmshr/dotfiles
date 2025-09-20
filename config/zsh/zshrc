@@ -102,7 +102,7 @@ load_config() {
 }
 
 # Load core modules (always needed)
-for module in aliases functions go-dev; do
+for module in exports aliases functions go-dev dev-automation; do
     load_config "$module"
 done
 

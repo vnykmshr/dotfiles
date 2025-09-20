@@ -62,5 +62,34 @@ testwatch() {
     fi
 }
 
+# Simple project setup
+project_setup() {
+    echo "🚀 Setting up project..."
+
+    # Initialize git if not exists
+    [[ ! -d .git ]] && git init
+
+    # Create common directories
+    mkdir -p {src,tests,docs}
+
+    # Create README if not exists
+    [[ ! -f README.md ]] && echo "# $(basename "$PWD")" > README.md
+
+    # Create .gitignore if not exists
+    if [[ ! -f .gitignore ]]; then
+        if [[ -f "package.json" ]]; then
+            echo "node_modules/\n.env\ndist/" > .gitignore
+        elif [[ -f "go.mod" ]]; then
+            echo "*.exe\n*.so\n.env" > .gitignore
+        elif [[ -f "Cargo.toml" ]]; then
+            echo "target/\n**/*.rs.bk\n.env" > .gitignore
+        else
+            echo ".env\n.DS_Store" > .gitignore
+        fi
+    fi
+
+    echo "✅ Project setup complete!"
+}
+
 # Alias for backwards compatibility
 alias test='run_tests'
