@@ -66,6 +66,7 @@ alias free='free -h'
 alias ps='ps auxf'
 alias psg='ps aux | grep'
 alias top='top -o cpu'
+alias cpu='htop --sort-key PERCENT_CPU'
 
 # Network
 alias ports='netstat -tulanp'
