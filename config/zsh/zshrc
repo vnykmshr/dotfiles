@@ -117,6 +117,7 @@ load_config "personal-functions"
 [[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "intelligent-history"
 [[ "$DOTFILES_SKIP_SECURITY" != "1" ]] && load_config "security-automation"
 [[ "$DOTFILES_SKIP_PERFORMANCE" != "1" ]] && load_config "performance"
+[[ "$DOTFILES_SKIP_ALIAS_REMINDER" != "1" ]] && load_config "alias-reminder"
 load_config "prompt"
 
 # Load CLI tools and workflow automation

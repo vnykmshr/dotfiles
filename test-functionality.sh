@@ -147,7 +147,13 @@ echo -e "\n${YELLOW}💬 INTERACTIVE FEATURES TESTS${NC}"
 run_test "Completion system" "zsh -c 'autoload -U compinit; echo \"Completions available\"'" "Completions available"
 run_test "FZF integration" "zsh -c 'source ~/.zshrc; echo \$FZF_DEFAULT_COMMAND'" "fd"
 
-# 15. Error Handling Tests
+# 15. Alias Reminder Tests
+echo -e "\n${YELLOW}💡 ALIAS REMINDER TESTS${NC}"
+run_test "Alias reminder module loads" "zsh -c 'source ~/.zshrc; type alias-reminder-show'" "function"
+run_test "Alias reminder shows tips" "zsh -c 'source config/zsh/alias-reminder; alias-reminder-show'" "Alias Reminders"
+run_test "Alias reminder level change" "zsh -c 'source ~/.zshrc; alias-reminder-level advanced'" "set to: advanced"
+
+# 16. Error Handling Tests
 echo -e "\n${YELLOW}🚨 ERROR HANDLING TESTS${NC}"
 run_test "Missing file handling" "zsh -c 'source ~/.zshrc; cat /nonexistent/file 2>&1 || echo \"Error handled\"'" "Error handled"
 run_test "Command not found handling" "zsh -c 'nonexistent_command 2>&1 || echo \"Command not found handled\"'" ""

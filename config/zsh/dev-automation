@@ -1,29 +1,5 @@
 # Development Automation
-
-# Universal development server
-dev() {
-    # Go projects
-    if [[ -f "go.mod" ]]; then
-        [[ -f "main.go" ]] && go run . || go run ./cmd/...
-    # Node.js projects
-    elif [[ -f "package.json" ]] && command -v jq >/dev/null; then
-        if jq -e '.scripts.dev' package.json >/dev/null 2>&1; then
-            npm run dev
-        elif jq -e '.scripts.start' package.json >/dev/null 2>&1; then
-            npm start
-        else
-            echo "No dev script found"; return 1
-        fi
-    # Python Django
-    elif [[ -f "manage.py" ]]; then
-        python manage.py runserver
-    # Makefile
-    elif [[ -f "Makefile" ]] && grep -q "^dev:" Makefile; then
-        make dev
-    else
-        echo "No dev server found"; return 1
-    fi
-}
+# Note: dev command provided by workflow/dev-server script
 
 # Universal test runner
 run_tests() {

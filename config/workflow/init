@@ -2,7 +2,7 @@
 # Sets up development workflow tools and integrations
 
 # Get the directory where this script is located
-local workflow_dir="${0:A:h}"
+local workflow_dir="${DOTFILES:-$HOME/.dotfiles}/config/workflow"
 
 # Source workflow aliases
 if [[ -f "$workflow_dir/aliases" ]]; then
