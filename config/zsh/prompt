@@ -76,10 +76,10 @@ git_prompt() {
     git_status=$(git status --porcelain 2>/dev/null)
 
     if [[ -n "$git_status" ]]; then
-        # Count different types of changes
-        local staged_count=$(echo "$git_status" | grep -c "^[MADRC]")
-        local modified_count=$(echo "$git_status" | grep -c "^.[MD]")
-        local untracked_count=$(echo "$git_status" | grep -c "^??")
+        # Count different types of changes (use command grep to avoid rg alias)
+        local staged_count=$(echo "$git_status" | command grep -c "^[MADRC]")
+        local modified_count=$(echo "$git_status" | command grep -c "^.[MD]")
+        local untracked_count=$(echo "$git_status" | command grep -c "^??")
 
         [[ $staged_count -gt 0 ]] && status_symbols+="●"     # staged changes
         [[ $modified_count -gt 0 ]] && status_symbols+="±"   # modified files
