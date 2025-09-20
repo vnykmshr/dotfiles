@@ -173,7 +173,8 @@ create_dotfiles_symlink() {
     # Handle existing file/directory/symlink
     if [[ -e $target_link ]]; then
         if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
-            local backup_name="dotfiles-$(date +%Y%m%d-%H%M%S)"
+            local backup_name
+            backup_name="dotfiles-$(date +%Y%m%d-%H%M%S)"
             run_cmd "mv \"$target_link\" \"$BACKUP_DIR/$backup_name\""
             log_info "Backed up existing .dotfiles to $BACKUP_DIR/$backup_name"
         else
@@ -361,11 +362,17 @@ process_gitconfig_template() {
     local output_file="$DOTFILES_DIR/config/git/gitconfig"
 
     # Load values from JSON config with fallbacks
-    local git_user_name=$(get_config_value '.user.name' 'Your Name')
-    local git_user_email=$(get_config_value '.user.email' 'your.email@example.com')
-    local git_signing_key=$(get_config_value '.git.signing_key' '~/.ssh/id_ed25519.pub')
-    local editor=$(get_config_value '.user.editor' 'nvim')
-    local git_gpg_sign=$(get_config_value '.git.gpg_sign' 'false')
+    local git_user_name
+    local git_user_email
+    local git_signing_key
+    local editor
+    local git_gpg_sign
+
+    git_user_name=$(get_config_value '.user.name' 'Your Name')
+    git_user_email=$(get_config_value '.user.email' 'your.email@example.com')
+    git_signing_key=$(get_config_value '.git.signing_key' "$HOME/.ssh/id_ed25519.pub")
+    editor=$(get_config_value '.user.editor' 'nvim')
+    git_gpg_sign=$(get_config_value '.git.gpg_sign' 'false')
 
     # Detect delta command path
     local delta_command="delta"
@@ -411,24 +418,41 @@ process_ssh_template() {
     local output_file="$DOTFILES_DIR/config/ssh/config"
 
     # Load values from JSON config with fallbacks
-    local ssh_github_key=$(get_config_value '.ssh.keys.github' '~/.ssh/id_ed25519')
-    local ssh_gitlab_key=$(get_config_value '.ssh.keys.gitlab' '~/.ssh/id_ed25519')
-    local ssh_personal_key=$(get_config_value '.ssh.keys.personal' '~/.ssh/id_ed25519')
-    local ssh_work_key=$(get_config_value '.ssh.keys.work' '~/.ssh/id_rsa')
-    local ssh_local_key=$(get_config_value '.ssh.keys.local' '~/.ssh/id_ed25519')
+    local ssh_github_key
+    local ssh_gitlab_key
+    local ssh_personal_key
+    local ssh_work_key
+    local ssh_local_key
+    local personal_server_alias
+    local personal_server_host
+    local personal_server_user
+    local personal_server_port
+    local work_server_alias
+    local work_server_host
+    local work_server_user
+    local work_server_port
 
-    local personal_server_alias=$(get_config_value '.ssh.servers.personal.alias' 'my-server')
-    local personal_server_host=$(get_config_value '.ssh.servers.personal.host' 'example.com')
-    local personal_server_user=$(get_config_value '.ssh.servers.personal.user' "$USER")
-    local personal_server_port=$(get_config_value '.ssh.servers.personal.port' '22')
+    ssh_github_key=$(get_config_value '.ssh.keys.github' "$HOME/.ssh/id_ed25519")
+    ssh_gitlab_key=$(get_config_value '.ssh.keys.gitlab' "$HOME/.ssh/id_ed25519")
+    ssh_personal_key=$(get_config_value '.ssh.keys.personal' "$HOME/.ssh/id_ed25519")
+    ssh_work_key=$(get_config_value '.ssh.keys.work' "$HOME/.ssh/id_rsa")
+    ssh_local_key=$(get_config_value '.ssh.keys.local' "$HOME/.ssh/id_ed25519")
 
-    local work_server_alias=$(get_config_value '.ssh.servers.work.alias' 'work-server')
-    local work_server_host=$(get_config_value '.ssh.servers.work.host' 'work.example.com')
-    local work_server_user=$(get_config_value '.ssh.servers.work.user' "$USER")
-    local work_server_port=$(get_config_value '.ssh.servers.work.port' '22')
+    personal_server_alias=$(get_config_value '.ssh.servers.personal.alias' 'my-server')
+    personal_server_host=$(get_config_value '.ssh.servers.personal.host' 'example.com')
+    personal_server_user=$(get_config_value '.ssh.servers.personal.user' "$USER")
+    personal_server_port=$(get_config_value '.ssh.servers.personal.port' '22')
 
-    local local_dev_host=$(get_config_value '.ssh.servers.local_dev.host' 'localhost')
-    local local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "$USER")
+    work_server_alias=$(get_config_value '.ssh.servers.work.alias' 'work-server')
+    work_server_host=$(get_config_value '.ssh.servers.work.host' 'work.example.com')
+    work_server_user=$(get_config_value '.ssh.servers.work.user' "$USER")
+    work_server_port=$(get_config_value '.ssh.servers.work.port' '22')
+
+    local local_dev_host
+    local local_dev_user
+
+    local_dev_host=$(get_config_value '.ssh.servers.local_dev.host' 'localhost')
+    local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "$USER")
 
     # Show preview in dry run mode
     if [[ $DRY_RUN == "true" ]]; then
@@ -461,17 +485,29 @@ process_zsh_exports_template() {
     local output_file="$DOTFILES_DIR/config/zsh/exports.local"
 
     # Load values from JSON config with fallbacks
-    local workspace_dir=$(get_config_value '.environment.workspace_dir' '~/workspace')
-    local projects_dir=$(get_config_value '.environment.projects_dir' '~/projects')
-    local personal_bin_dir=$(get_config_value '.environment.personal_bin_dir' '~/.local/bin')
-    local browser=$(get_config_value '.user.browser' 'open')
-    local terminal=$(get_config_value '.user.terminal' 'Terminal')
-    local pager=$(get_config_value '.environment.pager' 'less')
-    local npm_prefix=$(get_config_value '.development.node.npm_prefix' '~/.npm-global')
-    local python_path=$(get_config_value '.development.python.path' '')
-    local go_path=$(get_config_value '.development.go.path' '~/go')
-    local cargo_home=$(get_config_value '.development.rust.cargo_home' '~/.cargo')
-    local preferred_editor=$(get_config_value '.user.editor' 'nvim')
+    local workspace_dir
+    local projects_dir
+    local personal_bin_dir
+    local browser
+    local terminal
+    local pager
+    local npm_prefix
+    local python_path
+    local go_path
+    local cargo_home
+    local preferred_editor
+
+    workspace_dir=$(get_config_value '.environment.workspace_dir' "$HOME/workspace")
+    projects_dir=$(get_config_value '.environment.projects_dir' "$HOME/projects")
+    personal_bin_dir=$(get_config_value '.environment.personal_bin_dir' "$HOME/.local/bin")
+    browser=$(get_config_value '.user.browser' 'open')
+    terminal=$(get_config_value '.user.terminal' 'Terminal')
+    pager=$(get_config_value '.environment.pager' 'less')
+    npm_prefix=$(get_config_value '.development.node.npm_prefix' "$HOME/.npm-global")
+    python_path=$(get_config_value '.development.python.path' '')
+    go_path=$(get_config_value '.development.go.path' "$HOME/go")
+    cargo_home=$(get_config_value '.development.rust.cargo_home' "$HOME/.cargo")
+    preferred_editor=$(get_config_value '.user.editor' 'nvim')
     local preferred_lang="en_US.UTF-8"
     local code_editor="code"
 
