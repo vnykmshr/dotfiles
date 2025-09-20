@@ -1,11 +1,28 @@
-# Modern prompt configuration
-# Modern prompt configuration
+# Modern Enhanced Prompt Configuration
+#
+# Features:
+# - Smart directory truncation for long paths
+# - Comprehensive git status with symbols:
+#   ● = staged changes    ± = modified files    ? = untracked files
+#   ⚑ = stashed changes   ↑ = ahead of remote   ↓ = behind remote
+# - Virtual environment indicator (Python/venv)
+# - Node.js version (in Node projects)
+# - Background jobs counter
+# - Exit status with error codes
+# - Optional timestamp
+#
+# Configuration:
+# - Set DOTFILES_PROMPT_TIME=1 to show timestamps
+# - Set DOTFILES_SKIP_PROMPT=1 to disable entirely
+# - Set KUBECTL_CONTEXT to show Kubernetes context
+# - Automatically detects: Git repos, Node.js projects, Docker projects, virtual envs
 
 # Skip if user has set DOTFILES_SKIP_PROMPT=1
 [[ "$DOTFILES_SKIP_PROMPT" == "1" ]] && return
 
 # Skip if prompt is already customized (oh-my-zsh, starship, etc.)
-[[ -n "$ZSH_THEME" || -n "$STARSHIP_CONFIG" || "$PROMPT" != *"%"* ]] && return
+[[ -n "$ZSH_THEME" || -n "$STARSHIP_CONFIG" ]] && return
+[[ -n "$PROMPT" && "$PROMPT" != *"%"* ]] && return
 
 # Check if user wants to skip during first setup
 if [[ ! -f "$HOME/.config/dotfiles/prompt-choice" ]]; then
@@ -41,34 +58,136 @@ fi
 # Enable prompt substitution
 setopt PROMPT_SUBST
 
-# Git status function
+# Git status function with enhanced information
 git_prompt() {
-    local branch diff1 diff2
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null) || return
+    local branch status_symbols ahead behind stash_count
 
-    # Check for changes
-    git diff-index --quiet HEAD 2>/dev/null
-    if [[ $? -ne 0 ]]; then
-        diff1="*"
+    # Get branch name
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null) || {
+        # Detached HEAD - show short commit hash
+        branch=$(git rev-parse --short HEAD 2>/dev/null) || return
+        branch="($branch)"
+    }
+
+    status_symbols=""
+
+    # Check for various git states
+    local git_status
+    git_status=$(git status --porcelain 2>/dev/null)
+
+    if [[ -n "$git_status" ]]; then
+        # Count different types of changes
+        local staged_count=$(echo "$git_status" | grep -c "^[MADRC]")
+        local modified_count=$(echo "$git_status" | grep -c "^.[MD]")
+        local untracked_count=$(echo "$git_status" | grep -c "^??")
+
+        [[ $staged_count -gt 0 ]] && status_symbols+="●"     # staged changes
+        [[ $modified_count -gt 0 ]] && status_symbols+="±"   # modified files
+        [[ $untracked_count -gt 0 ]] && status_symbols+="?"  # untracked files
     fi
 
-    # Check for staged changes
-    git diff-index --quiet --cached HEAD 2>/dev/null
-    if [[ $? -ne 0 ]]; then
-        diff2="+"
+    # Check for stashed changes
+    stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+    [[ $stash_count -gt 0 ]] && status_symbols+="⚑"
+
+    # Check for ahead/behind remote
+    local upstream_info
+    upstream_info=$(git rev-list --count --left-right @{upstream}...HEAD 2>/dev/null)
+    if [[ -n "$upstream_info" ]]; then
+        behind=$(echo "$upstream_info" | cut -f1)
+        ahead=$(echo "$upstream_info" | cut -f2)
+        [[ $ahead -gt 0 ]] && status_symbols+="↑"
+        [[ $behind -gt 0 ]] && status_symbols+="↓"
     fi
 
-    echo " %F{242}($branch$diff1$diff2)%f"
+    # Color the branch based on status
+    local branch_color="%F{green}"
+    [[ -n "$status_symbols" ]] && branch_color="%F{yellow}"
+    [[ "$status_symbols" == *"?"* ]] && branch_color="%F{red}"
+
+    echo " ${branch_color}$branch%f%F{cyan}$status_symbols%f"
 }
 
-# Exit status indicator
+# Directory path with smart truncation
+dir_prompt() {
+    local current_dir="${PWD/#$HOME/~}"
+    local dir_parts=("${(@s:/:)current_dir}")
+    local result=""
+
+    # If in home directory
+    if [[ "$current_dir" == "~" ]]; then
+        echo "%F{blue}~%f"
+        return
+    fi
+
+    # If path is short enough, show full path
+    if [[ ${#current_dir} -le 30 ]]; then
+        echo "%F{blue}$current_dir%f"
+        return
+    fi
+
+    # For long paths, show first and last directories
+    if [[ ${#dir_parts[@]} -gt 3 ]]; then
+        result="${dir_parts[1]}/…/${dir_parts[-2]}/${dir_parts[-1]}"
+    else
+        result="$current_dir"
+    fi
+
+    echo "%F{blue}$result%f"
+}
+
+# Exit status with enhanced indicators
 exit_status() {
-    echo "%(?..%F{red}✗%f )"
+    echo "%(?..%F{red}✗ %?%f )"
 }
 
-# Set the prompt
-PROMPT='$(exit_status)%F{blue}%1~%f$(git_prompt) %F{green}→%f '
-RPROMPT=''
+# Virtual environment indicator
+venv_prompt() {
+    [[ -n "$VIRTUAL_ENV" ]] && echo "%F{cyan}($(basename $VIRTUAL_ENV))%f "
+}
 
-# Simple continuation prompt
-PS2='%F{yellow}→%f '
+# Node.js version indicator (if nvm/node is available and in a node project)
+node_prompt() {
+    if [[ -f "package.json" ]] && command -v node >/dev/null 2>&1; then
+        local node_version=$(node --version 2>/dev/null)
+        [[ -n "$node_version" ]] && echo "%F{green}⬢ ${node_version#v}%f "
+    fi
+}
+
+# Background jobs indicator
+jobs_prompt() {
+    local job_count=$(jobs | wc -l | tr -d ' ')
+    [[ $job_count -gt 0 ]] && echo "%F{yellow}⚡$job_count%f "
+}
+
+# Time indicator (if enabled)
+time_prompt() {
+    [[ "$DOTFILES_PROMPT_TIME" == "1" ]] && echo "%F{242}%T%f "
+}
+
+# Docker context indicator (if in docker project)
+docker_prompt() {
+    if [[ -f "Dockerfile" || -f "docker-compose.yml" || -f "docker-compose.yaml" ]]; then
+        echo "%F{blue}🐳%f "
+    fi
+}
+
+# Kubernetes context indicator (if kubectl is available and context is set)
+k8s_prompt() {
+    if command -v kubectl >/dev/null 2>&1 && [[ -n "$KUBECTL_CONTEXT" ]]; then
+        echo "%F{magenta}☸ $KUBECTL_CONTEXT%f "
+    fi
+}
+
+# Set the enhanced prompt
+PROMPT='$(time_prompt)$(exit_status)$(venv_prompt)$(jobs_prompt)$(dir_prompt)$(git_prompt)
+%F{green}❯%f '
+
+# Right-side prompt with optional information
+RPROMPT='$(docker_prompt)$(k8s_prompt)$(node_prompt)'
+
+# Enhanced continuation prompt
+PS2='%F{yellow}❯❯%f '
+
+# Selection prompt (for select command)
+PS3='%F{green}?%f '
