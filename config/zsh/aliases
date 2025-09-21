@@ -104,7 +104,7 @@ alias gup='git pull && git submodule update'
 alias gcl='git clean -fd && git reset --hard'
 
 # Enhanced git workflow aliases
-alias gh='$DOTFILES/config/workflow/git-helpers'
+alias mygh='$DOTFILES/config/workflow/git-helpers'
 alias gsave='$DOTFILES/config/workflow/git-helpers save'
 alias gpull='$DOTFILES/config/workflow/git-helpers pull'
 alias gnew='$DOTFILES/config/workflow/git-helpers new'
