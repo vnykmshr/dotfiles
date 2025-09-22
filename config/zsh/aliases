@@ -142,9 +142,6 @@ if command -v fd >/dev/null 2>&1; then
     alias find='fd'
 fi
 
-if command -v ripgrep >/dev/null 2>&1; then
-    alias grep='rg'
-fi
 
 if command -v zoxide >/dev/null 2>&1; then
     alias cd='z'
@@ -223,10 +220,10 @@ alias serve-here='python3 -m http.server 8000'
 # Utility Functions as Aliases
 # =============================================================================
 
-# Color output for grep
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
+# Enhanced grep with useful defaults
+alias grep='grep --color=auto -n -H'
+alias egrep='egrep --color=auto -n -H'
+alias fgrep='fgrep --color=auto -n -H'
 
 # Human readable sizes
 alias du1='du --max-depth=1'

@@ -19,7 +19,6 @@ fi
 
 # File searching with ripgrep (better grep)
 if command -v rg >/dev/null 2>&1; then
-    alias grep='rg --color=auto'
     alias rga='rg --no-ignore --hidden'
     alias rgf='rg --files'
 fi
