@@ -14,33 +14,64 @@ ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 # Curated aliases based on usage patterns
 declare -A ALIASES
 ALIASES=(
-    # Beginner (most frequent commands)
-    "md"    "make dev (you use this 128 times!)"
-    "acp"   "git add -u && git commit && git push"
-    "gst"   "git status --short --branch (you use this 558 times!)"
+    # Navigation & File Management
+    ".."    "cd .. (go up one directory)"
+    "..."   "cd ../.."
     "ws"    "cd $HOME/workspace"
     "proj"  "cd $HOME/workspace/projects"
-    "ll"    "ls -la"
-    "reload" "source ~/.zshrc"
+    "ll"    "ls -la with details"
+    "la"    "ls -la all files"
+    "lt"    "tree view (level 2)"
+    "lm"    "ls with pager"
+    "ducks" "show largest directories"
+    "findbig" "find 5 largest files"
 
-    # Intermediate
-    "gup"   "git pull && git submodule update"
-    "gcl"   "git clean -fd && git reset --hard"
-    "dev"   "smart project dev server"
-    "cpu"   "htop --sort-key PERCENT_CPU"
-    "ports" "show open network ports"
-    "cls"   "clear screen"
-    "path"  "show PATH in readable format"
-
-    # Advanced
-    "qc"    "quick commit with auto messages"
-    "status" "enhanced project status"
+    # Git Shortcuts
+    "gst"   "git status (you use this often!)"
     "ga"    "git add"
     "gc"    "git commit"
     "gp"    "git push"
     "gd"    "git diff"
-    ".."    "cd .. (go up one directory)"
+    "gup"   "git pull && submodule update"
+    "gcl"   "git clean -fd && reset --hard"
+    "mygh"  "enhanced git helpers"
+    "gsave" "git save helper"
+
+    # System Monitoring
+    "cpu"   "htop sorted by CPU usage"
+    "ports" "show open network ports"
+    "conncount" "count network connections by state"
+    "wotgobblemem" "top 15 memory-consuming processes"
+    "memfree" "show free memory"
+    "dskload" "show disk I/O processes"
+    "psg"   "ps aux | grep"
+
+    # Development Tools
     "serve" "python3 -m http.server"
+    "cls"   "clear screen"
+    "path"  "show PATH in readable format"
+    "curly" "enhanced curl with timing details"
+    "vgrep" "smart grep with fd + ripgrep"
+    "v"     "open in $EDITOR"
+
+    # Network & Web
+    "get"   "curl with progress bar"
+    "header" "curl headers only"
+    "ping"  "ping with 5 packets"
+    "fastping" "ping 100 packets"
+
+    # Safety & Utilities
+    "rm"    "rm -i (interactive deletion)"
+    "cp"    "cp -i (interactive copy)"
+    "mv"    "mv -i (interactive move)"
+    "df"    "df -h (human readable)"
+    "du"    "du -h (human readable)"
+    "reload" "source ~/.zshrc"
+
+    # Typo Protection
+    "shh"   "ssh (common typo fix)"
+    "sduo"  "sudo (typo fix)"
+    "suod"  "sudo (typo fix)"
 )
 
 increment_session_counter() {
@@ -56,30 +87,43 @@ should_show_reminder() {
 }
 
 show_reminders() {
-    # Get random aliases
+    # Get all available aliases
     local -a keys=(${(k)ALIASES})
     local -a selected=()
-    local count=0
+    local total_keys=${#keys[@]}
 
-    # Simple random selection
-    for key in ${(o)keys}; do
-        [[ $count -lt $ALIAS_REMINDER_MAX_TIPS ]] || break
-        selected+="$key"
-        ((count++))
+    # Return if no aliases
+    [[ $total_keys -eq 0 ]] && return
+
+    # Randomly select aliases
+    local count=0
+    local max_attempts=$((ALIAS_REMINDER_MAX_TIPS * 3))  # Prevent infinite loops
+    local attempts=0
+
+    while [[ $count -lt $ALIAS_REMINDER_MAX_TIPS && $attempts -lt $max_attempts ]]; do
+        local random_index=$(( (RANDOM % total_keys) + 1 ))
+        local selected_key="${keys[$random_index]}"
+
+        # Check if already selected
+        if [[ ! " ${selected[@]} " =~ " ${selected_key} " ]]; then
+            selected+=("$selected_key")
+            ((count++))
+        fi
+        ((attempts++))
     done
 
     [[ ${#selected[@]} -eq 0 ]] && return
 
-    echo "\n💡 Alias Reminders (Level: $ALIAS_REMINDER_LEVEL)"
+    echo "\n💡 Alias Reminders (${#selected[@]} random tips)"
     echo "════════════════════════════════════════"
 
     for alias in $selected; do
-        printf "%-12s %s\n" "$alias" "${ALIASES[$alias]}"
+        printf "%-15s %s\n" "$alias" "${ALIASES[$alias]}"
     done
 
     echo "\n💡 Try these shortcuts to speed up your workflow!"
-    echo "   Configure: export ALIAS_REMINDER_LEVEL={beginner|intermediate|advanced}"
-    echo "   Disable:   export ALIAS_REMINDER_ENABLED=false\n"
+    echo "   Show more: ar-show  |  Level: ar-level {beginner|intermediate|advanced}"
+    echo "   Disable:   ar-off   |  Enable: ar-on\n"
 }
 
 # Management commands
