@@ -49,8 +49,10 @@ workflow_check() {
 }
 
 # Auto-completion for workflow tools
-# Note: Temporarily disabled all custom completions due to conflicts with system completion
-if false && command -v compdef >/dev/null 2>&1; then
+# Note: Custom completions disabled due to conflicts with alias expansions and system completion
+# The completion definitions caused '_comps: assignment to invalid subscript range' errors
+# when trying to register completions for aliases with variable paths (e.g., $WORKFLOW_DIR/script)
+if [[ "$DOTFILES_ENABLE_WORKFLOW_COMPLETIONS" == "true" ]] && command -v compdef >/dev/null 2>&1; then
     # Test runner completion
     _test_runner_completion() {
         local -a options
