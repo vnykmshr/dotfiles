@@ -3,7 +3,6 @@
 # Configuration
 ALIAS_REMINDER_ENABLED="${ALIAS_REMINDER_ENABLED:-true}"
 ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-5}"
-ALIAS_REMINDER_LEVEL="${ALIAS_REMINDER_LEVEL:-beginner}"
 ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-5}"
 ALIAS_REMINDER_DIR="$HOME/.config/dotfiles"
 ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
@@ -122,34 +121,20 @@ show_reminders() {
     done
 
     echo "\n💡 Try these shortcuts to speed up your workflow!"
-    echo "   Show more: ar-show  |  Level: ar-level {beginner|intermediate|advanced}"
-    echo "   Disable:   ar-off   |  Enable: ar-on\n"
+    echo "   Show more: ar-show  |  Disable: ar-off  |  Enable: ar-on\n"
 }
 
 # Management commands
-alias-reminder-level() {
-    case "$1" in
-        beginner|intermediate|advanced)
-            export ALIAS_REMINDER_LEVEL="$1"
-            echo "Alias reminder level set to: $1"
-            ;;
-        *)
-            echo "Usage: alias-reminder-level {beginner|intermediate|advanced}"
-            echo "Current level: $ALIAS_REMINDER_LEVEL"
-            ;;
-    esac
-}
-
 alias-reminder-show() { show_reminders; }
-alias-reminder-disable() { export ALIAS_REMINDER_ENABLED=false; echo "Disabled"; }
-alias-reminder-enable() { export ALIAS_REMINDER_ENABLED=true; echo "Enabled"; }
-alias-reminder-reset() { rm -f "$ALIAS_REMINDER_COUNTER"; echo "Reset"; }
+alias-reminder-disable() { export ALIAS_REMINDER_ENABLED=false; echo "Alias reminders disabled"; }
+alias-reminder-enable() { export ALIAS_REMINDER_ENABLED=true; echo "Alias reminders enabled"; }
+alias-reminder-reset() { rm -f "$ALIAS_REMINDER_COUNTER"; echo "Session counter reset"; }
 
 # Short aliases
-alias ar-level='alias-reminder-level'
 alias ar-show='alias-reminder-show'
 alias ar-on='alias-reminder-enable'
 alias ar-off='alias-reminder-disable'
+alias ar-reset='alias-reminder-reset'
 
 # Auto-run in interactive shells
 if [[ $- == *i* && "$ALIAS_REMINDER_ENABLED" == "true" ]]; then

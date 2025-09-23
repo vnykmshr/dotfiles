@@ -10,7 +10,7 @@
 - **Development Automation**: Universal `dev`, `test`, `testwatch` commands for any
   project
 - **Git Workflow**: Smart commit suggestions, branch management, 45+ aliases
-- **Alias Reminders**: Periodic helpful shortcuts to build muscle memory
+- **Alias Reminders**: Shows 5 random shortcuts every 5 commands for muscle memory
 - **Environment Detection**: Auto-activate .nvmrc/.python-version, load .env files
 - **Performance**: Fast shell startup (0.158s) with lazy loading
 - **Modern Tools**: bat, eza, fd, ripgrep, delta, zoxide integration
@@ -49,6 +49,11 @@ gclean             # Remove merged branches
 
 # Performance
 shell-bench        # Measure startup time
+
+# Alias Reminders
+ar-show            # Show 5 random aliases
+ar-off             # Disable reminders
+ar-on              # Enable reminders
 ```
 
 ## What's Included
