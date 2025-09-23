@@ -49,7 +49,8 @@ workflow_check() {
 }
 
 # Auto-completion for workflow tools
-if command -v compdef >/dev/null 2>&1; then
+# Note: Temporarily disabled all custom completions due to conflicts with system completion
+if false && command -v compdef >/dev/null 2>&1; then
     # Test runner completion
     _test_runner_completion() {
         local -a options
@@ -63,8 +64,7 @@ if command -v compdef >/dev/null 2>&1; then
         _describe 'test-runner options' options
     }
     compdef _test_runner_completion test-runner
-    compdef _test_runner_completion t
-    compdef _test_runner_completion test
+    # Note: Only enabling completion for the actual script, not the alias
 
     # Project init completion
     _project_init_completion() {
@@ -91,8 +91,8 @@ if command -v compdef >/dev/null 2>&1; then
             _describe 'project-init options' options
         fi
     }
-    compdef _project_init_completion project-init
-    compdef _project_init_completion pinit
+    # Note: Disabled project-init completion to avoid conflicts
+    # compdef _project_init_completion project-init
 
     # Git helpers completion
     _git_helpers_completion() {
@@ -108,8 +108,9 @@ if command -v compdef >/dev/null 2>&1; then
         )
         _describe 'git-helpers commands' commands
     }
-    compdef _git_helpers_completion git-helpers
-    compdef _git_helpers_completion gw
+    # Temporarily disable git-helpers completion too
+    # compdef _git_helpers_completion git-helpers
+    # Note: Removed 'gw' completion - it's an alias with variable expansion
 
     # Dev server completion
     _dev_server_completion() {
@@ -123,9 +124,11 @@ if command -v compdef >/dev/null 2>&1; then
         )
         _describe 'dev-server options' options
     }
-    compdef _dev_server_completion dev-server
-    compdef _dev_server_completion dev
-    compdef _dev_server_completion serve
+    # Temporarily disable all dev-server completions to debug
+    # compdef _dev_server_completion dev-server
+    # if [[ -x "$workflow_dir/dev-server" ]]; then
+    #     compdef _dev_server_completion dev
+    # fi
 fi
 
 # Add helpful aliases for the check function
