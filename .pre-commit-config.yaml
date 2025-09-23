@@ -45,6 +45,7 @@ repos:
     hooks:
       - id: shellcheck
         args: [-e, SC1090, -e, SC1091]
+        exclude: '^config/zsh/alias-reminder$'
 
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli

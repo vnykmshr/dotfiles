@@ -1,77 +1,75 @@
+#!/usr/bin/env zsh
 # Alias reminder system - shows helpful aliases periodically
 
-# Configuration - ensure variables are always set
+# Configuration - simple and self-contained
 export ALIAS_REMINDER_ENABLED="${ALIAS_REMINDER_ENABLED:-true}"
 export ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-5}"
-export ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-5}"
 export ALIAS_REMINDER_DIR="$HOME/.config/dotfiles"
 export ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 
 # Create directory if needed
 [[ ! -d "$ALIAS_REMINDER_DIR" ]] && mkdir -p "$ALIAS_REMINDER_DIR"
 
-# Curated aliases based on usage patterns
-# Declare as global associative array
-typeset -gA ALIASES
-ALIASES=(
+# Simple alias collection - always available
+declare -A HELPFUL_ALIASES=(
     # Navigation & File Management
-    ".."    "cd .. (go up one directory)"
-    "..."   "cd ../.."
-    "ws"    "cd $HOME/workspace"
-    "proj"  "cd $HOME/workspace/projects"
-    "ll"    "ls -la with details"
-    "la"    "ls -la all files"
-    "lt"    "tree view (level 2)"
-    "lm"    "ls with pager"
-    "ducks" "show largest directories"
-    "findbig" "find 5 largest files"
+    [".."]="cd .. (go up one directory)"
+    ["..."]="cd ../.."
+    ["ws"]="cd $HOME/workspace"
+    ["proj"]="cd $HOME/workspace/projects"
+    ["ll"]="ls -la with details"
+    ["la"]="ls -la all files"
+    ["lt"]="tree view (level 2)"
+    ["lm"]="ls with pager"
+    ["ducks"]="show largest directories"
+    ["findbig"]="find 5 largest files"
 
     # Git Shortcuts
-    "gst"   "git status (you use this often!)"
-    "ga"    "git add"
-    "gc"    "git commit"
-    "gp"    "git push"
-    "gd"    "git diff"
-    "gup"   "git pull && submodule update"
-    "gcl"   "git clean -fd && reset --hard"
-    "mygh"  "enhanced git helpers"
-    "gsave" "git save helper"
+    ["gst"]="git status (you use this often!)"
+    ["ga"]="git add"
+    ["gc"]="git commit"
+    ["gp"]="git push"
+    ["gd"]="git diff"
+    ["gup"]="git pull && submodule update"
+    ["gcl"]="git clean -fd && reset --hard"
+    ["mygh"]="enhanced git helpers"
+    ["gsave"]="git save helper"
 
     # System Monitoring
-    "cpu"   "htop sorted by CPU usage"
-    "ports" "show open network ports"
-    "conncount" "count network connections by state"
-    "wotgobblemem" "top 15 memory-consuming processes"
-    "memfree" "show free memory"
-    "dskload" "show disk I/O processes"
-    "psg"   "ps aux | grep"
+    ["cpu"]="htop sorted by CPU usage"
+    ["ports"]="show open network ports"
+    ["conncount"]="count network connections by state"
+    ["wotgobblemem"]="top 15 memory-consuming processes"
+    ["memfree"]="show free memory"
+    ["dskload"]="show disk I/O processes"
+    ["psg"]="ps aux | grep"
 
     # Development Tools
-    "serve" "python3 -m http.server"
-    "cls"   "clear screen"
-    "path"  "show PATH in readable format"
-    "curly" "enhanced curl with timing details"
-    "vgrep" "smart grep with fd + ripgrep"
-    "v"     "open in $EDITOR"
+    ["serve"]="python3 -m http.server"
+    ["cls"]="clear screen"
+    ["path"]="show PATH in readable format"
+    ["curly"]="enhanced curl with timing details"
+    ["vgrep"]="smart grep with fd + ripgrep"
+    ["v"]="open in $EDITOR"
 
     # Network & Web
-    "get"   "curl with progress bar"
-    "header" "curl headers only"
-    "ping"  "ping with 5 packets"
-    "fastping" "ping 100 packets"
+    ["get"]="curl with progress bar"
+    ["header"]="curl headers only"
+    ["ping"]="ping with 5 packets"
+    ["fastping"]="ping 100 packets"
 
     # Safety & Utilities
-    "rm"    "rm -i (interactive deletion)"
-    "cp"    "cp -i (interactive copy)"
-    "mv"    "mv -i (interactive move)"
-    "df"    "df -h (human readable)"
-    "du"    "du -h (human readable)"
-    "reload" "source ~/.zshrc"
+    ["rm"]="rm -i (interactive deletion)"
+    ["cp"]="cp -i (interactive copy)"
+    ["mv"]="mv -i (interactive move)"
+    ["df"]="df -h (human readable)"
+    ["du"]="du -h (human readable)"
+    ["reload"]="source ~/.zshrc"
 
     # Typo Protection
-    "shh"   "ssh (common typo fix)"
-    "sduo"  "sudo (typo fix)"
-    "suod"  "sudo (typo fix)"
+    ["shh"]="ssh (common typo fix)"
+    ["sduo"]="sudo (typo fix)"
+    ["suod"]="sudo (typo fix)"
 )
 
 increment_session_counter() {
@@ -82,102 +80,58 @@ increment_session_counter() {
 }
 
 should_show_reminder() {
-    local session_count=$(increment_session_counter)
+    local session_count
+    session_count=$(increment_session_counter)
     (( session_count % ALIAS_REMINDER_FREQUENCY == 0 ))
 }
 
+# Simple, reliable reminder function
 show_reminders() {
-    # Ensure we have the right number of tips
-    local max_tips=${ALIAS_REMINDER_MAX_TIPS:-5}
-
-    # Get all available aliases using zsh syntax
-    local -a keys
-    keys=(${(@k)ALIASES})
-    local total_keys=${#keys[@]}
-
-    # Return if no aliases
-    [[ $total_keys -eq 0 ]] && return
-
-    # Randomly select aliases
+    local -a keys=("${(@k)HELPFUL_ALIASES}")
     local -a selected=()
-    local count=0
-    local max_attempts=$((max_tips * 3))  # Prevent infinite loops
-    local attempts=0
+    local max_tips=3
 
-    while [[ $count -lt $max_tips && $attempts -lt $max_attempts ]]; do
-        local random_index=$(( (RANDOM % total_keys) + 1 ))
-        local selected_key="${keys[$random_index]}"
-
-        # Check if already selected (zsh array search)
-        if [[ ${selected[(ie)$selected_key]} -gt ${#selected} ]]; then
-            selected+=("$selected_key")
-            ((count++))
-        fi
-        ((attempts++))
+    # Randomly select unique aliases
+    while [[ ${#selected[@]} -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
+        local idx=$(( RANDOM % ${#keys[@]} + 1 ))
+        local key="${keys[$idx]}"
+        selected+=("$key")
+        keys=("${keys[@]:#$key}")  # Remove selected key
     done
 
     [[ ${#selected[@]} -eq 0 ]] && return
 
-    printf "\n💡 Alias Reminders (%d random tips)\n" ${#selected[@]}
+    printf "\n💡 Alias Reminders (%d tips)\n" ${#selected[@]}
     echo "════════════════════════════════════════"
 
-    for alias in $selected; do
-        printf "%-15s %s\n" "$alias" "${ALIASES[$alias]}"
+    for alias_name in "${selected[@]}"; do
+        printf "%-15s %s\n" "$alias_name" "${HELPFUL_ALIASES[$alias_name]}"
     done
 
-    printf "\n💡 Try these shortcuts to speed up your workflow!\n"
-    printf "   Show more: ar-show  |  Disable: ar-off  |  Enable: ar-on\n\n"
+    printf "\n💡 Try these shortcuts! Use 'ar-show' for more.\n\n"
 }
 
 # Management commands
 alias-reminder-show() {
-    # Self-contained function that recreates everything it needs
-    local -A local_aliases=(
-        ".." "cd .. (go up one directory)"
-        "..." "cd ../.."
-        "ws" "cd $HOME/workspace"
-        "ll" "ls -la with details"
-        "la" "ls -la all files"
-        "gst" "git status (you use this often!)"
-        "ga" "git add"
-        "gc" "git commit"
-        "gp" "git push"
-        "gd" "git diff"
-        "cpu" "htop sorted by CPU usage"
-        "ports" "show open network ports"
-        "cls" "clear screen"
-        "v" "open in $EDITOR"
-        "vgrep" "smart grep with fd + ripgrep"
-        "curly" "enhanced curl with timing details"
-        "ducks" "show largest directories"
-        "memfree" "show free memory"
-        "conncount" "count network connections by state"
-        "ar-show" "show these reminders"
-    )
-
-    local -a keys=(${(@k)local_aliases})
+    local -a keys=("${(@k)HELPFUL_ALIASES}")
     local -a selected=()
     local max_tips=5
-    local count=0
 
-    # Randomly select aliases
-    while [[ $count -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
-        local random_index=$(( (RANDOM % ${#keys[@]}) + 1 ))
-        local selected_key="${keys[$random_index]}"
-
-        # Add to selected
-        selected+=("$selected_key")
-
-        # Remove from keys to avoid duplicates
-        keys=("${(@)keys:#$selected_key}")
-        ((count++))
+    # Randomly select unique aliases
+    while [[ ${#selected[@]} -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
+        local idx=$(( RANDOM % ${#keys[@]} + 1 ))
+        local key="${keys[$idx]}"
+        selected+=("$key")
+        keys=("${keys[@]:#$key}")  # Remove selected key
     done
 
-    printf "\n💡 Alias Reminders (%d random tips)\n" ${#selected[@]}
+    [[ ${#selected[@]} -eq 0 ]] && return
+
+    printf "\n💡 Alias Reminders (%d tips)\n" ${#selected[@]}
     echo "════════════════════════════════════════"
 
-    for alias in $selected; do
-        printf "%-15s %s\n" "$alias" "${local_aliases[$alias]}"
+    for alias_name in "${selected[@]}"; do
+        printf "%-15s %s\n" "$alias_name" "${HELPFUL_ALIASES[$alias_name]}"
     done
 
     printf "\n💡 Try these shortcuts to speed up your workflow!\n"
