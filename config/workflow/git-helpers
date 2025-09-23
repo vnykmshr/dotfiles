@@ -105,10 +105,16 @@ quick_save() {
     if [[ $input =~ ^[0-9]+$ ]]; then
         # User selected a number - get fresh suggestions
         local temp_suggestions
-        if ! mapfile -t temp_suggestions < <(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //'); then
-            log_error "Failed to generate commit message suggestions"
-            return 1
-        fi
+        # Use Bash 3.2 compatible method instead of mapfile
+        local suggestion_output
+        suggestion_output=$(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //')
+
+        local IFS=$'\n'
+        local line_count=0
+        while IFS= read -r line; do
+            temp_suggestions[line_count]="$line"
+            ((line_count++))
+        done <<<"$suggestion_output"
 
         if [[ ${#temp_suggestions[@]} -eq 0 ]]; then
             log_error "No suggestions available"
