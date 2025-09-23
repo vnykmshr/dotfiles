@@ -1,11 +1,11 @@
 # Alias reminder system - shows helpful aliases periodically
 
-# Configuration
-ALIAS_REMINDER_ENABLED="${ALIAS_REMINDER_ENABLED:-true}"
-ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-5}"
-ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-5}"
-ALIAS_REMINDER_DIR="$HOME/.config/dotfiles"
-ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
+# Configuration - ensure variables are always set
+export ALIAS_REMINDER_ENABLED="${ALIAS_REMINDER_ENABLED:-true}"
+export ALIAS_REMINDER_FREQUENCY="${ALIAS_REMINDER_FREQUENCY:-5}"
+export ALIAS_REMINDER_MAX_TIPS="${ALIAS_REMINDER_MAX_TIPS:-5}"
+export ALIAS_REMINDER_DIR="$HOME/.config/dotfiles"
+export ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 
 # Create directory if needed
 [[ ! -d "$ALIAS_REMINDER_DIR" ]] && mkdir -p "$ALIAS_REMINDER_DIR"
