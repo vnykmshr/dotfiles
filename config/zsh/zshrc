@@ -171,8 +171,5 @@ load_config "personal.local"
 # Local overrides
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
-# Load alias reminders last to ensure variables persist
+# === ALIAS REMINDERS ===
 [[ "$DOTFILES_SKIP_ALIAS_REMINDER" != "1" ]] && load_config "alias-reminder"
-
-# Force load alias reminders (troubleshooting)
-source "$DOTFILES/config/zsh/alias-reminder" 2>/dev/null || true
