@@ -64,16 +64,31 @@ alias suod='sudo'
 # System info
 alias df='df -h'
 alias du='du -h'
-alias free='free -h'
 alias ps='ps auxf'
 alias psg='ps aux | grep'
 alias top='top -o cpu'
 alias cpu='htop --sort-key PERCENT_CPU'
 
+# Cross-platform memory and process aliases
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS versions
+    alias free='vm_stat'
+    alias wotgobblemem='/bin/ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k 6 | tail -15'
+    alias memfree='vm_stat | awk "/Pages free/ {gsub(/\./, \"\", \$3); printf \"%.0f MB\\n\", \$3 * 4096 / 1024 / 1024}"'
+    alias dskload='/bin/ps aux | awk "\$8 ~ /D/ {print}"'
+else
+    # Linux versions
+    alias free='free -h'
+    alias wotgobblemem='ps -o time,ppid,pid,nice,pcpu,pmem,user,comm -A | sort -n -k 6 | tail -15'
+    alias memfree="free -m | sed -n -e '3p' | grep -Po '\\d+$'"
+    alias dskload="ps faux | awk '\$8 ~ /D/{print}'"
+fi
+
 # Network
 alias ports='netstat -tulanp'
 alias ping='ping -c 5'
 alias fastping='ping -c 100 -s 2'
+alias conncount="netstat -tan | awk '{print \$6}' | sort | uniq -c"
 
 # Development shortcuts
 alias cls='clear'
@@ -200,6 +215,7 @@ alias touch='touch -c'
 
 # Find large files
 alias findbig='find . -type f -exec ls -s {} \; | sort -n -r | head -5'
+alias ducks='du -cks * 2>/dev/null | sort -rn | head'
 
 # =============================================================================
 # Network & Web
@@ -220,10 +236,55 @@ alias serve-here='python3 -m http.server 8000'
 # Utility Functions as Aliases
 # =============================================================================
 
+# Enhanced curl with timing and response details
+curly() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: curly <url> [curl options]"
+        echo "Enhanced curl with headers and detailed timing information"
+        return 1
+    fi
+
+    local url="$1"
+    shift
+
+    echo "🌐 Fetching: $url"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+    # Show headers
+    echo "📋 Headers:"
+    curl -Is "$url" "$@" | while IFS= read -r line; do
+        echo "   $line"
+    done
+
+    echo
+    echo "⏱️  Timing Details:"
+    curl -o /dev/null -s -w "\
+   DNS Lookup:        %{time_namelookup}s
+   TCP Connect:       %{time_connect}s
+   TLS Handshake:     %{time_appconnect}s
+   Pre-transfer:      %{time_pretransfer}s
+   Redirect:          %{time_redirect}s
+   Start Transfer:    %{time_starttransfer}s
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Total Time:        %{time_total}s
+
+   HTTP Code:         %{http_code}
+   Size Downloaded:   %{size_download} bytes
+   Speed:             %{speed_download} bytes/sec
+" "$url" "$@"
+}
+
 # Enhanced grep with useful defaults
 alias grep='grep --color=auto -n -H'
 alias egrep='egrep --color=auto -n -H'
 alias fgrep='fgrep --color=auto -n -H'
+
+# Smart grep using fd and ripgrep
+if command -v fd >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
+    alias vgrep='fd --type f --exclude node_modules --exclude .git --exclude logs --exclude doc --exclude vendor --exclude dist --exclude webpack --exclude static --exec rg --line-number --ignore-case'
+else
+    alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' -and -not -path './vendor/*' -and -not -path './dist/*' -and -not -path './webpack/*' -and -not -path './static/*' -print0 | xargs -0 grep -nir"
+fi
 
 # Human readable sizes
 alias du1='du --max-depth=1'
@@ -268,6 +329,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Package managers
     if command -v apt >/dev/null 2>&1; then
         alias update='sudo apt update && sudo apt upgrade'
+        alias upgrade='sudo apt-get update && sudo apt-get upgrade && sudo apt-get clean'
         alias install='sudo apt install'
         alias search='apt search'
     elif command -v yum >/dev/null 2>&1; then
