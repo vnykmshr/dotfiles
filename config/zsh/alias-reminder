@@ -11,7 +11,8 @@ export ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 [[ ! -d "$ALIAS_REMINDER_DIR" ]] && mkdir -p "$ALIAS_REMINDER_DIR"
 
 # Curated aliases based on usage patterns
-declare -A ALIASES
+# Declare as global associative array
+typeset -gA ALIASES
 ALIASES=(
     # Navigation & File Management
     ".."    "cd .. (go up one directory)"
@@ -130,9 +131,57 @@ show_reminders() {
 
 # Management commands
 alias-reminder-show() {
-    # Ensure variables are set
-    ALIAS_REMINDER_MAX_TIPS=${ALIAS_REMINDER_MAX_TIPS:-5}
-    show_reminders
+    # Self-contained function that recreates everything it needs
+    local -A local_aliases=(
+        ".." "cd .. (go up one directory)"
+        "..." "cd ../.."
+        "ws" "cd $HOME/workspace"
+        "ll" "ls -la with details"
+        "la" "ls -la all files"
+        "gst" "git status (you use this often!)"
+        "ga" "git add"
+        "gc" "git commit"
+        "gp" "git push"
+        "gd" "git diff"
+        "cpu" "htop sorted by CPU usage"
+        "ports" "show open network ports"
+        "cls" "clear screen"
+        "v" "open in $EDITOR"
+        "vgrep" "smart grep with fd + ripgrep"
+        "curly" "enhanced curl with timing details"
+        "ducks" "show largest directories"
+        "memfree" "show free memory"
+        "conncount" "count network connections by state"
+        "ar-show" "show these reminders"
+    )
+
+    local -a keys=(${(@k)local_aliases})
+    local -a selected=()
+    local max_tips=5
+    local count=0
+
+    # Randomly select aliases
+    while [[ $count -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
+        local random_index=$(( (RANDOM % ${#keys[@]}) + 1 ))
+        local selected_key="${keys[$random_index]}"
+
+        # Add to selected
+        selected+=("$selected_key")
+
+        # Remove from keys to avoid duplicates
+        keys=("${(@)keys:#$selected_key}")
+        ((count++))
+    done
+
+    printf "\n💡 Alias Reminders (%d random tips)\n" ${#selected[@]}
+    echo "════════════════════════════════════════"
+
+    for alias in $selected; do
+        printf "%-15s %s\n" "$alias" "${local_aliases[$alias]}"
+    done
+
+    printf "\n💡 Try these shortcuts to speed up your workflow!\n"
+    printf "   Show more: ar-show  |  Disable: ar-off  |  Enable: ar-on\n\n"
 }
 alias-reminder-disable() { export ALIAS_REMINDER_ENABLED=false; echo "Alias reminders disabled"; }
 alias-reminder-enable() { export ALIAS_REMINDER_ENABLED=true; echo "Alias reminders enabled"; }
