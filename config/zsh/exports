@@ -98,8 +98,15 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 export AWS_PAGER=""
 
 # Homebrew (if installed) - dynamically detect installation
-if command -v brew >/dev/null 2>&1; then
-    HOMEBREW_PREFIX="$(brew --prefix)"
+if [[ -x "/usr/local/bin/brew" ]] || [[ -x "/opt/homebrew/bin/brew" ]]; then
+    # Cache the prefix to avoid repeated calls during shell reload
+    if [[ -z "$HOMEBREW_PREFIX" ]]; then
+        if [[ -x "/opt/homebrew/bin/brew" ]]; then
+            HOMEBREW_PREFIX="/opt/homebrew"
+        elif [[ -x "/usr/local/bin/brew" ]]; then
+            HOMEBREW_PREFIX="/usr/local"
+        fi
+    fi
     export HOMEBREW_PREFIX
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_INSECURE_REDIRECT=1
@@ -111,7 +118,7 @@ fi
 # =============================================================================
 
 # GPG
-export GPG_TTY=$(tty)
+export GPG_TTY=$(/usr/bin/tty)
 
 # SSH
 export SSH_KEY_PATH="$HOME/.ssh/id_ed25519"
