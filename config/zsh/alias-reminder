@@ -11,7 +11,8 @@ export ALIAS_REMINDER_COUNTER="$ALIAS_REMINDER_DIR/session-counter"
 [[ ! -d "$ALIAS_REMINDER_DIR" ]] && mkdir -p "$ALIAS_REMINDER_DIR"
 
 # Simple alias collection - always available
-declare -A HELPFUL_ALIASES=(
+typeset -gA HELPFUL_ALIASES
+HELPFUL_ALIASES=(
     # Navigation & File Management
     [".."]="cd .. (go up one directory)"
     ["..."]="cd ../.."
