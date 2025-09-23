@@ -6,7 +6,10 @@
 
 **Build your development identity, don't copy mine.**
 
-This project provides a solid foundation and practical examples. The real value comes from understanding the patterns and adapting them to your unique workflow. Great developers don't just copy configurations—they understand, modify, and evolve them.
+This project provides a solid foundation and practical examples. The real value
+comes from understanding the patterns and adapting them to your unique workflow.
+Great developers don't just copy configurations—they understand, modify, and
+evolve them.
 
 ## Design Principles
 
@@ -18,7 +21,7 @@ This project provides a solid foundation and practical examples. The real value 
 
 ### 2. **Modular Architecture**
 
-```
+```text
 config/
 ├── zsh/          # Shell environment and functions
 ├── git/          # Version control templates and aliases
@@ -164,13 +167,13 @@ Your dotfiles should answer these questions:
 # When you run gsave, you get context-aware suggestions
 gsave
 # Suggestions:
-# 1. 📚 Update documentation
+# 1. Update documentation
 # 2. feat: add new feature
 # 3. fix: resolve bug
 # 4. Update performance.md
 # Commit message (or number): 1
 
-# Creates commit: "📚 Update documentation"
+# Creates commit: "Update documentation"
 ```
 
 **Branch management**:
@@ -303,4 +306,6 @@ While this is designed for personal use, improvements to the core system are wel
 
 ---
 
-**Remember**: The best dotfiles are the ones you understand completely and have adapted to your specific needs. Use this project as a foundation, not a destination.
+**Remember**: The best dotfiles are the ones you understand completely and have
+adapted to your specific needs. Use this project as a foundation, not a
+destination.

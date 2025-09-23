@@ -68,8 +68,8 @@ ar-on              # Enable reminders
 
 ## Documentation
 
-- **[📚 Project Overview](docs/README.md)** - Philosophy and design principles
-- **[🔧 Customization Guide](docs/customization-guide.md)** - Adaptation examples
+- [Project Overview](docs/README.md) - Philosophy and design principles
+- [Customization Guide](docs/customization-guide.md) - Adaptation examples
 
 ## Requirements
 
