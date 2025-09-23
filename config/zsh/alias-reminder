@@ -136,7 +136,23 @@ alias ar-on='alias-reminder-enable'
 alias ar-off='alias-reminder-disable'
 alias ar-reset='alias-reminder-reset'
 
-# Auto-run in interactive shells
+# Function to check and show reminders (can be called manually or via hooks)
+check_reminders() {
+    [[ "$ALIAS_REMINDER_ENABLED" == "true" ]] && should_show_reminder && show_reminders
+}
+
+# Hook into zsh's command cycle to show reminders periodically
+alias_reminder_hook() {
+    check_reminders
+}
+
+# Auto-run in interactive shells and set up hooks
 if [[ $- == *i* && "$ALIAS_REMINDER_ENABLED" == "true" ]]; then
-    should_show_reminder && show_reminders
+    # Try to add to precmd hooks
+    if command -v add-zsh-hook >/dev/null 2>&1; then
+        add-zsh-hook precmd alias_reminder_hook 2>/dev/null
+    fi
+
+    # Also provide manual trigger
+    alias check-reminders='check_reminders'
 fi
