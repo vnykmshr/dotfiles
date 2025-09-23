@@ -93,7 +93,7 @@ show_reminders() {
 
     # Randomly select unique aliases
     while [[ ${#selected[@]} -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
-        local idx=$(( RANDOM % ${#keys[@]} + 1 ))
+        local idx=$(( (RANDOM % ${#keys[@]}) + 1 ))
         local key="${keys[$idx]}"
         selected+=("$key")
         keys=("${keys[@]:#$key}")  # Remove selected key
@@ -119,7 +119,7 @@ alias-reminder-show() {
 
     # Randomly select unique aliases
     while [[ ${#selected[@]} -lt $max_tips && ${#keys[@]} -gt 0 ]]; do
-        local idx=$(( RANDOM % ${#keys[@]} + 1 ))
+        local idx=$(( (RANDOM % ${#keys[@]}) + 1 ))
         local key="${keys[$idx]}"
         selected+=("$key")
         keys=("${keys[@]:#$key}")  # Remove selected key
