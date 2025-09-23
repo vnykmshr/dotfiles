@@ -289,6 +289,12 @@ dotfiles-edit() {
     cd "$DOTFILES" && "$EDITOR" .
 }
 
+# Find the largest files in current directory
+findbig() {
+    # Use sh to avoid zsh parsing issues
+    echo '/usr/bin/find . -type f -exec ls -s {} \; 2>/dev/null | sort -n -r | head -5' | sh
+}
+
 # Reload zsh configuration
 reload() {
     source "$HOME/.zshrc"

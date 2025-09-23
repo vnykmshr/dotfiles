@@ -213,8 +213,7 @@ alias tar-list='tar -tzf'
 # Quick file creation
 alias touch='touch -c'
 
-# Find large files
-alias findbig='find . -type f -exec ls -s {} \; | sort -n -r | head -5'
+# Find large files - see functions file for findbig implementation
 alias ducks='du -cks * 2>/dev/null | sort -rn | head'
 
 # =============================================================================
