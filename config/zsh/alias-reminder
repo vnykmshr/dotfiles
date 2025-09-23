@@ -86,25 +86,29 @@ should_show_reminder() {
 }
 
 show_reminders() {
-    # Get all available aliases
-    local -a keys=(${(k)ALIASES})
-    local -a selected=()
+    # Ensure we have the right number of tips
+    local max_tips=${ALIAS_REMINDER_MAX_TIPS:-5}
+
+    # Get all available aliases using zsh syntax
+    local -a keys
+    keys=(${(@k)ALIASES})
     local total_keys=${#keys[@]}
 
     # Return if no aliases
     [[ $total_keys -eq 0 ]] && return
 
     # Randomly select aliases
+    local -a selected=()
     local count=0
-    local max_attempts=$((ALIAS_REMINDER_MAX_TIPS * 3))  # Prevent infinite loops
+    local max_attempts=$((max_tips * 3))  # Prevent infinite loops
     local attempts=0
 
-    while [[ $count -lt $ALIAS_REMINDER_MAX_TIPS && $attempts -lt $max_attempts ]]; do
+    while [[ $count -lt $max_tips && $attempts -lt $max_attempts ]]; do
         local random_index=$(( (RANDOM % total_keys) + 1 ))
         local selected_key="${keys[$random_index]}"
 
-        # Check if already selected
-        if [[ ! " ${selected[@]} " =~ " ${selected_key} " ]]; then
+        # Check if already selected (zsh array search)
+        if [[ ${selected[(ie)$selected_key]} -gt ${#selected} ]]; then
             selected+=("$selected_key")
             ((count++))
         fi
@@ -113,19 +117,23 @@ show_reminders() {
 
     [[ ${#selected[@]} -eq 0 ]] && return
 
-    echo "\n💡 Alias Reminders (${#selected[@]} random tips)"
+    printf "\n💡 Alias Reminders (%d random tips)\n" ${#selected[@]}
     echo "════════════════════════════════════════"
 
     for alias in $selected; do
         printf "%-15s %s\n" "$alias" "${ALIASES[$alias]}"
     done
 
-    echo "\n💡 Try these shortcuts to speed up your workflow!"
-    echo "   Show more: ar-show  |  Disable: ar-off  |  Enable: ar-on\n"
+    printf "\n💡 Try these shortcuts to speed up your workflow!\n"
+    printf "   Show more: ar-show  |  Disable: ar-off  |  Enable: ar-on\n\n"
 }
 
 # Management commands
-alias-reminder-show() { show_reminders; }
+alias-reminder-show() {
+    # Ensure variables are set
+    ALIAS_REMINDER_MAX_TIPS=${ALIAS_REMINDER_MAX_TIPS:-5}
+    show_reminders
+}
 alias-reminder-disable() { export ALIAS_REMINDER_ENABLED=false; echo "Alias reminders disabled"; }
 alias-reminder-enable() { export ALIAS_REMINDER_ENABLED=true; echo "Alias reminders enabled"; }
 alias-reminder-reset() { rm -f "$ALIAS_REMINDER_COUNTER"; echo "Session counter reset"; }
