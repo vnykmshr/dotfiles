@@ -61,6 +61,43 @@ gitlog() {
     git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
 }
 
+# gstat: Git Shortlog with color, totals, and optional top-N limit
+# Usage:
+#   gstat                 -> show all contributors
+#   gstat 10              -> show top 10 contributors
+#   gstat 5 --since="1 year ago" -> show top 5 contributors in last year
+
+gstat() {
+    local limit=""
+    if (( $# > 0 )); then
+        limit="$1"
+        shift
+    fi
+
+    # Color definitions, simple ANSI codes
+    local GREEN="\033[0;32m"
+    local BOLDGREEN="\033[1;32m"
+    local RESET="\033[0m"
+
+    git shortlog -nes --group=author "$@" | awk -v limit="$limit" -v green="$GREEN" -v boldgreen="$BOLDGREEN" -v reset="$RESET" '
+    BEGIN {rank=0}
+    {
+        rank++
+        count=$1
+        $1=""
+        name=$0
+        color = (rank <= 5) ? boldgreen : green
+        if (limit == "" || rank <= limit) {
+            printf "%s%5s%s %s\n", color, count, reset, name
+        }
+        total+=count
+    }
+    END {
+        print "-----"
+        printf "%sTotal:%s %d commits\n", boldgreen, reset, total
+    }'
+}
+
 # =============================================================================
 # Development Functions
 # =============================================================================
