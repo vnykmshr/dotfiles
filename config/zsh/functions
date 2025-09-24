@@ -61,13 +61,13 @@ gitlog() {
     git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
 }
 
-# gstat: Git Shortlog with color, totals, and optional top-N limit
+# gsl: Git Shortlog with color, totals, and optional top-N limit
 # Usage:
-#   gstat                 -> show all contributors
-#   gstat 10              -> show top 10 contributors
-#   gstat 5 --since="1 year ago" -> show top 5 contributors in last year
+#   gsl                 -> show all contributors
+#   gsl 10              -> show top 10 contributors
+#   gsl 5 --since="1 year ago" -> show top 5 contributors in last year
 
-gstat() {
+gsl() {
     local limit=""
     if (( $# > 0 )); then
         limit="$1"
