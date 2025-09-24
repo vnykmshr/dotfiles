@@ -25,7 +25,6 @@ fi
 
 # File finding with fd (better find)
 if command -v fd >/dev/null 2>&1; then
-    alias find='fd'
     alias fda='fd --no-ignore --hidden'
     alias fdt='fd --type f'
     alias fdd='fd --type d'

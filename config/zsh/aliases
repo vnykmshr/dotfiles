@@ -153,9 +153,7 @@ if command -v bat >/dev/null 2>&1; then
     alias less='bat --style=plain --paging=always'
 fi
 
-if command -v fd >/dev/null 2>&1; then
-    alias find='fd'
-fi
+# fd is available as independent command (not aliased to find)
 
 
 if command -v zoxide >/dev/null 2>&1; then
