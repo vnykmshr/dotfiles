@@ -63,13 +63,8 @@ tramp
 # Development Tools
 # =============================================================================
 
-# Version managers
-.nvmrc
-.node-version
-.ruby-version
-.python-version
-.java-version
-.tool-versions
+# Version managers (removed - these should be committed for environment consistency)
+# Move to project-specific .gitignore if needed
 
 # Environment files
 .env*
@@ -108,7 +103,6 @@ yarn-error.log*
 .next/
 .nuxt/
 .cache/
-dist/
 .turbo/
 .vercel
 .netlify/
@@ -119,13 +113,10 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -184,13 +175,11 @@ dmypy.json
 *.test
 # Output of the go coverage tool
 *.out
-# Dependency directories
-vendor/
+# Dependency directories (removed - some projects commit vendor/)
+# Add to project-specific .gitignore if needed
 
 # Rust
-target/
 **/*.rs.bk
-Cargo.lock
 
 # Java
 *.class
@@ -284,7 +273,6 @@ Dockerfile.local
 *.retry
 
 # Maven
-target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -296,7 +284,6 @@ buildNumber.properties
 
 # Gradle
 .gradle/
-build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
