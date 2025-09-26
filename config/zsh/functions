@@ -151,6 +151,71 @@ localip() {
 }
 
 # =============================================================================
+# Gource
+# =============================================================================
+
+# Gource quick alias (interactive)
+alias gourceq='gource --seconds-per-day 0.05 --max-files 300 --file-idle-time 10 --highlight-all-users --auto-skip-seconds 1 --background-colour 000000 --title "$(basename $(pwd))" --key --hide-dirnames --camera-mode overview'
+
+# Gource viewer function (interactive, customizable)
+gourcev() {
+  # Usage: gourcev [path] [resolution] [days-per-second]
+  # Example: gourcev /path/to/repo 1280x720 0.05
+  local repo="${1:-.}"
+  local res="${2:-1280x720}"
+  local spd="${3:-0.05}"            # seconds-per-day
+  local maxfiles=400
+  local idle=12
+  local title="$(basename "$(realpath "$repo")")"
+  cd "$repo" || return 1
+
+  gource \
+    --multi-sampling \
+    --seconds-per-day "$spd" \
+    --max-files "$maxfiles" \
+    --file-idle-time "$idle" \
+    --highlight-all-users \
+    --auto-skip-seconds 1 \
+    --background-colour 000000 \
+    --title "$title" \
+    --key \
+    --camera-mode overview \
+    --hide-dirnames \
+    --output-ppm-stream - \
+    -1280x720 \
+    | ffplay -loglevel warning -framerate 60 -i -
+}
+
+# Gource -> MP4/WebM renderer
+# Usage: gourcevid /path/to/repo out.mp4 1920x1080 60
+gourcevid() {
+  local repo="${1:-.}"
+  local out="${2:-gource.mp4}"
+  local res="${3:-1920x1080}"
+  local fr="${4:-60}"               # output frame rate
+  local spd="${5:-0.05}"            # seconds-per-day
+  local bitrate="${6:-12000k}"
+
+  cd "$repo" || return 1
+
+  # Gource generates ppm frames to stdout; pipe to ffmpeg to encode
+  gource \
+    --seconds-per-day "$spd" \
+    --max-files 500 \
+    --file-idle-time 10 \
+    --highlight-all-users \
+    --auto-skip-seconds 1 \
+    --background-colour 000000 \
+    --title "$(basename "$(realpath "$repo")")" \
+    --key \
+    --camera-mode overview \
+    -"$res" \
+    --output-ppm-stream - \
+  | ffmpeg -y -r "$fr" -f image2pipe -vcodec ppm -i - \
+      -vcodec libx264 -preset slow -pix_fmt yuv420p -crf 18 -b:v "$bitrate" "$out"
+}
+
+# =============================================================================
 # System Information
 # =============================================================================
 

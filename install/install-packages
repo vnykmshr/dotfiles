@@ -47,6 +47,11 @@ install_core_tools() {
                 # Compression
                 unzip
                 p7zip
+
+                # misc
+                gource
+                sox
+                ffmpeg
             )
 
             log_info "Installing Homebrew packages..."
