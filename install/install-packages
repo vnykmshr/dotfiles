@@ -48,10 +48,10 @@ install_core_tools() {
                 unzip
                 p7zip
 
-                # misc
-                gource
-                sox
-                ffmpeg
+                # Media tools
+                gource # Git repository visualizer
+                sox    # Audio processing
+                ffmpeg # Video/audio converter
             )
 
             log_info "Installing Homebrew packages..."

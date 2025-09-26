@@ -159,6 +159,16 @@ alias gourceq='gource --seconds-per-day 0.05 --max-files 300 --file-idle-time 10
 
 # Gource viewer function (interactive, customizable)
 gourcev() {
+  # Check dependencies
+  if ! command -v gource >/dev/null 2>&1; then
+    echo "Error: gource is not installed" >&2
+    return 1
+  fi
+  if ! command -v ffplay >/dev/null 2>&1; then
+    echo "Error: ffplay (ffmpeg) is not installed" >&2
+    return 1
+  fi
+
   # Usage: gourcev [path] [resolution] [days-per-second]
   # Example: gourcev /path/to/repo 1280x720 0.05
   local repo="${1:-.}"
@@ -166,7 +176,7 @@ gourcev() {
   local spd="${3:-0.05}"            # seconds-per-day
   local maxfiles=400
   local idle=12
-  local title="$(basename "$(realpath "$repo")")"
+  local title="$(basename "$(cd "$repo" && pwd)")"
   cd "$repo" || return 1
 
   gource \
@@ -182,13 +192,23 @@ gourcev() {
     --camera-mode overview \
     --hide-dirnames \
     --output-ppm-stream - \
-    -1280x720 \
+    -"$res" \
     | ffplay -loglevel warning -framerate 60 -i -
 }
 
 # Gource -> MP4/WebM renderer
 # Usage: gourcevid /path/to/repo out.mp4 1920x1080 60
 gourcevid() {
+  # Check dependencies
+  if ! command -v gource >/dev/null 2>&1; then
+    echo "Error: gource is not installed" >&2
+    return 1
+  fi
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "Error: ffmpeg is not installed" >&2
+    return 1
+  fi
+
   local repo="${1:-.}"
   local out="${2:-gource.mp4}"
   local res="${3:-1920x1080}"
@@ -206,7 +226,7 @@ gourcevid() {
     --highlight-all-users \
     --auto-skip-seconds 1 \
     --background-colour 000000 \
-    --title "$(basename "$(realpath "$repo")")" \
+    --title "$(basename "$(cd "$repo" && pwd)")" \
     --key \
     --camera-mode overview \
     -"$res" \
