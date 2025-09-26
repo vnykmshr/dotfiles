@@ -72,7 +72,7 @@ dev: ## Setup development environment (pre-commit, hooks, linting)
 	@./install/setup-pre-commit.sh
 
 packages: ## Install system packages
-	@source install/install-packages && install_packages
+	@DOTFILES_DIR=$(PWD) source install/install-packages && install_packages_main
 
 update: ## Update from git
 	@git pull origin main
