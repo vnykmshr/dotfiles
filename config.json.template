@@ -41,7 +41,7 @@
         "signing_key": {
           "type": "string",
           "description": "Path to GPG/SSH signing key",
-          "default": "~/.ssh/id_ed25519.pub"
+          "default": "$HOME/.ssh/id_ed25519.pub"
         },
         "gpg_sign": {
           "type": "boolean",
@@ -59,27 +59,27 @@
             "github": {
               "type": "string",
               "description": "SSH key for GitHub",
-              "default": "~/.ssh/id_ed25519"
+              "default": "$HOME/.ssh/id_ed25519"
             },
             "gitlab": {
               "type": "string",
               "description": "SSH key for GitLab",
-              "default": "~/.ssh/id_ed25519"
+              "default": "$HOME/.ssh/id_ed25519"
             },
             "personal": {
               "type": "string",
               "description": "SSH key for personal servers",
-              "default": "~/.ssh/id_ed25519"
+              "default": "$HOME/.ssh/id_ed25519"
             },
             "work": {
               "type": "string",
               "description": "SSH key for work servers",
-              "default": "~/.ssh/id_rsa"
+              "default": "$HOME/.ssh/id_rsa"
             },
             "local": {
               "type": "string",
               "description": "SSH key for local development",
-              "default": "~/.ssh/id_ed25519"
+              "default": "$HOME/.ssh/id_ed25519"
             }
           }
         },
@@ -151,17 +151,17 @@
         "workspace_dir": {
           "type": "string",
           "description": "Main workspace directory",
-          "default": "~/workspace"
+          "default": "$HOME/workspace"
         },
         "projects_dir": {
           "type": "string",
           "description": "Projects directory",
-          "default": "~/projects"
+          "default": "$HOME/projects"
         },
         "personal_bin_dir": {
           "type": "string",
           "description": "Personal scripts directory",
-          "default": "~/.local/bin"
+          "default": "$HOME/.local/bin"
         },
         "pager": {
           "type": "string",
@@ -179,7 +179,7 @@
             "npm_prefix": {
               "type": "string",
               "description": "NPM global install prefix",
-              "default": "~/.npm-global"
+              "default": "$HOME/.npm-global"
             }
           }
         },
@@ -199,7 +199,7 @@
             "path": {
               "type": "string",
               "description": "GOPATH directory",
-              "default": "~/go"
+              "default": "$HOME/go"
             }
           }
         },
@@ -209,7 +209,7 @@
             "cargo_home": {
               "type": "string",
               "description": "Cargo home directory",
-              "default": "~/.cargo"
+              "default": "$HOME/.cargo"
             }
           }
         }

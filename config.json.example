@@ -7,16 +7,16 @@
     "terminal": "Terminal"
   },
   "git": {
-    "signing_key": "~/.ssh/id_ed25519.pub",
+    "signing_key": "$HOME/.ssh/id_ed25519.pub",
     "gpg_sign": false
   },
   "ssh": {
     "keys": {
-      "github": "~/.ssh/id_ed25519",
-      "gitlab": "~/.ssh/id_ed25519",
-      "personal": "~/.ssh/id_ed25519",
-      "work": "~/.ssh/id_rsa",
-      "local": "~/.ssh/id_ed25519"
+      "github": "$HOME/.ssh/id_ed25519",
+      "gitlab": "$HOME/.ssh/id_ed25519",
+      "personal": "$HOME/.ssh/id_ed25519",
+      "work": "$HOME/.ssh/id_rsa",
+      "local": "$HOME/.ssh/id_ed25519"
     },
     "servers": {
       "personal": {
@@ -38,23 +38,23 @@
     }
   },
   "environment": {
-    "workspace_dir": "~/workspace",
-    "projects_dir": "~/projects",
-    "personal_bin_dir": "~/.local/bin",
+    "workspace_dir": "$HOME/workspace",
+    "projects_dir": "$HOME/projects",
+    "personal_bin_dir": "$HOME/.local/bin",
     "pager": "less"
   },
   "development": {
     "node": {
-      "npm_prefix": "~/.npm-global"
+      "npm_prefix": "$HOME/.npm-global"
     },
     "python": {
       "path": ""
     },
     "go": {
-      "path": "~/go"
+      "path": "$HOME/go"
     },
     "rust": {
-      "cargo_home": "~/.cargo"
+      "cargo_home": "$HOME/.cargo"
     }
   }
 }
