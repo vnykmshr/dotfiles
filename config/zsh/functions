@@ -412,12 +412,9 @@ dotfiles-edit() {
 }
 
 # Find the largest files in current directory
-# Note: In existing shells with old alias definitions, you may need to start a fresh shell
-# or manually run: unalias findbig; source ~/.zshrc
 unalias findbig 2>/dev/null
 findbig() {
-    # Use sh to avoid zsh parsing issues that occur in some shell environments
-    echo '/usr/bin/find . -type f -exec ls -s {} \; 2>/dev/null | sort -n -r | head -5' | sh
+    /usr/bin/find . -type f -exec ls -s {} \; 2>/dev/null | sort -n -r | head -5
 }
 
 # Reload zsh configuration

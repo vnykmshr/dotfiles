@@ -7,58 +7,9 @@
 # Core configuration
 export DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 
-# Ensure .dotfiles symlink exists and points to the correct location
+# Verify .dotfiles symlink exists (setup.sh should create it)
 if [[ ! -L "$HOME/.dotfiles" ]]; then
-    # Try to detect the actual dotfiles directory
-    local actual_dotfiles_dir=""
-
-    # Method 1: Check if we can determine location from this script's path
-    if [[ -n "${(%):-%x}" ]]; then
-        local script_dir="${${(%):-%x}:A:h:h:h}"  # Go up 3 levels from config/zsh/zshrc
-        if [[ -f "$script_dir/install/setup.sh" && -d "$script_dir/config" ]]; then
-            actual_dotfiles_dir="$script_dir"
-        fi
-    fi
-
-    # Method 2: Check if we're currently in a dotfiles directory
-    if [[ -z "$actual_dotfiles_dir" && -f "${PWD}/config/zsh/zshrc" && -f "${PWD}/install/setup.sh" ]]; then
-        actual_dotfiles_dir="$PWD"
-    fi
-
-    # Method 3: Search for dotfiles directory in common locations
-    if [[ -z "$actual_dotfiles_dir" ]]; then
-        # Search in home directory and common workspace locations
-        local search_paths=(
-            "$HOME/dotfiles"
-            "$HOME/.dotfiles-src"
-            "$HOME/workspace/dotfiles"
-            "$HOME/workspace/*/dotfiles"
-            "$HOME/*/dotfiles"
-            "$HOME/src/dotfiles"
-            "$HOME/dev/dotfiles"
-        )
-
-        for pattern in "${search_paths[@]}"; do
-            for possible_dir in $~pattern; do
-                if [[ -d "$possible_dir" && -f "$possible_dir/install/setup.sh" && -d "$possible_dir/config" ]]; then
-                    actual_dotfiles_dir="$possible_dir"
-                    break 2
-                fi
-            done
-        done
-    fi
-
-    # Create symlink if we found the directory
-    if [[ -n "$actual_dotfiles_dir" && -d "$actual_dotfiles_dir" ]]; then
-        # Remove existing file/directory if it exists but isn't a symlink
-        [[ -e "$HOME/.dotfiles" && ! -L "$HOME/.dotfiles" ]] && rm -rf "$HOME/.dotfiles"
-
-        # Create the symlink
-        ln -sf "$actual_dotfiles_dir" "$HOME/.dotfiles"
-
-        # Update DOTFILES to use the symlink
-        export DOTFILES="$HOME/.dotfiles"
-    fi
+    echo "⚠️  Warning: ~/.dotfiles symlink not found. Run 'make install' to set up dotfiles properly." >&2
 fi
 
 export HISTFILE="$HOME/.zsh_history"
@@ -124,7 +75,7 @@ load_config "prompt"
 [[ -r "$DOTFILES/config/workflow/init" ]] && source "$DOTFILES/config/workflow/init"
 
 # Override any conflicting aliases with our functions (must be after CLI tools)
-unalias cat 2>/dev/null || true
+unalias cat 2>/dev/null || true  # cat() function defined in aliases
 
 # Tool integrations (lazy load heavy ones)
 # Brew shellenv - only run if brew works properly
@@ -138,8 +89,6 @@ elif [[ -x "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
 fi
-
-# Note: Removed mise integration - using brew for tool management
 
 # Lazy load fzf
 if command -v fzf >/dev/null 2>&1; then
