@@ -67,7 +67,7 @@ cleanup_tmpdir() {
     find "$DOTFILES_TMPDIR" -depth -type d -empty -delete 2>/dev/null
 
     # Update cleanup marker
-    touch "$DOTFILES_TMP_CLEANUP_MARKER"
+    /usr/bin/touch "$DOTFILES_TMP_CLEANUP_MARKER"
 
     # Log cleanup if any files were removed (only in verbose mode)
     if [[ "$DOTFILES_DEBUG" == "true" ]] && (( files_removed > 0 )); then
