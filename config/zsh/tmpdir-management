@@ -13,13 +13,13 @@ init_tmpdir() {
 
     # Create directory if it doesn't exist
     if [[ ! -d "$DOTFILES_TMPDIR" ]]; then
-        mkdir -p "$DOTFILES_TMPDIR"
-        chmod 700 "$DOTFILES_TMPDIR"
+        /bin/mkdir -p "$DOTFILES_TMPDIR"
+        /bin/chmod 700 "$DOTFILES_TMPDIR"
     fi
 
     # Ensure proper permissions (user-only access)
     if [[ -d "$DOTFILES_TMPDIR" ]]; then
-        chmod 700 "$DOTFILES_TMPDIR" 2>/dev/null || true
+        /bin/chmod 700 "$DOTFILES_TMPDIR" 2>/dev/null || true
     fi
 
     # Export TMPDIR for this session and all child processes
@@ -38,8 +38,8 @@ cleanup_tmpdir() {
 
     # Check if cleanup was run recently (once per day)
     if [[ -f "$DOTFILES_TMP_CLEANUP_MARKER" ]]; then
-        local last_cleanup=$(stat -f "%m" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null || echo 0)
-        local current_time=$(date +%s)
+        local last_cleanup=$(/usr/bin/stat -f "%m" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null || echo 0)
+        local current_time=$(/bin/date +%s)
         local day_in_seconds=86400
 
         # Skip if cleaned in last 24 hours
@@ -56,15 +56,15 @@ cleanup_tmpdir() {
 
     # Remove old files (not directories yet)
     while IFS= read -r file; do
-        if rm -f "$file" 2>/dev/null; then
+        if /bin/rm -f "$file" 2>/dev/null; then
             ((files_removed++))
         else
             ((errors++))
         fi
-    done < <(find "$DOTFILES_TMPDIR" -depth -type f -mtime "+${DOTFILES_TMP_CLEANUP_DAYS}" 2>/dev/null)
+    done < <(/usr/bin/find "$DOTFILES_TMPDIR" -depth -type f -mtime "+${DOTFILES_TMP_CLEANUP_DAYS}" 2>/dev/null)
 
     # Remove empty directories
-    find "$DOTFILES_TMPDIR" -depth -type d -empty -delete 2>/dev/null
+    /usr/bin/find "$DOTFILES_TMPDIR" -depth -type d -empty -delete 2>/dev/null
 
     # Update cleanup marker
     /usr/bin/touch "$DOTFILES_TMP_CLEANUP_MARKER"
@@ -83,10 +83,10 @@ tmpdir_status() {
     echo "  Directory exists: $([ -d "$DOTFILES_TMPDIR" ] && echo 'yes' || echo 'no')"
 
     if [[ -d "$DOTFILES_TMPDIR" ]]; then
-        local perms=$(stat -f "%Sp" "$DOTFILES_TMPDIR" 2>/dev/null)
-        local owner=$(stat -f "%Su" "$DOTFILES_TMPDIR" 2>/dev/null)
-        local size=$(du -sh "$DOTFILES_TMPDIR" 2>/dev/null | cut -f1)
-        local file_count=$(find "$DOTFILES_TMPDIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+        local perms=$(/usr/bin/stat -f "%Sp" "$DOTFILES_TMPDIR" 2>/dev/null)
+        local owner=$(/usr/bin/stat -f "%Su" "$DOTFILES_TMPDIR" 2>/dev/null)
+        local size=$(/usr/bin/du -sh "$DOTFILES_TMPDIR" 2>/dev/null | /usr/bin/cut -f1)
+        local file_count=$(/usr/bin/find "$DOTFILES_TMPDIR" -type f 2>/dev/null | /usr/bin/wc -l | /usr/bin/tr -d ' ')
 
         echo "  Permissions: $perms"
         echo "  Owner: $owner"
@@ -94,7 +94,7 @@ tmpdir_status() {
         echo "  Files: $file_count"
 
         if [[ -f "$DOTFILES_TMP_CLEANUP_MARKER" ]]; then
-            local last_cleanup=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null)
+            local last_cleanup=$(/usr/bin/stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null)
             echo "  Last cleanup: $last_cleanup"
         else
             echo "  Last cleanup: never"
