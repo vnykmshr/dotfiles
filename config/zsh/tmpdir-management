@@ -1,0 +1,133 @@
+# TMPDIR Management
+# Provides user-owned temporary directory with automatic cleanup
+
+# Configuration
+export DOTFILES_TMPDIR="${HOME}/tmp"
+export DOTFILES_TMP_CLEANUP_DAYS="${DOTFILES_TMP_CLEANUP_DAYS:-7}"
+export DOTFILES_TMP_CLEANUP_MARKER="${DOTFILES_TMPDIR}/.last_cleanup"
+
+# Initialize user-owned TMPDIR
+init_tmpdir() {
+    # Only run if not already initialized
+    [[ -n "${TMPDIR_INITIALIZED:-}" ]] && return 0
+
+    # Create directory if it doesn't exist
+    if [[ ! -d "$DOTFILES_TMPDIR" ]]; then
+        mkdir -p "$DOTFILES_TMPDIR"
+        chmod 700 "$DOTFILES_TMPDIR"
+    fi
+
+    # Ensure proper permissions (user-only access)
+    if [[ -d "$DOTFILES_TMPDIR" ]]; then
+        chmod 700 "$DOTFILES_TMPDIR" 2>/dev/null || true
+    fi
+
+    # Export TMPDIR for this session and all child processes
+    export TMPDIR="$DOTFILES_TMPDIR"
+
+    # Mark as initialized
+    export TMPDIR_INITIALIZED=1
+}
+
+# Cleanup old temporary files
+cleanup_tmpdir() {
+    # Safety checks
+    [[ ! -d "$DOTFILES_TMPDIR" ]] && return 0
+    [[ "$DOTFILES_TMPDIR" == "/" ]] && return 0  # Paranoid safety check
+    [[ "$DOTFILES_TMPDIR" == "$HOME" ]] && return 0  # Don't clean home!
+
+    # Check if cleanup was run recently (once per day)
+    if [[ -f "$DOTFILES_TMP_CLEANUP_MARKER" ]]; then
+        local last_cleanup=$(stat -f "%m" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null || echo 0)
+        local current_time=$(date +%s)
+        local day_in_seconds=86400
+
+        # Skip if cleaned in last 24 hours
+        if (( current_time - last_cleanup < day_in_seconds )); then
+            return 0
+        fi
+    fi
+
+    # Find and remove files older than N days
+    # -mtime +N: modified more than N days ago
+    # Using -depth to handle nested directories safely
+    local files_removed=0
+    local errors=0
+
+    # Remove old files (not directories yet)
+    while IFS= read -r file; do
+        if rm -f "$file" 2>/dev/null; then
+            ((files_removed++))
+        else
+            ((errors++))
+        fi
+    done < <(find "$DOTFILES_TMPDIR" -depth -type f -mtime "+${DOTFILES_TMP_CLEANUP_DAYS}" 2>/dev/null)
+
+    # Remove empty directories
+    find "$DOTFILES_TMPDIR" -depth -type d -empty -delete 2>/dev/null
+
+    # Update cleanup marker
+    touch "$DOTFILES_TMP_CLEANUP_MARKER"
+
+    # Log cleanup if any files were removed (only in verbose mode)
+    if [[ "$DOTFILES_DEBUG" == "true" ]] && (( files_removed > 0 )); then
+        echo "[TMPDIR] Cleaned $files_removed temp files older than ${DOTFILES_TMP_CLEANUP_DAYS} days" >&2
+    fi
+}
+
+# Show TMPDIR status (for debugging)
+tmpdir_status() {
+    echo "TMPDIR Configuration:"
+    echo "  Location: $TMPDIR"
+    echo "  Cleanup age: ${DOTFILES_TMP_CLEANUP_DAYS} days"
+    echo "  Directory exists: $([ -d "$DOTFILES_TMPDIR" ] && echo 'yes' || echo 'no')"
+
+    if [[ -d "$DOTFILES_TMPDIR" ]]; then
+        local perms=$(stat -f "%Sp" "$DOTFILES_TMPDIR" 2>/dev/null)
+        local owner=$(stat -f "%Su" "$DOTFILES_TMPDIR" 2>/dev/null)
+        local size=$(du -sh "$DOTFILES_TMPDIR" 2>/dev/null | cut -f1)
+        local file_count=$(find "$DOTFILES_TMPDIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+
+        echo "  Permissions: $perms"
+        echo "  Owner: $owner"
+        echo "  Size: $size"
+        echo "  Files: $file_count"
+
+        if [[ -f "$DOTFILES_TMP_CLEANUP_MARKER" ]]; then
+            local last_cleanup=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M:%S" "$DOTFILES_TMP_CLEANUP_MARKER" 2>/dev/null)
+            echo "  Last cleanup: $last_cleanup"
+        else
+            echo "  Last cleanup: never"
+        fi
+    fi
+}
+
+# Disable custom TMPDIR (for troubleshooting)
+tmpdir_disable() {
+    unset TMPDIR
+    export TMPDIR_INITIALIZED=0
+    echo "Custom TMPDIR disabled. Using system default: $(getconf DARWIN_USER_TEMP_DIR)"
+}
+
+# Re-enable custom TMPDIR
+tmpdir_enable() {
+    init_tmpdir
+    echo "Custom TMPDIR enabled: $TMPDIR"
+}
+
+# Initialize on load (unless explicitly disabled)
+if [[ "$DOTFILES_SKIP_TMPDIR" != "1" ]]; then
+    init_tmpdir
+
+    # Run cleanup in background to avoid blocking shell startup
+    # Only if we're in an interactive shell
+    if [[ -o interactive ]]; then
+        (cleanup_tmpdir &)
+    fi
+fi
+
+# Export functions for user access
+alias tmpdir-status='tmpdir_status'
+alias tmpdir-disable='tmpdir_disable'
+alias tmpdir-enable='tmpdir_enable'
+alias tmpdir-clean='cleanup_tmpdir'
