@@ -1,97 +1,127 @@
-# Release v3.3.0 - Development Automation Complete
+# Release v3.5.0 - TMPDIR Management & Stability Improvements
 
 ## Overview
 
-Major release completing the development automation suite with comprehensive code refactoring and quality improvements. This release represents a 66% code reduction while adding significant new functionality.
+This release introduces user-owned TMPDIR management to resolve permission
+errors with modern development tools, along with multiple bug fixes and
+codebase cleanup.
 
-## New Features
+## Key Features
 
-### Universal Development Commands
+### User-Owned TMPDIR Management
 
-- **`dev`** - Universal development server command for any project type
-- **`test`** - Universal test runner command for any project type
-- **`testwatch`** - Continuous testing with file watching (requires entr)
+Comprehensive temporary directory management system that solves permission
+issues with Claude Code, Flutter, and other tools that require TMPDIR access:
 
-### Smart Project Detection
+- **Automatic setup**: Creates `~/tmp` directory with secure permissions (700)
+- **Smart cleanup**: Automatically removes files older than 7 days
+  (configurable via `DOTFILES_TMP_CLEANUP_DAYS`)
+- **Background operation**: Cleanup runs asynchronously to avoid blocking shell
+  startup
+- **Management commands**:
+  - `tmpdir-status` - Show current TMPDIR configuration and statistics
+  - `tmpdir-disable` - Temporarily disable custom TMPDIR
+  - `tmpdir-enable` - Re-enable custom TMPDIR
+  - `tmpdir-clean` - Manually trigger cleanup
+- **Optional disable**: Set `DOTFILES_SKIP_TMPDIR=1` to skip initialization
+- **macOS optimization**: Excludes directory from Time Machine backups
 
-- **Go projects**: `go.mod` detection, runs `go run .` or `go test ./...`
-- **Node.js projects**: `package.json` script detection (dev/start/test)
-- **Python projects**: Django, pytest, unittest support
-- **Rust projects**: `Cargo.toml` detection with `cargo run/test`
-- **Makefile projects**: target detection (dev/serve/start/test)
+**Location**: `config/zsh/tmpdir-management` (134 lines)
 
-### Enhanced Environment Detection
+### Visualization Tools
 
-- **Auto-activation**: .nvmrc and .python-version files with mise integration
-- **.env loading**: Automatic environment variable loading on directory change
-- **Project automation**: Auto-load development tools in supported projects
+- Added gource aliases for repository visualization
+- Install gource, sox, and ffmpeg packages for video generation
 
-## Code Quality Improvements
+## Bug Fixes
 
-### Major Refactoring
+- **TMPDIR cleanup**: Use absolute path for touch command to ensure
+  reliability during shell initialization
+- **Path resolution**: Replace `~` with `$HOME` in home paths for consistent
+  expansion
+- **Shell reload**: Fix command lookup errors when reloading shell
+  configuration
+- **Makefile**: Correct packages target implementation
+- **Alias conflicts**: Remove `find=fd` alias that conflicted with system
+  tooling
+- **Gitignore**: Reduce overly restrictive patterns in global gitignore
 
-- **125 lines removed** (66% code reduction) from automation modules
-- **Eliminated AI bloat**: Removed duplicate detection logic and verbose implementations
-- **Consolidated architecture**: Single 63-line dev-automation module replaces 183 lines
-- **Improved maintainability**: Clear separation of concerns, reusable patterns
+## Code Quality
 
-### Performance Optimization
+### Refactoring
 
-- **Shell startup**: 0.087-0.148s (improved from previous 0.158s)
-- **Lazy loading**: Development tools loaded only in relevant project directories
-- **Efficient detection**: Optimized project type detection logic
+- Removed 291 lines of unused code and duplicate files
+- Eliminated unnecessary logging functions and color variables
+- Simplified symlink detection logic (52 lines removed)
+- Consolidated duplicate documentation (RELEASE-NOTES.md)
 
-### Documentation Accuracy
+### Documentation
 
-- **Fixed performance claims**: Updated to reflect actual measurements
-- **Removed misleading features**: Eliminated references to non-existent functions
-- **Accurate git alias count**: Updated from "40+" to actual "45+"
-- **Current implementation**: All examples work with actual codebase
+- Removed marketing language, using factual descriptions
+- Cleaned up redundant comments and notes
+- Improved code clarity and maintainability
 
-## Technical Architecture
+## Technical Details
 
+### Architecture
+
+```text
+config/zsh/tmpdir-management     # TMPDIR management (134 lines)
+install/setup.sh                 # Automatic ~/tmp setup on macOS
 ```
-config/zsh/
-├── environment-detection    # Auto-activation and .env loading
-├── dev-automation          # Universal dev/test commands (63 lines)
-├── go-dev                  # Go-specific development tools
-└── git-helpers            # Smart git workflow automation
-```
+
+### Performance Impact
+
+- Cleanup runs in background subprocess
+- No impact on shell startup time
+- Rate-limited to once per day
+
+### Safety Features
+
+- Multiple safety checks prevent accidental deletion of important
+  directories
+- Paranoid checks: won't clean `/` or `$HOME`
+- Graceful handling when TMPDIR doesn't exist
+- Comprehensive error handling
 
 ## Compatibility
 
-- **Cross-platform**: macOS, Linux, WSL support maintained
-- **Fallback handling**: Graceful degradation when tools unavailable
+- **Cross-platform**: macOS and Linux support
 - **No breaking changes**: All existing functionality preserved
+- **Optional feature**: Can be disabled without affecting other dotfiles
+  functionality
 
 ## Testing
 
-- **Comprehensive test suite**: All 13 tests passing
-- **Real-world validation**: Tested with Go, Node.js, and Python projects
-- **Environment detection**: Verified .nvmrc and .env loading
-- **Performance validation**: Startup time benchmarked
+All 13 tests passing with comprehensive validation:
+
+- TMPDIR initialization and permissions
+- Cleanup functionality and safety checks
+- Management command functionality
+- Background subprocess operation
 
 ## Migration Notes
 
-No migration required. All existing configurations and commands continue to work unchanged. New universal commands complement rather than replace existing workflows.
+No migration required. The TMPDIR management initializes automatically on shell
+startup. Existing workflows continue unchanged.
 
-## Philosophy Applied
+To disable if needed:
 
-This release exemplifies the project philosophy:
+```bash
+export DOTFILES_SKIP_TMPDIR=1
+```
 
-- **Real utility over feature count**: Focus on daily development needs
-- **Practical over verbose**: Clean implementations without unnecessary complexity
-- **Code quality**: Eliminate redundancy, maximize maintainability
-- **Performance conscious**: Fast startup, efficient detection
+## What's Changed Since v3.4.0
 
-## Next Steps
+- 13 commits addressing features, fixes, and maintenance
+- 1 new feature (TMPDIR management)
+- 6 bug fixes
+- 3 code quality improvements
+- 2 alias updates
+- 1 package addition
 
-All core development automation is now complete. Future enhancements will focus on:
-
-- Build/deploy automation (if requested)
-- Project templates and scaffolding
-- Additional language support based on user needs
+**Full Changelog**: <https://github.com/vnykmshr/dotfiles/compare/v3.4.0...v3.5.0>
 
 ---
 
-**Full Changelog**: v3.2.0...v3.3.0
+**Previous Release**: [v3.3.0 - Development Automation Complete](https://github.com/vnykmshr/dotfiles/releases/tag/v3.3.0)

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2025-10-14
+
+### Added
+- User-owned TMPDIR management system to resolve permission errors
+  - Auto-creates ~/tmp directory with secure permissions (700)
+  - Automatic cleanup of files older than 7 days (configurable)
+  - Management commands: tmpdir-status, tmpdir-disable, tmpdir-enable, tmpdir-clean
+  - Optional disable with DOTFILES_SKIP_TMPDIR=1
+  - Reduces Time Machine backup overhead on macOS
+- Gource visualization aliases and package installations (gource, sox, ffmpeg)
+- Git status list alias (gsl)
+
+### Fixed
+- Touch command path in cleanup_tmpdir for reliable execution during shell initialization
+- Use $HOME instead of ~ in home paths for better path resolution
+- Shell reload command lookup errors
+- Packages target in Makefile
+- Remove find=fd alias to prevent tooling conflicts
+- Reduce restrictive patterns in global gitignore
+
+### Changed
+- Rename gstat to gsl (git status list)
+- Major refactoring: removed 291 lines of unused code and duplicates
+- Clean up redundant comments and notes
+- Remove marketing language from documentation, use factual descriptions
+- Code formatting improvements
+
 ## [3.4.0] - 2025-09-23
 
 ### Added
