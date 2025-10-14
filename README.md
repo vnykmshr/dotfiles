@@ -1,6 +1,6 @@
-# Professional Dotfiles
+# Dotfiles
 
-> Clean, fast, intelligent dotfiles designed for customization
+> Clean, fast dotfiles designed for customization
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
@@ -81,7 +81,7 @@ ar-on              # Enable reminders
 
 **Build your development identity, don't copy mine.**
 
-This project provides professional patterns and examples. The real value comes
+This project provides practical patterns and examples. The real value comes
 from understanding and adapting them to your workflow. Great developers don't
 just copy configurations—they evolve them.
 

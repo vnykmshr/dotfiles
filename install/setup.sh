@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Dotfiles Setup Script
-# Professional dotfiles installation with dry-run support and cross-platform compatibility
+# Installation with dry-run support and cross-platform compatibility
 
 set -euo pipefail
 
@@ -24,7 +24,7 @@ usage() {
     cat <<EOF
 Usage: $0 [OPTIONS]
 
-Professional dotfiles setup with modern best practices.
+Dotfiles setup with dry-run support and template-based configuration.
 
 OPTIONS:
     -d, --dry-run       Show what would be done without making changes

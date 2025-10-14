@@ -1,6 +1,6 @@
 # Project Overview
 
-> Professional dotfiles designed for customization, not copy-paste
+> Practical dotfiles designed for customization, not copy-paste
 
 ## Philosophy
 
@@ -37,11 +37,11 @@ config/
 - Each component is optional and independently configurable
 - Graceful fallbacks when tools aren't available
 
-### 4. **Professional Quality**
+### 4. **Quality & Testing**
 
-- Clean, maintainable code following industry standards
-- Comprehensive test coverage ensuring reliability
-- Cross-platform compatibility (macOS, Linux, WSL)
+- Clean, maintainable code
+- Comprehensive test coverage with 13 validation checks
+- Cross-platform: macOS, Linux, WSL
 
 ## What's Actually Implemented
 
