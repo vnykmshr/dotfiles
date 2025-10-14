@@ -97,8 +97,7 @@ alias j='jobs'
 alias path='echo $PATH | tr ":" "\n"'
 
 # Weather (requires curl)
-# Note: weather() function is defined in functions file instead of alias
-alias forecast='curl -s "https://wttr.in/"'
+alias forecast='curl -s "https://wttr.in/"'  # weather() function in functions file
 
 # =============================================================================
 # Development Tools
@@ -222,8 +221,6 @@ alias ducks='du -cks * 2>/dev/null | sort -rn | head'
 alias get='curl --location --progress-bar'
 alias post='curl --location --progress-bar --data'
 alias header='curl --location --head'
-
-# Note: json() function is defined in functions file instead of alias
 
 # Web server
 alias serve='python3 -m http.server'

@@ -618,17 +618,14 @@ configure_shell() {
 setup_development_tools() {
     log_step "Setting up development tools"
 
-    # Modern CLI tools are now installed via the main package manager (brew/apt/etc)
+    # Modern CLI tools installed via main package manager (brew/apt/etc)
+    # See install/install-packages for implementation
 
-    # Add bin directory to PATH
     local bin_dir="$DOTFILES_DIR/bin"
     if [[ -d $bin_dir ]]; then
         log_info "Custom scripts available in: $bin_dir"
     fi
 }
-
-# Note: Modern CLI tools are now installed via the main package installation system
-# See install/install-packages for the current implementation
 
 # Apply OS-specific defaults
 apply_os_defaults() {
