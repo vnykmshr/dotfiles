@@ -155,9 +155,8 @@ fi
 # fd is available as independent command (not aliased to find)
 
 
-if command -v zoxide >/dev/null 2>&1; then
-    alias cd='z'
-fi
+# zoxide is initialized in cli-tools/aliases
+# cd remains the builtin command, use 'z' for zoxide smart jumping
 
 # Editor shortcuts
 alias v='$EDITOR'

@@ -33,9 +33,10 @@ fi
 # Smart navigation with zoxide (better cd)
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init zsh)"
-    alias cd='z'
-    alias cdi='zoxide_interactive'  # Interactive mode
-    alias cdb='z -'  # Go back
+    # Use zoxide-specific commands instead of aliasing cd
+    alias zi='zi'  # Interactive mode (built-in to zoxide)
+    alias zb='z -'  # Go back to previous directory
+    # cd remains the builtin command
 fi
 
 # Git enhancements
