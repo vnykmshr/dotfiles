@@ -1,35 +1,44 @@
-# Global gitignore file for common artifacts
+###############################################################################
+# Global gitignore for developer environment noise
+# Safe for multi-language stacks (Go, Node, Python, Flutter, etc.)
+###############################################################################
 
-# =============================================================================
-# Operating System
-# =============================================================================
+# -----------------------------------------------------------------------------
+# OS Files
+# -----------------------------------------------------------------------------
 
 # macOS
 .DS_Store
 .DS_Store?
-._*
+.AppleDouble
+.LSOverride
 .Spotlight-V100
 .Trashes
-ehthumbs.db
-Thumbs.db
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
 
 # Windows
+Thumbs.db
+ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Linux
+# Linux / Generic
 *~
 .nfs*
 
-# =============================================================================
-# IDEs and Editors
-# =============================================================================
+# -----------------------------------------------------------------------------
+# Editors and IDEs
+# -----------------------------------------------------------------------------
 
-# Visual Studio Code
+# VS Code
 .vscode/
 *.code-workspace
 
-# JetBrains IDEs
+# JetBrains IDEs (GoLand, PyCharm, WebStorm, etc.)
 .idea/
 *.iml
 *.ipr
@@ -42,303 +51,134 @@ $RECYCLE.BIN/
 # Vim
 *.swp
 *.swo
-*~
 .netrwhist
 Session.vim
 
 # Emacs
 *~
 \#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
+.emacs.desktop*
 *.elc
-auto-save-list
+auto-save-list/
 tramp
 .\#*
 
 # Atom
 .atom/
 
-# =============================================================================
-# Development Tools
-# =============================================================================
+# -----------------------------------------------------------------------------
+# Environment and Local Config
+# -----------------------------------------------------------------------------
 
-# Version managers (removed - these should be committed for environment consistency)
-# Move to project-specific .gitignore if needed
+.env
+.env.local
+.env.secret
+.envrc
+!*.env.example
+!*.env.template
 
-# Environment files
-.env*
-!.env.example
-!.env.template
+*.local
+config.local.*
 
-# Logs
+# -----------------------------------------------------------------------------
+# Logs and Runtime Data
+# -----------------------------------------------------------------------------
+
 *.log
 logs/
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids
+yarn-*.log*
+pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
-coverage/
-.nyc_output
+# -----------------------------------------------------------------------------
+# Cache and Coverage
+# -----------------------------------------------------------------------------
 
-# =============================================================================
-# Language Specific
-# =============================================================================
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.yarn-integrity
-.eslintcache
-.next/
-.nuxt/
 .cache/
-.turbo/
-.vercel
-.netlify/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-develop-eggs/
-downloads/
-eggs/
-.eggs/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-# Virtual environments (covered by .env* above)
-.venv/
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+coverage/
+.nyc_output/
 .pytest_cache/
-.coverage
-htmlcov/
 .tox/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
 .mypy_cache/
 .dmypy.json
-dmypy.json
 .pyre/
+.hypothesis/
 
-# Ruby
-*.gem
-*.rbc
-/.config
-/coverage/
-/InstalledFiles
-/pkg/
-/spec/reports/
-/spec/examples.txt
-/test/tmp/
-/test/version_tmp/
-/tmp/
-.bundle
-.byebug_history
-.rspec
-/vendor/bundle
+# -----------------------------------------------------------------------------
+# Temporary and Backup Files
+# -----------------------------------------------------------------------------
 
-# Go
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-# Test binary, built with `go test -c`
-*.test
-# Output of the go coverage tool
-*.out
-# Dependency directories (removed - some projects commit vendor/)
-# Add to project-specific .gitignore if needed
-
-# Rust
-**/*.rs.bk
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.iml
-
-# C/C++
-*.o
-*.obj
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-core
-
-# =============================================================================
-# Databases
-# =============================================================================
-
-*.sqlite
-*.sqlite3
-*.db
-
-# =============================================================================
-# Temporary Files
-# =============================================================================
-
-# Temporary directories
 tmp/
 temp/
-
-# Backup files
 *.bak
 *.backup
-*.old
+.*.tmp
+*.tmp
 *.orig
 *.save
-*.tmp
+*~
 
-# Archive files
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
+# -----------------------------------------------------------------------------
+# Credentials and Keys
+# -----------------------------------------------------------------------------
 
-# =============================================================================
-# Personal Files
-# =============================================================================
-
-# Personal notes and todos
-TODO
-NOTES
-.notes
-notes.txt
-todo.txt
-
-# SSH keys (security)
 id_rsa
 id_dsa
 id_ecdsa
 id_ed25519
 *.pem
-
-# GPG keys
 *.gpg
 *.pgp
+*.p12
+*.key
+*.crt
 
-# =============================================================================
-# Build Tools and Package Managers
-# =============================================================================
+# -----------------------------------------------------------------------------
+# Cloud and DevOps
+# -----------------------------------------------------------------------------
 
-# Docker
-.dockerignore
-Dockerfile.local
+.aws/
+.gcloud/
+*service-account*.json
+*.kubeconfig
 
 # Terraform
 *.tfstate
 *.tfstate.*
 .terraform/
-.terraform.lock.hcl
 
-# Ansible
-*.retry
+# -----------------------------------------------------------------------------
+# Personal Notes and Misc
+# -----------------------------------------------------------------------------
 
-# Maven
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
+.notes
+*.sw?
+*.tmp~
 
-# Gradle
-.gradle/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# -----------------------------------------------------------------------------
+# Optional toggles (uncomment if you want them globally ignored)
+# -----------------------------------------------------------------------------
 
-# CMake
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
+# --- Build artifacts ---
+# dist/
+# build/
+# bin/
+# out/
 
-# =============================================================================
-# Cloud and DevOps
-# =============================================================================
+# --- Dependencies ---
+# node_modules/
+# vendor/
+# .venv/
+# venv/
+# ENV/
+# __pycache__/
 
-# AWS
-.aws/
-*.pem
-
-# Google Cloud
-.gcloud/
-*-key.json
-
-# Kubernetes
-*.kubeconfig
-
-# =============================================================================
-# Project Specific
-# =============================================================================
-
-# Local development overrides
-docker-compose.override.yml
-config.local.*
-*.local
-
-# Test outputs
-test-results/
-junit.xml
-coverage-report/
-
-# Documentation builds
-_site/
-.sass-cache/
-.jekyll-metadata
-.jekyll-cache/
-
-# Mac specific for mounted volumes
-.fseventsd
-.DocumentRevisions-V100
-.TemporaryItems
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
+# --- Framework outputs ---
+# .next/
+# .nuxt/
+# .dart_tool/
+# build/
+# flutter_export_environment.sh
