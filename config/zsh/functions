@@ -1,13 +1,18 @@
-
-# Custom utility functions for enhanced productivity
+# Shell Functions - Organized by Category
+# All functions preserved, reorganized for clarity
 
 # =============================================================================
-# File and Directory Operations
+# FILE & DIRECTORY OPERATIONS
 # =============================================================================
 
 # Create directory and cd into it
 mkcd() {
     mkdir -p "$1" && cd "$1"
+}
+
+# Backup file with timestamp
+backup() {
+    cp "$1" "$1.bak.$(date +%Y%m%d_%H%M%S)"
 }
 
 # Extract various archive formats
@@ -42,8 +47,14 @@ fdir() {
     find . -type d -name "*$1*" 2>/dev/null
 }
 
+# Find the largest files in current directory
+unalias findbig 2>/dev/null
+findbig() {
+    /usr/bin/find . -type f -exec ls -s {} \; 2>/dev/null | sort -n -r | head -5
+}
+
 # =============================================================================
-# Git Functions
+# GIT OPERATIONS
 # =============================================================================
 
 # Git clone and cd into directory
@@ -61,12 +72,11 @@ gitlog() {
     git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
 }
 
-# gsl: Git Shortlog with color, totals, and optional top-N limit
+# Git shortlog with color, totals, and optional top-N limit
 # Usage:
 #   gsl                 -> show all contributors
 #   gsl 10              -> show top 10 contributors
 #   gsl 5 --since="1 year ago" -> show top 5 contributors in last year
-
 gsl() {
     local limit=""
     if (( $# > 0 )); then
@@ -74,7 +84,7 @@ gsl() {
         shift
     fi
 
-    # Color definitions, simple ANSI codes
+    # Color definitions
     local GREEN="\033[0;32m"
     local BOLDGREEN="\033[1;32m"
     local RESET="\033[0m"
@@ -98,8 +108,23 @@ gsl() {
     }'
 }
 
+# Quick commit with auto-generated message
+qc() {
+    local message="$*"
+    [[ -z "$message" ]] && message="update: $(git diff --name-only --cached | tr '\n' ' ')"
+    [[ -z "$message" ]] && message="misc: updates"
+    git add -u && git commit -m "$message"
+}
+
+# Add, commit, push workflow
+acp() {
+    git add -u
+    git commit -m "${*:-update}"
+    git push
+}
+
 # =============================================================================
-# Development Functions
+# DEVELOPMENT & PROCESSES
 # =============================================================================
 
 # Start a simple HTTP server
@@ -134,109 +159,8 @@ killp() {
     fi
 }
 
-# Get external IP address
-myip() {
-    curl -s https://ipinfo.io/ip
-}
-
-# Get local IP address
-localip() {
-    if command -v ip >/dev/null 2>&1; then
-        ip route get 1.1.1.1 | grep -oP 'src \K\S+'
-    elif command -v ifconfig >/dev/null 2>&1; then
-        ifconfig | grep -Eo 'inet (addr:)?([0-9]*\\.){3}[0-9]*' | grep -Eo '([0-9]*\\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1
-    else
-        echo "Unable to determine local IP"
-    fi
-}
-
 # =============================================================================
-# Gource
-# =============================================================================
-
-# Gource quick alias (interactive)
-alias gourceq='gource --seconds-per-day 0.05 --max-files 300 --file-idle-time 10 --highlight-all-users --auto-skip-seconds 1 --background-colour 000000 --title "$(basename $(pwd))" --key --hide-dirnames --camera-mode overview'
-
-# Gource viewer function (interactive, customizable)
-gourcev() {
-  # Check dependencies
-  if ! command -v gource >/dev/null 2>&1; then
-    echo "Error: gource is not installed" >&2
-    return 1
-  fi
-  if ! command -v ffplay >/dev/null 2>&1; then
-    echo "Error: ffplay (ffmpeg) is not installed" >&2
-    return 1
-  fi
-
-  # Usage: gourcev [path] [resolution] [days-per-second]
-  # Example: gourcev /path/to/repo 1280x720 0.05
-  local repo="${1:-.}"
-  local res="${2:-1280x720}"
-  local spd="${3:-0.05}"            # seconds-per-day
-  local maxfiles=400
-  local idle=12
-  local title="$(basename "$(cd "$repo" && pwd)")"
-  cd "$repo" || return 1
-
-  gource \
-    --multi-sampling \
-    --seconds-per-day "$spd" \
-    --max-files "$maxfiles" \
-    --file-idle-time "$idle" \
-    --highlight-all-users \
-    --auto-skip-seconds 1 \
-    --background-colour 000000 \
-    --title "$title" \
-    --key \
-    --camera-mode overview \
-    --hide-dirnames \
-    --output-ppm-stream - \
-    -"$res" \
-    | ffplay -loglevel warning -framerate 60 -i -
-}
-
-# Gource -> MP4/WebM renderer
-# Usage: gourcevid /path/to/repo out.mp4 1920x1080 60
-gourcevid() {
-  # Check dependencies
-  if ! command -v gource >/dev/null 2>&1; then
-    echo "Error: gource is not installed" >&2
-    return 1
-  fi
-  if ! command -v ffmpeg >/dev/null 2>&1; then
-    echo "Error: ffmpeg is not installed" >&2
-    return 1
-  fi
-
-  local repo="${1:-.}"
-  local out="${2:-gource.mp4}"
-  local res="${3:-1920x1080}"
-  local fr="${4:-60}"               # output frame rate
-  local spd="${5:-0.05}"            # seconds-per-day
-  local bitrate="${6:-12000k}"
-
-  cd "$repo" || return 1
-
-  # Gource generates ppm frames to stdout; pipe to ffmpeg to encode
-  gource \
-    --seconds-per-day "$spd" \
-    --max-files 500 \
-    --file-idle-time 10 \
-    --highlight-all-users \
-    --auto-skip-seconds 1 \
-    --background-colour 000000 \
-    --title "$(basename "$(cd "$repo" && pwd)")" \
-    --key \
-    --camera-mode overview \
-    -"$res" \
-    --output-ppm-stream - \
-  | ffmpeg -y -r "$fr" -f image2pipe -vcodec ppm -i - \
-      -vcodec libx264 -preset slow -pix_fmt yuv420p -crf 18 -b:v "$bitrate" "$out"
-}
-
-# =============================================================================
-# System Information
+# SYSTEM INFORMATION
 # =============================================================================
 
 # System information
@@ -268,29 +192,24 @@ meminfo() {
     fi
 }
 
-# =============================================================================
-# Text Processing
-# =============================================================================
-
-# Convert to lowercase
-lower() {
-    echo "$1" | tr '[:upper:]' '[:lower:]'
+# Get external IP address
+myip() {
+    curl -s https://ipinfo.io/ip
 }
 
-# Convert to uppercase
-upper() {
-    echo "$1" | tr '[:lower:]' '[:upper:]'
-}
-
-# Generate random password
-genpass() {
-    local length="${1:-16}"
-    LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+=' < /dev/urandom | head -c "$length"
-    echo
+# Get local IP address
+localip() {
+    if command -v ip >/dev/null 2>&1; then
+        ip route get 1.1.1.1 | grep -oP 'src \K\S+'
+    elif command -v ifconfig >/dev/null 2>&1; then
+        ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1
+    else
+        echo "Unable to determine local IP"
+    fi
 }
 
 # =============================================================================
-# Docker Functions
+# DOCKER OPERATIONS
 # =============================================================================
 
 # Docker cleanup
@@ -311,7 +230,7 @@ dsh() {
 }
 
 # =============================================================================
-# Kubernetes Functions
+# KUBERNETES OPERATIONS
 # =============================================================================
 
 # Kubernetes context switching
@@ -333,7 +252,7 @@ kns() {
 }
 
 # =============================================================================
-# Tmux Functions
+# TMUX SESSION MANAGEMENT
 # =============================================================================
 
 # Tmux session manager
@@ -349,8 +268,25 @@ tm() {
 }
 
 # =============================================================================
-# Web Development
+# TEXT & DATA PROCESSING
 # =============================================================================
+
+# Convert to lowercase
+lower() {
+    echo "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+# Convert to uppercase
+upper() {
+    echo "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+# Generate random password
+genpass() {
+    local length="${1:-16}"
+    LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+=' < /dev/urandom | head -c "$length"
+    echo
+}
 
 # JSON pretty print
 json() {
@@ -374,8 +310,89 @@ urldecode() {
 }
 
 # =============================================================================
-# Miscellaneous
+# VISUALIZATION & UTILITIES
 # =============================================================================
+
+# Gource quick alias (interactive)
+alias gourceq='gource --seconds-per-day 0.05 --max-files 300 --file-idle-time 10 --highlight-all-users --auto-skip-seconds 1 --background-colour 000000 --title "$(basename $(pwd))" --key --hide-dirnames --camera-mode overview'
+
+# Gource viewer function (interactive, customizable)
+gourcev() {
+    # Check dependencies
+    if ! command -v gource >/dev/null 2>&1; then
+        echo "Error: gource is not installed" >&2
+        return 1
+    fi
+    if ! command -v ffplay >/dev/null 2>&1; then
+        echo "Error: ffplay (ffmpeg) is not installed" >&2
+        return 1
+    fi
+
+    # Usage: gourcev [path] [resolution] [days-per-second]
+    # Example: gourcev /path/to/repo 1280x720 0.05
+    local repo="${1:-.}"
+    local res="${2:-1280x720}"
+    local spd="${3:-0.05}"            # seconds-per-day
+    local maxfiles=400
+    local idle=12
+    local title="$(basename "$(cd "$repo" && pwd)")"
+    cd "$repo" || return 1
+
+    gource \
+        --multi-sampling \
+        --seconds-per-day "$spd" \
+        --max-files "$maxfiles" \
+        --file-idle-time "$idle" \
+        --highlight-all-users \
+        --auto-skip-seconds 1 \
+        --background-colour 000000 \
+        --title "$title" \
+        --key \
+        --camera-mode overview \
+        --hide-dirnames \
+        --output-ppm-stream - \
+        -"$res" \
+        | ffplay -loglevel warning -framerate 60 -i -
+}
+
+# Gource -> MP4/WebM renderer
+# Usage: gourcevid /path/to/repo out.mp4 1920x1080 60
+gourcevid() {
+    # Check dependencies
+    if ! command -v gource >/dev/null 2>&1; then
+        echo "Error: gource is not installed" >&2
+        return 1
+    fi
+    if ! command -v ffmpeg >/dev/null 2>&1; then
+        echo "Error: ffmpeg is not installed" >&2
+        return 1
+    fi
+
+    local repo="${1:-.}"
+    local out="${2:-gource.mp4}"
+    local res="${3:-1920x1080}"
+    local fr="${4:-60}"               # output frame rate
+    local spd="${5:-0.05}"            # seconds-per-day
+    local bitrate="${6:-12000k}"
+
+    cd "$repo" || return 1
+
+    # Gource generates ppm frames to stdout; pipe to ffmpeg to encode
+    gource \
+        --seconds-per-day "$spd" \
+        --max-files 500 \
+        --file-idle-time 10 \
+        --highlight-all-users \
+        --auto-skip-seconds 1 \
+        --background-colour 000000 \
+        --title "$(basename "$(cd "$repo" && pwd)")" \
+        --key \
+        --camera-mode overview \
+        -"$res" \
+        --output-ppm-stream - \
+    | ffmpeg -y -r "$fr" -f image2pipe -vcodec ppm -i - \
+        -vcodec libx264 -preset slow -pix_fmt yuv420p -crf 18 -b:v "$bitrate" "$out"
+}
 
 # Weather report
 weather() {
@@ -403,7 +420,7 @@ timecmd() {
 }
 
 # =============================================================================
-# Dotfiles Management
+# DOTFILES & WORKFLOW MANAGEMENT
 # =============================================================================
 
 # Edit dotfiles
@@ -411,14 +428,34 @@ dotfiles-edit() {
     cd "$DOTFILES" && "$EDITOR" .
 }
 
-# Find the largest files in current directory
-unalias findbig 2>/dev/null
-findbig() {
-    /usr/bin/find . -type f -exec ls -s {} \; 2>/dev/null | sort -n -r | head -5
-}
-
 # Reload zsh configuration
 reload() {
     source "$HOME/.zshrc"
     echo "Zsh configuration reloaded!"
+}
+
+# Enhanced status - git + system info
+status() {
+    echo "📁 $(pwd)"
+    [[ -d .git ]] && echo "🔀 $(git branch --show-current) | $(git status --porcelain | wc -l | tr -d ' ') changes"
+    echo "💾 $(df -h . | awk 'NR==2 {print $4}') free"
+    echo "🔄 $(uptime | cut -d, -f1)"
+}
+
+# Git workflow automation helper
+workflowutil() {
+    case "$1" in
+        init) git init && git add . && git commit -m "initial commit" ;;
+        push) git add -u && git commit -m "${2:-update}" && git push ;;
+        pull) git pull && git submodule update ;;
+        clean) git clean -fd && git reset --hard ;;
+        *) echo "Usage: workflowutil {init|push [msg]|pull|clean}" ;;
+    esac
+}
+
+# Create project directory with git init
+mkproject() {
+    local name="$1"
+    [[ -z "$name" ]] && { echo "Usage: mkproject <name>"; return 1; }
+    mkdir "$name" && cd "$name" && git init
 }
