@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Comprehensive critical path test suite (tests/test-critical-path.sh)
-  - 16 behavioral tests covering installation, backup/restore, cross-platform
+  - Behavioral tests covering installation, backup/restore, cross-platform
   - OS detection and platform-specific behavior
   - Template processing (JSON parsing, placeholder replacement)
   - Symlink creation and overwrite operations
   - Backup creation and restore verification
-  - Cross-platform file handling (hidden files, spaces, dotfile globbing)
+  - Cross-platform file handling (path with spaces)
   - Dry-run mode behavior testing
-- Total test coverage: 29 tests (13 basic + 16 critical path)
+- Total test coverage: 22 tests (9 basic + 13 critical path)
 
 ### Changed
 - **Function Organization**: Reorganized shell functions into 10 logical sections for better discoverability

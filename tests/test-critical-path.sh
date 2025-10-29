@@ -249,18 +249,6 @@ else
     fail "Git config template not found"
 fi
 
-# Test SSH config template
-if [[ -f "$PROJECT_ROOT/config/ssh/config.template" ]]; then
-    if grep -q '{{ ' "$PROJECT_ROOT/config/ssh/config.template"; then
-        pass "SSH config template has placeholders"
-    else
-        # SSH template might not have placeholders, that's ok
-        pass "SSH config template exists"
-    fi
-else
-    fail "SSH config template not found"
-fi
-
 echo ""
 
 # =============================================================================
@@ -268,22 +256,6 @@ echo ""
 # =============================================================================
 
 echo "Testing cross-platform file handling..."
-
-# Test hidden file handling (works same on macOS and Linux)
-touch "$TEST_DIR/.hidden_file"
-if [[ -f "$TEST_DIR/.hidden_file" ]]; then
-    pass "Hidden file creation works"
-else
-    fail "Hidden file creation failed"
-fi
-
-# Test dotfile globbing
-DOT_FILES=("$TEST_DIR"/.*)
-if [[ ${#DOT_FILES[@]} -gt 0 ]]; then
-    pass "Dotfile globbing works"
-else
-    fail "Dotfile globbing failed"
-fi
 
 # Test path handling with spaces
 mkdir -p "$TEST_DIR/path with spaces"

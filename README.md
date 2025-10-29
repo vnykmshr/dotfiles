@@ -21,7 +21,7 @@ Fork it, understand what each piece does, then adapt it to your workflow. The va
 - **Organized Functions**: 40+ shell functions in 10 logical categories
 - **Environment Detection**: Auto-activate .nvmrc/.python-version
 - **Cross-Platform**: macOS, Linux, WSL
-- **Quality**: 25 pre-commit hooks, 29 automated tests
+- **Quality**: 25 pre-commit hooks, 22 automated tests
 
 ## Quick Start
 
@@ -114,6 +114,7 @@ shell-bench        # Measure startup time
 - Security automation and TMPDIR management
 
 **Customize in**:
+
 - `config/zsh/personal-aliases` - Your shortcuts
 - `config/zsh/personal-functions` - Your utilities
 - `config/zsh/personal.local` - Local overrides (gitignored)
