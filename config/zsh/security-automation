@@ -25,6 +25,33 @@ secure_env_files() {
     [[ "$updated" == "true" ]] && echo "Updated .gitignore with environment files"
 }
 
+# Basic secret patterns for git hooks
+get_secret_patterns() {
+    echo "password\s*[=:]\s*['\"][^'\"]{8,}['\"]|secret\s*[=:]\s*['\"][^'\"]{16,}['\"]|token\s*[=:]\s*['\"][^'\"]{20,}['\"]|api[_-]?key\s*[=:]\s*['\"][^'\"]{16,}['\"]"
+}
+
+# Install basic git security hook
+install_security_hooks() {
+    local git_dir
+    git_dir=$(git rev-parse --git-dir 2>/dev/null) || return
+    local hook="$git_dir/hooks/pre-commit"
+
+    [[ -f "$hook" ]] && return
+
+    cat > "$hook" <<'EOF'
+#!/bin/bash
+# Basic security check
+patterns="password\s*[=:]\s*['\"][^'\"]{8,}['\"]|secret\s*[=:]\s*['\"][^'\"]{16,}['\"]|token\s*[=:]\s*['\"][^'\"]{20,}['\"]"
+if git diff --cached --name-only | xargs grep -lE "$patterns" 2>/dev/null; then
+    echo "Potential secrets detected in commit"
+    echo "Review files and remove sensitive data"
+    exit 1
+fi
+EOF
+
+    chmod +x "$hook"
+}
+
 # =============================================================================
 # SSH Security
 # =============================================================================
@@ -48,8 +75,35 @@ check_ssh_security() {
 }
 
 # =============================================================================
+# Automatic Security
+# =============================================================================
+
+# Run security checks on directory change
+security_check_on_cd() {
+    git rev-parse --git-dir >/dev/null 2>&1 || return
+
+    # Secure .env files if present
+    setopt local_options nullglob
+    local env_files=(.env*)
+    if [[ ${#env_files[@]} -gt 0 ]]; then
+        secure_env_files
+    fi
+
+    # Install git hooks if missing
+    install_security_hooks
+}
+
+# =============================================================================
 # Commands
 # =============================================================================
 
 alias seccheck='check_ssh_security'
 alias envcheck='secure_env_files'
+alias gitsec='install_security_hooks'
+
+# =============================================================================
+# Setup
+# =============================================================================
+
+autoload -U add-zsh-hook
+add-zsh-hook chpwd security_check_on_cd

@@ -1,7 +1,73 @@
-# Personal Functions
-# Add your custom functions here
+# Personal functions based on actual workflow patterns
 
-# Example:
-# my_function() {
-#     echo "Your custom logic here"
-# }
+# Quick commit with auto-generated message
+qc() {
+    local message="$*"
+    [[ -z "$message" ]] && message="update: $(git diff --name-only --cached | tr '\n' ' ')"
+    [[ -z "$message" ]] && message="misc: updates"
+    git add -u && git commit -m "$message"
+}
+
+# Add, commit, push workflow (most used pattern)
+acp() {
+    git add -u
+    git commit -m "${*:-update}"
+    git push
+}
+
+# Note: 'dev' function moved to workflow automation tools
+# Use 'dev' alias which points to the enhanced dev-server tool
+
+# Enhanced status - git + system info
+status() {
+    echo "📁 $(pwd)"
+    [[ -d .git ]] && echo "🔀 $(git branch --show-current) | $(git status --porcelain | wc -l | tr -d ' ') changes"
+    echo "💾 $(df -h . | awk 'NR==2 {print $4}') free"
+    echo "🔄 $(uptime | cut -d, -f1)"
+}
+
+# Workflow automation
+workflowutil() {
+    case "$1" in
+        init) git init && git add . && git commit -m "initial commit" ;;
+        push) git add -u && git commit -m "${2:-update}" && git push ;;
+        pull) git pull && git submodule update ;;
+        clean) git clean -fd && git reset --hard ;;
+        *) echo "Usage: workflow {init|push [msg]|pull|clean}" ;;
+    esac
+}
+
+# Project setup
+mkproject() {
+    local name="$1"
+    [[ -z "$name" ]] && { echo "Usage: mkproject <name>"; return 1; }
+    mkdir "$name" && cd "$name" && git init
+}
+
+# Find and kill process
+killp() {
+    local name="$1"
+    [[ -z "$name" ]] && { echo "Usage: killp <process>"; return 1; }
+    pkill -f "$name"
+}
+
+# Extract any archive
+extract() {
+    case "$1" in
+        *.tar.gz|*.tgz) tar -xzf "$1" ;;
+        *.tar.bz2) tar -xjf "$1" ;;
+        *.zip) unzip "$1" ;;
+        *.rar) unrar x "$1" ;;
+        *) echo "Unknown format: $1" ;;
+    esac
+}
+
+# Create directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Backup file with timestamp
+backup() {
+    cp "$1" "$1.bak.$(date +%Y%m%d_%H%M%S)"
+}

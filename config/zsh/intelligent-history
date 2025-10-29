@@ -1,23 +1,108 @@
-# Essential History Functions
+# Intelligent Shell History
+
+# =============================================================================
+# Configuration
+# =============================================================================
 
 # History options (these extend base zshrc settings)
-setopt HIST_FIND_NO_DUPS HIST_VERIFY
+setopt HIST_FIND_NO_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_SAVE_NO_DUPS HIST_VERIFY
+
+# Variables
+export HISTORY_STATS_FILE="$HOME/.zsh_history_stats"
+export HISTORY_SENSITIVE_PATTERNS="$HOME/.config/zsh/sensitive-patterns"
+
+# =============================================================================
+# Sensitive Command Filtering
+# =============================================================================
+
+# Initialize patterns file
+init_sensitive_patterns() {
+    local patterns_file="$HISTORY_SENSITIVE_PATTERNS"
+    [[ -f "$patterns_file" ]] && return
+
+    mkdir -p "$(dirname "$patterns_file")"
+    cat > "$patterns_file" <<'EOF'
+# Sensitive patterns (regex)
+^.*password.*$
+^.*secret.*$
+^.*token.*$
+^.*api[_-]?key.*$
+^.*export.*(SECRET|TOKEN|KEY|PASSWORD).*$
+^.*mysql.*-p.*$
+^.*curl.*(-H.*Authorization|-u.*:).*$
+^.*ssh.*password.*$
+^.*git.*https://.*:.*@.*$
+EOF
+}
+
+# Check if command is sensitive
+is_sensitive_command() {
+    local command="$1"
+    [[ ! -f "$HISTORY_SENSITIVE_PATTERNS" ]] && init_sensitive_patterns
+
+    while IFS= read -r pattern; do
+        [[ "$pattern" =~ ^[[:space:]]*# || -z "${pattern// }" ]] && continue
+        [[ "$command" =~ $pattern ]] && return 0
+    done < "$HISTORY_SENSITIVE_PATTERNS"
+    return 1
+}
+
+# =============================================================================
+# Statistics
+# =============================================================================
+
+# Update stats (called periodically)
+update_history_stats() {
+    local stats_file="$HISTORY_STATS_FILE"
+    [[ ! -f "$stats_file" ]] && { command mkdir -p "$(dirname "$stats_file")"; echo "# timestamp:total:unique" > "$stats_file"; }
+
+    local total=$(wc -l < "$HISTFILE" 2>/dev/null || echo 0)
+    local unique=$(sort -u "$HISTFILE" 2>/dev/null | wc -l || echo 0)
+    echo "$(date +%s):$total:$unique" >> "$stats_file"
+    tail -100 "$stats_file" > "${stats_file}.tmp" && command mv "${stats_file}.tmp" "$stats_file"
+}
+
+# Show statistics
+history_stats() {
+    [[ ! -f "$HISTFILE" ]] && { echo "No history file found"; return 1; }
+
+    local total=$(wc -l < "$HISTFILE")
+    local unique=$(sort -u "$HISTFILE" | wc -l)
+    local duplicate_rate=$(( (total - unique) * 100 / total ))
+
+    echo "History: $total total, $unique unique (${duplicate_rate}% duplicates)"
+    echo "\nTop commands:"
+    awk '{print $1}' "$HISTFILE" | sort | uniq -c | sort -nr | head -5 | awk '{printf "  %s (%d)\n", $2, $1}'
+}
+
+# Suggest similar commands
+history_suggest() {
+    [[ -z "$1" ]] && { echo "Usage: history_suggest <query>"; return 1; }
+    echo "Commands matching '$1':"
+    grep -i "$1" "$HISTFILE" 2>/dev/null | sort | uniq -c | sort -nr | head -5 | awk '{$1=""; print substr($0,2)}'
+}
 
 # =============================================================================
 # Search
 # =============================================================================
 
-# Search history with context
+# Search with context
 hsearch() {
-    [[ -z "$1" ]] && { echo "Usage: hsearch <pattern>"; return 1; }
-    command -v rg >/dev/null 2>&1 && rg -i "$1" "$HISTFILE" || grep -i "$1" "$HISTFILE"
+    [[ -z "$1" ]] && { echo "Usage: hsearch <pattern> [context_lines]"; return 1; }
+    local context="${2:-3}"
+    command -v rg >/dev/null 2>&1 && rg -i -C "$context" "$1" "$HISTFILE" || grep -i -C "$context" "$1" "$HISTFILE"
+}
+
+# Recent history with timestamps
+history_time() {
+    fc -lt '%m-%d %H:%M' -"${1:-10}"
 }
 
 # =============================================================================
 # Cleanup
 # =============================================================================
 
-# Remove duplicates from history
+# Remove duplicates
 history_dedupe() {
     [[ ! -f "$HISTFILE" ]] && { echo "No history file"; return 1; }
     local backup="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
@@ -25,11 +110,60 @@ history_dedupe() {
     echo "History deduplicated (backup: $backup)"
 }
 
+# Remove sensitive commands
+history_clean_sensitive() {
+    [[ ! -f "$HISTFILE" ]] && { echo "No history file"; return 1; }
+    init_sensitive_patterns
+    local backup="${HISTFILE}.backup.$(date +%Y%m%d_%H%M%S)"
+    command cp "$HISTFILE" "$backup"
+    local removed=0
+    while IFS= read -r line; do
+        is_sensitive_command "$line" && ((removed++)) || echo "$line" >> "${HISTFILE}.tmp"
+    done < "$HISTFILE"
+    command mv "${HISTFILE}.tmp" "$HISTFILE"
+    echo "Removed $removed sensitive entries (backup: $backup)"
+}
+
+# Project-based suggestions
+smart_suggest() {
+    echo "Suggestions for $(basename $(pwd)):"
+    [[ -f "package.json" ]] && echo "  npm install, npm run dev, npm test"
+    [[ -f "Cargo.toml" ]] && echo "  cargo build, cargo run, cargo test"
+    [[ -f "go.mod" ]] && echo "  go run ., go build, go test"
+    [[ -d ".git" ]] && echo "  git status, git add ., git commit, git push"
+}
+
 # =============================================================================
-# Aliases
+# Hooks and Setup
 # =============================================================================
 
-alias h='history'
-alias hg='history | grep'
+# Filter sensitive commands before execution
+preexec_history_filter() {
+    is_sensitive_command "$1" && echo "Command excluded from history (sensitive)"
+}
+
+# Update stats periodically
+precmd_history_stats() {
+    (( HISTCMD % 50 == 0 )) && update_history_stats
+}
+
+# Aliases
+alias hstats='history_stats'
+alias hsuggest='history_suggest'
+alias htime='history_time'
 alias hfind='hsearch'
 alias hclean='history_dedupe'
+alias hpriv='history_clean_sensitive'
+alias suggest='smart_suggest'
+alias h='history'
+alias hg='history | grep'
+alias h10='history -10'
+alias h50='history -50'
+
+# Setup hooks
+autoload -U add-zsh-hook
+add-zsh-hook preexec preexec_history_filter
+add-zsh-hook precmd precmd_history_stats
+
+# Initialize
+[[ -z "$INTELLIGENT_HISTORY_LOADED" ]] && { init_sensitive_patterns; export INTELLIGENT_HISTORY_LOADED=1; }
