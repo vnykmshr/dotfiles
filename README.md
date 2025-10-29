@@ -9,19 +9,19 @@
 
 ## Philosophy
 
-**Build your development identity, don't copy mine.**
+This is my personal setup. You probably shouldn't use it as-is.
 
-This project provides a solid foundation and practical examples. The real value comes from understanding the patterns and adapting them to your unique workflow. Great developers don't just copy configurations—they understand, modify, and evolve them.
+Fork it, understand what each piece does, then adapt it to your workflow. The value is in the patterns and structure, not the specific configurations.
 
 ## Features
 
-- **Fast Shell**: 0.158s startup with lazy loading and optimized completions
-- **Modern CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide with fallbacks
-- **Git Workflow**: Smart commit helpers, branch management, 45+ aliases
-- **Alias Reminders**: Learn shortcuts through spaced repetition (5 random every 5 commands)
-- **Environment Detection**: Auto-activate .nvmrc/.python-version, load .env files
-- **Cross-Platform**: macOS, Linux, WSL with graceful fallbacks
-- **Quality**: 20+ pre-commit hooks, security scanning, automated tests
+- **Fast Shell**: 0.158s startup with lazy loading
+- **Modern CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
+- **Git Helpers**: 45+ aliases, quick commit shortcuts (qc, acp)
+- **Organized Functions**: 40+ shell functions in 10 logical categories
+- **Environment Detection**: Auto-activate .nvmrc/.python-version
+- **Cross-Platform**: macOS, Linux, WSL
+- **Quality**: 25 pre-commit hooks, 29 automated tests
 
 ## Quick Start
 
@@ -58,8 +58,8 @@ Configuration files use JSON templates to separate personal data (name, email, S
 
 ```text
 config/
-├── zsh/          # Shell environment (19 modules, 2946 lines)
-├── git/          # Version control templates and aliases
+├── zsh/          # Shell environment (18 modules, ~2800 lines)
+├── git/          # Version control and aliases
 ├── nvim/         # Editor configuration
 ├── tmux/         # Terminal multiplexer
 ├── ssh/          # SSH client templates
@@ -106,46 +106,25 @@ shell-bench        # Measure startup time
 
 ### Shell Environment (Zsh)
 
-**Performance**:
-
-- Fast startup (0.158s) with lazy loading of fzf and mise
-- Optimized completion system with caching
-- Conditional module loading (skip what you don't need)
-
-**Features**:
-
+- Fast startup (0.158s) with lazy loading and completion caching
 - Intelligent history with search and deduplication
-- Cross-platform compatibility (macOS, Linux, WSL)
-- Modern CLI tool integration with traditional fallbacks
-- Security automation (confirmations for dangerous commands)
-- TMPDIR management (resolves permission errors)
+- Modern CLI tools (bat, eza, fd, ripgrep) with fallbacks
+- 40+ organized functions in 10 categories
+- Cross-platform support (macOS, Linux, WSL)
+- Security automation and TMPDIR management
 
-**Customization**:
-
+**Customize in**:
 - `config/zsh/personal-aliases` - Your shortcuts
 - `config/zsh/personal-functions` - Your utilities
 - `config/zsh/personal.local` - Local overrides (gitignored)
 
 ### Git Integration
 
-**Smart Workflow** (optional via `gw` command):
-
-- Commit message suggestions based on conventional commits
-- Interactive numbered selection or custom messages
-- Quick save workflow helpers
-
-**45+ Aliases**:
-
-- Short forms: `g`, `ga`, `gc`, `gd`, `gp`, `gl`
-- Branch management: `gnew`, `gswitch`, `gclean`
-- Enhanced viewing: delta for diffs, better log formats
-- Shortcuts for common operations
-
-**Configuration**:
-
-- Comprehensive gitconfig with smart defaults
-- Global gitignore (185 lines covering all major platforms/tools)
-- Delta integration for better diffs
+- 45+ aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`, `git-cleanup`
+- Quick commits: `qc` (quick commit), `acp` (add, commit, push)
+- Smart workflow helpers (optional): `gw`, `gws`
+- Enhanced diffs with delta integration
+- Global gitignore covering major platforms
 - SSH signing support
 
 ### Modern CLI Tools
@@ -209,16 +188,15 @@ alias dcup="docker-compose up -d"
 **3. Personal Functions** (`config/zsh/personal-functions`)
 
 ```bash
-# Quick project setup
-mkproject() {
-    mkdir -p ~/projects/$1
-    cd ~/projects/$1
-    git init
+# Project-specific shortcuts
+myproject() {
+    cd ~/projects/myproject && git pull
 }
 
-# Docker helpers
-dcbash() {
-    docker-compose exec ${1:-app} bash
+# Environment-specific helpers
+work_vpn() {
+    echo "Connecting to work VPN..."
+    # your vpn connection logic
 }
 ```
 
@@ -255,44 +233,17 @@ if [[ "$HOST" == "personal-mbp" ]]; then
 fi
 ```
 
-### Common Patterns
-
-**Frontend Developer**:
+### Example Customizations
 
 ```bash
 # Personal aliases
 alias serve="npm run dev"
-alias preview="npm run preview"
+alias pods="kubectl get pods"
+alias db="docker-compose exec postgres psql"
 
 # Personal functions
-npm_fresh() {
-    rm -rf node_modules package-lock.json
-    npm install
-}
-```
-
-**Backend Developer**:
-
-```bash
-# Database shortcuts
-alias db_reset="docker-compose down && docker-compose up -d postgres"
-
-# API testing
-api_test() {
-    curl -s "http://localhost:3000/$1" | jq
-}
-```
-
-**DevOps Engineer**:
-
-```bash
-# Kubernetes shortcuts
-alias pods="kubectl get pods"
-alias logs="kubectl logs -f"
-
-# Terraform
-tf_plan() {
-    terraform plan -var-file="envs/$1.tfvars"
+deploy() {
+    git push && ssh production "cd /app && git pull && make restart"
 }
 ```
 

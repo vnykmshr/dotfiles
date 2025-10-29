@@ -51,8 +51,8 @@ make install
 # Benchmark startup time
 ./bin/shell-bench
 
-# Profile zsh startup
-zsh -xv 2>&1 | ts -i '%.s'
+# Profile zsh startup (shows what's slow)
+time zsh -i -c exit
 ```
 
 **Solutions:**
