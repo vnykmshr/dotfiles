@@ -19,6 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Total test coverage: 29 tests (13 basic + 16 critical path)
 
 ### Changed
+- **Function Organization**: Reorganized shell functions into 10 logical sections for better discoverability
+  - File & Directory Operations
+  - Git Operations
+  - Development & Processes
+  - System Information
+  - Docker Operations
+  - Kubernetes Operations
+  - Tmux Session Management
+  - Text & Data Processing
+  - Visualization & Utilities
+  - Dotfiles & Workflow Management
+- **Consolidated Functions**: Moved qc, acp, status, workflowutil, mkproject from personal-functions to main functions file
+- **personal-functions**: Now a minimal placeholder for user-specific customizations
+- All function names preserved (no renames, maintaining short/abbreviated forms)
 - Consolidate documentation: merge docs/README.md and docs/customization-guide.md into main README
 - Simplify COMMAND_EXAMPLES.md from 387 to 63 lines (quick reference only)
 - Remove CONTRIBUTING.md (streamlining for personal dotfiles focus)
