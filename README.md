@@ -41,15 +41,16 @@ make install
 
 Configuration files use JSON templates to separate personal data (name, email, SSH keys) from versioned configs. This prevents accidental commits of sensitive information and makes customization explicit.
 
+`config.json`
+
 ```json
-// config.json
 {
   "user": {
     "name": "Your Name",
     "email": "you@example.com"
   },
   "git": {
-    "signing_key": "$HOME/.ssh/id_ed25519.pub"
+    "signing_key": "$HOME/.ssh/id_edxyz.pub"
   }
 }
 ```
