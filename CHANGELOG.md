@@ -7,16 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comprehensive critical path test suite (tests/test-critical-path.sh)
+  - 16 behavioral tests covering installation, backup/restore, cross-platform
+  - OS detection and platform-specific behavior
+  - Template processing (JSON parsing, placeholder replacement)
+  - Symlink creation and overwrite operations
+  - Backup creation and restore verification
+  - Cross-platform file handling (hidden files, spaces, dotfile globbing)
+  - Dry-run mode behavior testing
+- Total test coverage: 29 tests (13 basic + 16 critical path)
+
 ### Changed
 - Consolidate documentation: merge docs/README.md and docs/customization-guide.md into main README
 - Simplify COMMAND_EXAMPLES.md from 387 to 63 lines (quick reference only)
 - Remove CONTRIBUTING.md (streamlining for personal dotfiles focus)
 - Update README to remove references to deleted workflow tools (dev, test, testwatch)
+- Workflow directory simplified: removed dev-server, test-runner, project-init (653 lines)
+- Git helpers: remove emoji from commit suggestions, opt-in via DOTFILES_SKIP_WORKFLOW
+- Pre-commit: exclude tests/ directory from hardcoded path checks
 
 ### Removed
 - docs/README.md (merged into main README)
 - docs/customization-guide.md (merged into main README)
 - CONTRIBUTING.md (not needed for personal dotfiles repo)
+- config/workflow/dev-server, test-runner, project-init (unused tools)
+- config/workflow/git-helpers.clean (dead code)
 
 ## [3.6.0] - 2025-10-29
 
