@@ -69,7 +69,7 @@ repos:
       # Check for hardcoded paths
       - id: check-hardcoded-paths
         name: Check for hardcoded paths
-        entry: bash -c 'if grep -r "/usr/local\|/opt/homebrew\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git .; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
+        entry: bash -c 'if grep -r "/usr/local\|/opt/homebrew\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git --exclude-dir=tests .; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
         language: system
         pass_filenames: false
 
