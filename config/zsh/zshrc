@@ -52,11 +52,8 @@ load_config() {
     [[ -r "$config_path" ]] && source "$config_path"
 }
 
-# TMPDIR Management (early initialization for all commands)
-[[ "$DOTFILES_SKIP_TMPDIR" != "1" ]] && load_config "tmpdir-management"
-
 # Load core modules (always needed)
-for module in exports aliases functions go-dev dev-automation; do
+for module in exports aliases functions dev-automation; do
     load_config "$module"
 done
 
@@ -71,7 +68,14 @@ load_config "personal-functions"
 [[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "intelligent-history"
 [[ "$DOTFILES_SKIP_SECURITY" != "1" ]] && load_config "security-automation"
 [[ "$DOTFILES_SKIP_PERFORMANCE" != "1" ]] && load_config "performance"
-load_config "prompt"
+
+# Minimal prompt (or use starship if installed)
+if command -v starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+else
+    # Simple fallback: user@host:directory %
+    PROMPT='%F{cyan}%n@%m%f:%F{blue}%~%f%# '
+fi
 
 # Load CLI tools and workflow automation
 [[ -r "$DOTFILES/config/cli-tools/init" ]] && source "$DOTFILES/config/cli-tools/init"
