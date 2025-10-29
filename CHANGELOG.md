@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2025-10-29
+
+### Added
+- `make restore` command for interactive backup restoration
+  - Lists available backups with timestamps
+  - Supports numbered selection or direct path input
+- `make uninstall` command for clean dotfiles removal
+  - Safely removes symlinks
+  - Preserves backups for recovery
+- Dependabot configuration for automated dependency updates
+  - Weekly updates for GitHub Actions
+  - Weekly updates for pre-commit hooks
+- Gitleaks security scanning in CI workflow
+  - Scans all commits for accidentally committed secrets
+  - Generates SARIF artifacts for GitHub Security
+- CONTRIBUTING.md with development guidelines
+  - Clear contribution process
+  - Code quality standards
+  - Testing requirements
+- docs/troubleshooting.md for common issues
+  - Installation problems and solutions
+  - Shell performance debugging
+  - Platform-specific guidance
+  - Recovery procedures
+- Repository badges to README
+  - CI status badge
+  - Version badge
+
+### Changed
+- Updated VERSION file from 3.3.0 to 3.5.0 (sync with releases)
+
 ## [3.5.0] - 2025-10-14
 
 ### Added
