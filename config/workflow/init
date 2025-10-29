@@ -1,141 +1,32 @@
 # Workflow Automation Initialization
-# Sets up development workflow tools and integrations
+# Lightweight git workflow helpers (opt-in via DOTFILES_SKIP_WORKFLOW)
+
+# Skip if disabled
+[[ "$DOTFILES_SKIP_WORKFLOW" == "1" ]] && return 0
 
 # Get the directory where this script is located
 local workflow_dir="${DOTFILES:-$HOME/.dotfiles}/config/workflow"
 
-# Source workflow aliases
+# Source workflow aliases (git helpers only)
 if [[ -f "$workflow_dir/aliases" ]]; then
     source "$workflow_dir/aliases"
 fi
 
-# Add workflow tools to PATH if not already there
-if [[ -d "$workflow_dir" && ":$PATH:" != *":$workflow_dir:"* ]]; then
-    export PATH="$workflow_dir:$PATH"
-fi
-
 # Workflow status check function
 workflow_check() {
-    echo "Workflow Automation Tools Status"
-    echo "================================"
+    echo "Workflow Tools Status"
+    echo "===================="
 
-    local tools=(
-        "test-runner:Smart test detection and execution"
-        "project-init:Project template initialization"
-        "git-helpers:Enhanced git workflow operations"
-        "dev-server:Development server auto-detection"
-    )
-
-    for tool_info in "${tools[@]}"; do
-        local tool="${tool_info%%:*}"
-        local description="${tool_info##*:}"
-
-        if [[ -x "$workflow_dir/$tool" ]]; then
-            echo "✓ $tool ($description)"
-        else
-            echo "✗ $tool ($description) - not found"
-        fi
-    done
-
-    echo ""
-    echo "Available commands:"
-    echo "  t, test         - Run tests for current project"
-    echo "  dev, serve      - Start development server"
-    echo "  pinit           - Initialize new project"
-    echo "  gw              - Git workflow helpers"
-    echo "  quickstart      - Create and setup new project"
-    echo "  projmenu        - Interactive project menu"
-    echo "  devstatus       - Show development status"
+    if [[ -x "$workflow_dir/git-helpers" ]]; then
+        echo "✓ git-helpers (Enhanced git workflow operations)"
+        echo ""
+        echo "Available commands:"
+        echo "  gw              - Git workflow helpers"
+        echo "  gws             - Git status with helpers"
+    else
+        echo "✗ No workflow tools found"
+    fi
 }
 
-# Auto-completion for workflow tools
-# Note: Custom completions disabled due to conflicts with alias expansions and system completion
-# The completion definitions caused '_comps: assignment to invalid subscript range' errors
-# when trying to register completions for aliases with variable paths (e.g., $WORKFLOW_DIR/script)
-if [[ "$DOTFILES_ENABLE_WORKFLOW_COMPLETIONS" == "true" ]] && command -v compdef >/dev/null 2>&1; then
-    # Test runner completion
-    _test_runner_completion() {
-        local -a options
-        options=(
-            '--interactive:Show available test commands and let user choose'
-            '--auto:Auto-run the most appropriate test command'
-            '--watch:Run tests in watch mode'
-            '--list:List detected project types and available commands'
-            '--help:Show help message'
-        )
-        _describe 'test-runner options' options
-    }
-    compdef _test_runner_completion test-runner
-    # Note: Only enabling completion for the actual script, not the alias
-
-    # Project init completion
-    _project_init_completion() {
-        local -a templates
-        templates=(
-            'nodejs:Node.js project with modern tooling'
-            'react:React application with TypeScript'
-            'python:Python project with modern packaging'
-            'rust:Rust project with Cargo'
-            'go:Go module project'
-            'static:Static website project'
-        )
-
-        if [[ $words[CURRENT-1] == (-t|--template) ]]; then
-            _describe 'templates' templates
-        else
-            local -a options
-            options=(
-                '--template:Use specific template'
-                '--list:List available templates'
-                '--directory:Create project in specific directory'
-                '--help:Show help message'
-            )
-            _describe 'project-init options' options
-        fi
-    }
-    # Note: Disabled project-init completion to avoid conflicts
-    # compdef _project_init_completion project-init
-
-    # Git helpers completion
-    _git_helpers_completion() {
-        local -a commands
-        commands=(
-            'status:Show comprehensive project status'
-            'add:Smart file staging'
-            'commit:Smart commit with generated messages'
-            'push:Smart push with upstream handling'
-            'pull:Smart pull with rebase'
-            'branch:Branch management'
-            'interactive:Interactive workflow menu'
-        )
-        _describe 'git-helpers commands' commands
-    }
-    # Temporarily disable git-helpers completion too
-    # compdef _git_helpers_completion git-helpers
-    # Note: Removed 'gw' completion - it's an alias with variable expansion
-
-    # Dev server completion
-    _dev_server_completion() {
-        local -a options
-        options=(
-            '--interactive:Show available servers and let user choose'
-            '--auto:Auto-start the most appropriate server'
-            '--list:List detected servers without starting'
-            '--port:Check if port is available'
-            '--help:Show help message'
-        )
-        _describe 'dev-server options' options
-    }
-    # Temporarily disable all dev-server completions to debug
-    # compdef _dev_server_completion dev-server
-    # if [[ -x "$workflow_dir/dev-server" ]]; then
-    #     compdef _dev_server_completion dev
-    # fi
-fi
-
-# Add helpful aliases for the check function
+# Add helpful alias for the check function
 alias workcheck='workflow_check'
-# workflow function is defined in personal-functions
-alias devtools='workflow_check'
-
-# Note: export -f not needed in zsh, functions are available by default

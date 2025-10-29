@@ -1,5 +1,5 @@
 # Workflow Automation Aliases
-# Essential shortcuts for development workflow tools
+# Git workflow helpers
 
 # Get the workflow directory
 if [[ -n "${DOTFILES:-}" ]]; then
@@ -8,23 +8,8 @@ else
     WORKFLOW_DIR="$HOME/.dotfiles/config/workflow"
 fi
 
-# Core workflow tool aliases
-if [[ -x "$WORKFLOW_DIR/test-runner" ]]; then
-    alias t='$WORKFLOW_DIR/test-runner'
-    alias test='$WORKFLOW_DIR/test-runner'
-fi
-
-if [[ -x "$WORKFLOW_DIR/project-init" ]]; then
-    alias pinit='$WORKFLOW_DIR/project-init'
-    alias newproject='$WORKFLOW_DIR/project-init'
-fi
-
-if [[ -x "$WORKFLOW_DIR/git-helpers" ]]; then
+# Git helpers (only if enabled)
+if [[ "$DOTFILES_SKIP_WORKFLOW" != "1" ]] && [[ -x "$WORKFLOW_DIR/git-helpers" ]]; then
     alias gw='$WORKFLOW_DIR/git-helpers'
     alias gws='$WORKFLOW_DIR/git-helpers status'
-fi
-
-if [[ -x "$WORKFLOW_DIR/dev-server" ]]; then
-    alias dev='$WORKFLOW_DIR/dev-server'
-    alias serve='$WORKFLOW_DIR/dev-server'
 fi

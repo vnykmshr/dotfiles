@@ -27,41 +27,16 @@ suggest_commit_message() {
         return 1
     fi
 
-    # Analyze changes for smart suggestions
-    if echo "$staged_files" | grep -q "README\|\.md$"; then
-        suggestions+=("📚 Update documentation")
-    fi
-
-    if echo "$staged_files" | grep -q "test\|spec\|\.test\."; then
-        suggestions+=("✅ Add tests" "🔧 Fix tests")
-    fi
-
-    if echo "$staged_files" | grep -q "package\.json\|Cargo\.toml\|requirements\.txt\|go\.mod"; then
-        suggestions+=("⬆️ Update dependencies" "📦 Add dependency")
-    fi
-
-    if echo "$staged_files" | grep -q "config\|\.env\|\.yml$\|\.yaml$"; then
-        suggestions+=("🔧 Update configuration")
-    fi
-
-    if echo "$staged_files" | grep -q "\.sh$\|Makefile\|bin/"; then
-        suggestions+=("🔧 Update build scripts")
-    fi
-
-    # Generic suggestions based on git status
-    if git diff --cached --name-only | wc -l | grep -q "^1$"; then
-        local file_name
-        file_name=$(git diff --cached --name-only)
-        suggestions+=("Update ${file_name##*/}")
-    fi
-
     # Common conventional commit types
     suggestions+=(
         "feat: add new feature"
         "fix: resolve bug"
+        "docs: update documentation"
+        "test: add or fix tests"
         "refactor: improve code structure"
         "style: format code"
         "chore: maintenance tasks"
+        "build: update build scripts or dependencies"
     )
 
     # Display suggestions
