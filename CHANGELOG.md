@@ -17,22 +17,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cross-platform file handling (hidden files, spaces, dotfile globbing)
   - Dry-run mode behavior testing
 - Total test coverage: 29 tests (13 basic + 16 critical path)
+- Minimal prompt with Starship support or simple fallback
+- Personal workflow functions: qc(), acp(), backup(), mkproject(), workflowutil(), status()
 
 ### Changed
-- Consolidate documentation: merge docs/README.md and docs/customization-guide.md into main README
-- Simplify COMMAND_EXAMPLES.md from 387 to 63 lines (quick reference only)
-- Remove CONTRIBUTING.md (streamlining for personal dotfiles focus)
-- Update README to remove references to deleted workflow tools (dev, test, testwatch)
-- Workflow directory simplified: removed dev-server, test-runner, project-init (653 lines)
-- Git helpers: remove emoji from commit suggestions, opt-in via DOTFILES_SKIP_WORKFLOW
+- **Major Code Reduction**: Reduced codebase by 1,614 lines (59% of shell functions + workflow)
+- **Documentation**: Consolidated into single comprehensive README
+  - Merged docs/README.md and docs/customization-guide.md into main README
+  - Simplified COMMAND_EXAMPLES.md from 387 to 63 lines (quick reference only)
+- **Workflow Automation**: 1156 → 503 lines (56% reduction)
+  - Git helpers: remove emoji from commit suggestions
+  - Opt-in via DOTFILES_SKIP_WORKFLOW
+- **Shell Functions**: 1,531 → 570 lines (63% reduction)
+  - functions: 424 → 220 lines - removed 21 novelty functions
+  - intelligent-history: 169 → 35 lines - removed statistics, hooks
+  - security-automation: 109 → 55 lines - removed automatic hooks
+  - dev-automation: 71 → 26 lines - kept universal test runner
+  - personal-functions: 73 → 7 lines - now placeholder for user customization
 - Pre-commit: exclude tests/ directory from hardcoded path checks
+- zshrc: Removed tmpdir-management and go-dev, simplified prompt loading
 
 ### Removed
-- docs/README.md (merged into main README)
-- docs/customization-guide.md (merged into main README)
-- CONTRIBUTING.md (not needed for personal dotfiles repo)
-- config/workflow/dev-server, test-runner, project-init (unused tools)
-- config/workflow/git-helpers.clean (dead code)
+- **Documentation**: docs/README.md, docs/customization-guide.md, CONTRIBUTING.md
+- **Workflow Tools** (653 lines): dev-server, test-runner, project-init, git-helpers.clean
+- **Shell Modules** (384 lines): tmpdir-management, go-dev, prompt
+- **Novelty Functions** (21 total): ff, fdir, findbig, sysinfo, duh, meminfo, lower, upper, genpass, kctx, kns, tm, gource*, weather, qr, calc, timecmd, urlencode, urldecode, dsh
 
 ## [3.6.0] - 2025-10-29
 
