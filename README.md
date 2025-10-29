@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
+[![CI](https://github.com/vnykmshr/dotfiles/workflows/CI/badge.svg)](https://github.com/vnykmshr/dotfiles/actions)
+[![Version](https://img.shields.io/badge/Version-3.5.0-blue.svg)](./CHANGELOG.md)
 
 ## Features
 

@@ -84,5 +84,36 @@ reset: ## Reset to clean state
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
 	@FORCE=true $(MAKE) install
 
-# Note: Uninstall functionality not yet implemented
-# To manually uninstall, remove symlinks and restore from ~/.dotfiles-backup-*
+restore: ## Restore from backup
+	@echo "Available backups:"
+	@ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5 | nl || echo "No backups found"
+	@echo
+	@read -p "Enter backup number to restore (or path): " backup; \
+	if [[ $$backup =~ ^[0-9]+$$ ]]; then \
+		backup_path=$$(ls -1td ~/.dotfiles-backup-* 2>/dev/null | sed -n "$${backup}p"); \
+	else \
+		backup_path=$$backup; \
+	fi; \
+	if [[ ! -d "$$backup_path" ]]; then \
+		echo "❌ Backup not found: $$backup_path"; \
+		exit 1; \
+	fi; \
+	echo "Restoring from: $$backup_path"; \
+	cp -rv "$$backup_path"/.??* ~/ 2>/dev/null || true; \
+	echo "✅ Restore complete"
+
+uninstall: ## Uninstall dotfiles
+	@echo "⚠️  This will remove installed dotfiles"
+	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
+	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
+	@for file in zshrc gitconfig tmux.conf; do \
+		if [[ -L ~/.$$file ]]; then \
+			echo "Removing symlink: ~/.$$file"; \
+			rm -f ~/.$$file; \
+		fi; \
+	done
+	@if [[ -L ~/.dotfiles ]]; then \
+		echo "Removing symlink: ~/.dotfiles"; \
+		rm -f ~/.dotfiles; \
+	fi
+	@echo "✅ Uninstall complete. Run 'make restore' to restore from backup"
