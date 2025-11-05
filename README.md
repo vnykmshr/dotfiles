@@ -5,13 +5,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Shell](https://img.shields.io/badge/Shell-Zsh-green.svg)](https://www.zsh.org/)
 [![CI](https://github.com/vnykmshr/dotfiles/workflows/CI/badge.svg)](https://github.com/vnykmshr/dotfiles/actions)
-[![Version](https://img.shields.io/badge/Version-3.7.0-blue.svg)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-3.7.0-blue.svg)](./docs/CHANGELOG.md)
 
 ## Philosophy
 
 This is my personal setup. You probably shouldn't use it as-is.
 
-Fork it, understand what each piece does, then adapt it to your workflow. The value is in the patterns and structure, not the specific configurations.
+Fork it, understand what each piece does, then adapt it to your workflow.
+The value is in the patterns and structure, not the specific
+configurations.
 
 ## Features
 
@@ -39,7 +41,9 @@ make install
 
 ### Template-Based Configuration
 
-Configuration files use JSON templates to separate personal data (name, email, SSH keys) from versioned configs. This prevents accidental commits of sensitive information and makes customization explicit.
+Configuration files use JSON templates to separate personal data
+(name, email, SSH keys) from versioned configs. This prevents accidental
+commits of sensitive information and makes customization explicit.
 
 `config.json`
 
@@ -68,7 +72,8 @@ config/
 └── workflow/     # Git helpers (optional)
 ```
 
-Each component is optional and independently configurable with `DOTFILES_SKIP_*` variables.
+Each component is optional and independently configurable with
+`DOTFILES_SKIP_*` variables.
 
 ### Progressive Enhancement
 
@@ -260,7 +265,7 @@ shell-bench        # Performance impact
 ## Documentation
 
 - [Troubleshooting Guide](docs/troubleshooting.md) - Common issues and solutions
-- [CHANGELOG](CHANGELOG.md) - Version history
+- [CHANGELOG](docs/CHANGELOG.md) - Version history
 
 ## Requirements
 

@@ -53,7 +53,7 @@ repos:
     hooks:
       - id: markdownlint
         args: ['--fix']
-        exclude: '^(CHANGELOG\.md)$'
+        exclude: '^(docs/CHANGELOG\.md|docs/TECHNICAL_BLOG\.md)$'
 
   # Local hooks for custom checks
   - repo: local
