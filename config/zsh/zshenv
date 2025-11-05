@@ -1,0 +1,5 @@
+# Environment variables loaded for ALL zsh shells
+# (interactive, non-interactive, login, non-login)
+
+# Rust/Cargo environment
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"

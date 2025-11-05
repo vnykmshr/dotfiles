@@ -195,6 +195,7 @@ setup_symlinks() {
 
     # Zsh configuration
     link_config "config/zsh/zshrc" ".zshrc"
+    link_config "config/zsh/zshenv" ".zshenv"
     link_config "config/zsh/aliases" ".aliases"
 
     # Git configuration
