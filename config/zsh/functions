@@ -431,6 +431,7 @@ dotfiles-edit() {
 # Reload zsh configuration
 reload() {
     source "$HOME/.zshrc"
+    rehash
     echo "Zsh configuration reloaded!"
 }
 

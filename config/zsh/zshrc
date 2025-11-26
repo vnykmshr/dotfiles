@@ -32,12 +32,11 @@ export LESS='-R -i -w -M -z-4' LESSHISTFILE=/dev/null
 export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
 # Path configuration
-typeset -U path PATH
+typeset -gU path PATH
 path=(
     "$HOME/.local/bin"
     "$HOME/bin"
     "$DOTFILES/bin"
-    "$HOME/.cargo/bin"
     $path
 )
 
