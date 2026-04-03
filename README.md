@@ -17,13 +17,12 @@ configurations.
 
 ## Features
 
-- **Fast Shell**: 0.158s startup with lazy loading
+- **Fast Shell**: Sub-200ms startup with lazy loading
 - **Modern CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
-- **Git Helpers**: 45+ aliases, quick commit shortcuts (qc, acp)
-- **Organized Functions**: 40+ shell functions in 10 logical categories
-- **Environment Detection**: Auto-activate .nvmrc/.python-version
+- **Git Helpers**: Extensive git aliases, quick commit shortcuts (qc, acp)
+- **Organized Functions**: Shell functions in logical categories
 - **Cross-Platform**: macOS, Linux, WSL
-- **Quality**: 25 pre-commit hooks, 22 automated tests
+- **Quality**: Pre-commit hooks and automated tests
 
 ## Quick Start
 
@@ -63,12 +62,12 @@ commits of sensitive information and makes customization explicit.
 
 ```text
 config/
-├── zsh/          # Shell environment (18 modules, ~2800 lines)
+├── zsh/          # Shell environment
 ├── git/          # Version control and aliases
 ├── nvim/         # Editor configuration
 ├── tmux/         # Terminal multiplexer
 ├── ssh/          # SSH client templates
-├── cli-tools/    # Modern tool integration
+├── cli-tools/    # Modern tool init and fallbacks
 └── workflow/     # Git helpers (optional)
 ```
 
@@ -112,10 +111,10 @@ shell-bench        # Measure startup time
 
 ### Shell Environment (Zsh)
 
-- Fast startup (0.158s) with lazy loading and completion caching
-- Intelligent history with search and deduplication
+- Sub-200ms startup with lazy loading and completion caching
+- History with search and deduplication
 - Modern CLI tools (bat, eza, fd, ripgrep) with fallbacks
-- 40+ organized functions in 10 categories
+- Organized functions in logical categories
 - Cross-platform support (macOS, Linux, WSL)
 - Security automation and TMPDIR management
 
@@ -127,7 +126,7 @@ shell-bench        # Measure startup time
 
 ### Git Integration
 
-- 45+ aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`, `git-cleanup`
+- Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`, `git-cleanup`
 - Quick commits: `qc` (quick commit), `acp` (add, commit, push)
 - Smart workflow helpers (optional): `gw`, `gws`
 - Enhanced diffs with delta integration
@@ -155,75 +154,24 @@ Integrated with fallbacks to traditional tools:
 
 ## Customization Guide
 
-### Quick Customization
+**Personal Info**: Edit `config.json` (created from `config.json.example`
+during install) with your name, email, and signing key.
 
-**1. Personal Info** (`config.json`)
+**Personal Aliases**: Add shortcuts to `config/zsh/personal-aliases`.
 
-Created during installation from `config.json.example`:
+**Personal Functions**: Add utilities to `config/zsh/personal-functions`.
 
-```json
-{
-  "user": {
-    "name": "Your Name",
-    "email": "you@example.com"
-  },
-  "git": {
-    "signing_key": "$HOME/.ssh/id_ed25519.pub"
-  },
-  "environment": {
-    "workspace_dir": "$HOME/workspace"
-  }
-}
-```
-
-**2. Personal Aliases** (`config/zsh/personal-aliases`)
-
-```bash
-# Navigation shortcuts
-alias work="cd ~/work"
-alias personal="cd ~/personal"
-
-# Project-specific
-alias build="npm run build"
-alias lint="npm run lint"
-
-# Docker workflow
-alias dc="docker-compose"
-alias dcup="docker-compose up -d"
-```
-
-**3. Personal Functions** (`config/zsh/personal-functions`)
-
-```bash
-# Project-specific shortcuts
-myproject() {
-    cd ~/projects/myproject && git pull
-}
-
-# Environment-specific helpers
-work_vpn() {
-    echo "Connecting to work VPN..."
-    # your vpn connection logic
-}
-```
+**Local Overrides**: Use `config/zsh/personal.local` (gitignored)
+for machine-specific config.
 
 ### Performance Tuning
 
-Skip features you don't need:
+Skip features you don't need in `config/zsh/exports.local` (gitignored):
 
 ```bash
-# Add to config/zsh/exports.local (gitignored)
 export DOTFILES_SKIP_WORKFLOW=1        # Disable git workflow helpers
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip platform detection
 export DOTFILES_SKIP_TMPDIR=1          # Disable TMPDIR management
-export DOTFILES_SKIP_ALIAS_REMINDER=1  # No alias reminders
-```
-
-Measure impact:
-
-```bash
-shell-bench 5           # Benchmark startup time
-make test              # Validate changes
 ```
 
 ### Environment-Specific Setup
@@ -232,26 +180,7 @@ make test              # Validate changes
 # Add to config/zsh/exports.local
 if [[ "$HOST" == "work-laptop" ]]; then
     alias k="kubectl --context=work"
-    export WORK_MODE=1
 fi
-
-if [[ "$HOST" == "personal-mbp" ]]; then
-    alias blog="cd ~/projects/blog"
-fi
-```
-
-### Example Customizations
-
-```bash
-# Personal aliases
-alias serve="npm run dev"
-alias pods="kubectl get pods"
-alias db="docker-compose exec postgres psql"
-
-# Personal functions
-deploy() {
-    git push && ssh production "cd /app && git pull && make restart"
-}
 ```
 
 ## Testing Your Changes

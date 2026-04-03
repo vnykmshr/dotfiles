@@ -1,5 +1,4 @@
 # Development Automation
-# Note: dev command provided by workflow/dev-server script
 
 # Universal test runner
 run_tests() {

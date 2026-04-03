@@ -170,9 +170,9 @@
 	bD = branch -D
 
 	# Stash operations
-	sl = stash list
+	stl = stash list
 	sa = stash apply
-	ss = stash save
+	sts = stash save
 	sp = stash pop
 	sd = stash drop
 
