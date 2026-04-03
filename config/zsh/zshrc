@@ -79,9 +79,6 @@ load_config "prompt"
 [[ -r "$DOTFILES/config/cli-tools/init" ]] && source "$DOTFILES/config/cli-tools/init"
 [[ -r "$DOTFILES/config/workflow/init" ]] && source "$DOTFILES/config/workflow/init"
 
-# Override any conflicting aliases with our functions (must be after CLI tools)
-unalias cat 2>/dev/null || true  # cat() function defined in aliases
-
 # fzf keybindings and completion
 command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 
@@ -115,6 +112,3 @@ load_config "personal.local"
 
 # Local overrides
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
-# Alias reminders
-[[ "$DOTFILES_SKIP_ALIAS_REMINDER" != "1" ]] && load_config "alias-reminder"

@@ -25,10 +25,7 @@ if ! command -v eza >/dev/null 2>&1; then
 fi
 
 # Directory listing shortcuts
-alias lr='ls -R'                    # recursive ls
-alias lx='ll -BX'                   # sort by extension
-alias lz='ll -rS'                   # sort by size
-alias lm='la | $PAGER'              # pipe through pager
+alias lr='ls -R'
 
 # Safety First - Dangerous Command Protection
 
@@ -52,9 +49,13 @@ alias suod='sudo'
 # System info
 alias df='df -h'
 alias du='du -h'
-alias ps='ps auxf'
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    alias ps='ps aux'
+    alias top='top -o cpu'
+else
+    alias ps='ps auxf'
+fi
 alias psg='ps aux | grep'
-alias top='top -o cpu'
 alias cpu='htop --sort-key PERCENT_CPU'
 
 # Cross-platform memory and process aliases
@@ -118,20 +119,6 @@ alias go.fmt='go fmt ./...'
 alias go.vet='go vet ./...'
 alias go.tidy='go mod tidy'
 
-# Alternatives - Define cat function to use brew-installed bat
-cat() {
-    if command -v bat >/dev/null 2>&1; then
-        # If it looks like help or BSD cat usage, use original cat
-        if [[ "$1" =~ ^-{1,2}(help|h)$ ]] || [[ "$#" -eq 0 && ! -t 0 ]]; then
-            command cat "$@"
-        else
-            command bat --style=plain "$@"
-        fi
-    else
-        command cat "$@"
-    fi
-}
-
 # Editor shortcuts
 alias v='$EDITOR'
 alias vim='$EDITOR'
@@ -188,47 +175,6 @@ alias header='curl --location --head'
 
 # Web server
 alias serve='python3 -m http.server'
-alias serve-here='python3 -m http.server 8000'
-
-# Utility Functions as Aliases
-
-# curl with timing and response details
-curly() {
-    if [[ $# -eq 0 ]]; then
-        echo "Usage: curly <url> [curl options]"
-        echo "curl with headers and detailed timing information"
-        return 1
-    fi
-
-    local url="$1"
-    shift
-
-    echo "Fetching: $url"
-    echo "---"
-
-    # Show headers
-    echo "Headers:"
-    curl -Is "$url" "$@" | while IFS= read -r line; do
-        echo "   $line"
-    done
-
-    echo
-    echo "Timing Details:"
-    curl -o /dev/null -s -w "\
-   DNS Lookup:        %{time_namelookup}s
-   TCP Connect:       %{time_connect}s
-   TLS Handshake:     %{time_appconnect}s
-   Pre-transfer:      %{time_pretransfer}s
-   Redirect:          %{time_redirect}s
-   Start Transfer:    %{time_starttransfer}s
-   ---
-   Total Time:        %{time_total}s
-
-   HTTP Code:         %{http_code}
-   Size Downloaded:   %{size_download} bytes
-   Speed:             %{speed_download} bytes/sec
-" "$url" "$@"
-}
 
 # grep with useful defaults
 alias grep='grep --color=auto -n -H'
@@ -242,13 +188,8 @@ else
     alias vgrep="find . -type f -and -not -path './node_modules/*' -and -not -path './.git/*' -and -not -path './logs/*' -and -not -path './doc/*' -and -not -path './vendor/*' -and -not -path './dist/*' -and -not -path './webpack/*' -and -not -path './static/*' -print0 | xargs -0 grep -nir"
 fi
 
-# Human readable sizes
-alias du1='du --max-depth=1'
-alias du2='du --max-depth=2'
-
 # Date/time
 alias now='date +"%T"'
-alias nowtime=now
 alias nowdate='date +"%d-%m-%Y"'
 
 # System Specific Aliases
@@ -260,7 +201,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias hidefiles='defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder'
 
     # Empty trash
-    alias emptytrash='sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* "delete from LSQuarantineEvent"'
+    alias emptytrash='rm -rf ~/.Trash/*'
 
     # Lock screen
     alias lock='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'

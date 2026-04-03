@@ -114,15 +114,6 @@ history_clean_sensitive() {
     echo "Removed $removed sensitive entries (backup: $backup)"
 }
 
-# Project-based suggestions
-smart_suggest() {
-    echo "Suggestions for $(basename $(pwd)):"
-    [[ -f "package.json" ]] && echo "  npm install, npm run dev, npm test"
-    [[ -f "Cargo.toml" ]] && echo "  cargo build, cargo run, cargo test"
-    [[ -f "go.mod" ]] && echo "  go run ., go build, go test"
-    [[ -d ".git" ]] && echo "  git status, git add ., git commit, git push"
-}
-
 # Hooks and Setup
 
 # Filter sensitive commands before execution
@@ -142,7 +133,6 @@ alias htime='history_time'
 alias hfind='hsearch'
 alias hclean='history_dedupe'
 alias hpriv='history_clean_sensitive'
-alias suggest='smart_suggest'
 alias h='history'
 alias hg='history | grep'
 alias h10='history -10'

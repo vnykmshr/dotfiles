@@ -20,6 +20,14 @@ if command -v bat >/dev/null 2>&1; then
     export BAT_TABS="4"
 
     alias less='bat --style=auto --paging=always'
+
+    cat() {
+        if [[ "$1" =~ ^-{1,2}(help|h)$ ]] || [[ "$#" -eq 0 && ! -t 0 ]]; then
+            command cat "$@"
+        else
+            command bat --style=plain "$@"
+        fi
+    }
 fi
 
 # --- ripgrep ---

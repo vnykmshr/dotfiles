@@ -106,13 +106,6 @@ gsl() {
 
 # DEVELOPMENT & PROCESSES
 
-# Start a simple HTTP server
-http_serve() {
-    local port="${1:-8000}"
-    echo "Starting HTTP server on port $port..."
-    python3 -m http.server "$port"
-}
-
 # Find and kill process by name
 killp() {
     local process="$1"
@@ -241,14 +234,10 @@ tm() {
 # TEXT & DATA PROCESSING
 
 # Convert to lowercase
-lower() {
-    echo "$1" | tr '[:upper:]' '[:lower:]'
-}
+lower() { tr '[:upper:]' '[:lower:]' <<<"${*:-$(cat)}"; }
 
 # Convert to uppercase
-upper() {
-    echo "$1" | tr '[:lower:]' '[:upper:]'
-}
+upper() { tr '[:lower:]' '[:upper:]' <<<"${*:-$(cat)}"; }
 
 # Generate random password
 genpass() {
@@ -273,6 +262,42 @@ urlencode() { python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys
 urldecode() { python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(sys.argv[1]))" "$1"; }
 
 # UTILITIES
+
+# curl with timing and response details
+curly() {
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: curly <url> [curl options]"
+        return 1
+    fi
+
+    local url="$1"
+    shift
+
+    echo "Fetching: $url"
+    echo "---"
+
+    echo "Headers:"
+    curl -Is "$url" "$@" | while IFS= read -r line; do
+        echo "   $line"
+    done
+
+    echo
+    echo "Timing Details:"
+    curl -o /dev/null -s -w "\
+   DNS Lookup:        %{time_namelookup}s
+   TCP Connect:       %{time_connect}s
+   TLS Handshake:     %{time_appconnect}s
+   Pre-transfer:      %{time_pretransfer}s
+   Redirect:          %{time_redirect}s
+   Start Transfer:    %{time_starttransfer}s
+   ---
+   Total Time:        %{time_total}s
+
+   HTTP Code:         %{http_code}
+   Size Downloaded:   %{size_download} bytes
+   Speed:             %{speed_download} bytes/sec
+" "$url" "$@"
+}
 
 # Weather report
 weather() {

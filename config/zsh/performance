@@ -1,24 +1,5 @@
 # Shell performance monitoring and optimization
 
-# Performance measurement
-shell_time() {
-    local iterations=${1:-5}
-    echo "Measuring zsh startup time ($iterations runs)..."
-
-    local total=0
-    for i in $(seq 1 "$iterations"); do
-        local start_time=$(date +%s.%N)
-        zsh -i -c exit >/dev/null 2>&1
-        local end_time=$(date +%s.%N)
-        local duration=$(awk "BEGIN {print $end_time - $start_time}")
-        total=$(awk "BEGIN {print $total + $duration}")
-        printf "Run $i: %.3fs\n" "$duration"
-    done
-
-    local average=$(awk "BEGIN {printf \"%.3f\", $total / $iterations}")
-    printf "Average: %.3fs\n" "$average"
-}
-
 # Profile current session
 shell_profile() {
     if [[ "$ZSH_PROF" == "1" ]]; then
@@ -71,19 +52,6 @@ startup_analyze() {
     echo "Defined aliases: $(alias | wc -l)"
 }
 
-# Quick performance tips
-perf_tips() {
-    echo "Shell performance tips:"
-    echo "======================"
-    echo "1. Use 'shell_time' to measure startup"
-    echo "2. Use 'ZSH_PROF=1 zsh' for detailed profiling"
-    echo "3. Run 'startup_analyze' to check common issues"
-    echo "4. Set DOTFILES_SKIP_PROMPT=1 if using custom prompt"
-    echo "5. Disable unused features with environment variables"
-}
-
 # Aliases
-alias stime='shell_time'
 alias sprof='shell_profile'
 alias sanalyze='startup_analyze'
-alias stips='perf_tips'

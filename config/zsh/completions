@@ -1,8 +1,6 @@
 
 # Custom completions
 
-# Make Target Completion (You use make commands frequently)
-
 # Make target completion
 _make_targets() {
     local context state line
@@ -32,7 +30,7 @@ _git_branches() {
     _describe 'git branches' branches
 }
 
-# Git workflow completions for your aliases
+# Git workflow completions
 compdef _git_branches gco  # git checkout completion
 
 # Custom Command Completions
@@ -54,7 +52,7 @@ _workflow_helper() {
 compdef _workflow_helper workflow-helper
 compdef _workflow_helper wh
 
-# ccusage completion (you use ccusage daily frequently)
+# ccusage completion
 _ccusage() {
     local -a commands
     commands=(
@@ -108,64 +106,6 @@ _go_modules() {
     fi
 }
 
-# Flutter Completion Enhancements
-
-# Flutter device completion for flutter run
-_flutter_devices() {
-    local -a devices
-    devices=(${(f)"$(flutter devices --machine 2>/dev/null | jq -r '.[].id' 2>/dev/null)"})
-    _describe 'flutter devices' devices
-}
-
-# Flutter command completion enhancement
-_flutter_enhanced() {
-    local context state line
-    local -a commands
-
-    commands=(
-        'run:Run the application'
-        'build:Build the application'
-        'test:Run tests'
-        'clean:Clean build artifacts'
-        'pub:Pub package manager'
-        'create:Create a new project'
-        'devices:List connected devices'
-        'doctor:Show Flutter doctor'
-    )
-
-    if [[ $words[CURRENT-1] == "run" ]]; then
-        _flutter_devices
-    else
-        _describe 'flutter commands' commands
-    fi
-}
-
-compdef _flutter_enhanced flutter
-compdef _flutter_enhanced fl
-
-# Brew Completion Enhancements
-
-# Brew completion
-_brew_enhanced() {
-    local context state line
-    local -a commands
-
-    commands=(
-        'install:Install packages'
-        'uninstall:Uninstall packages'
-        'update:Update Homebrew'
-        'upgrade:Upgrade packages'
-        'cleanup:Clean up old versions'
-        'services:Manage services'
-        'info:Show package info'
-        'search:Search packages'
-        'list:List installed packages'
-    )
-    _describe 'brew commands' commands
-}
-
-compdef _brew_enhanced brew
-
 # Project Type Detection for Completions
 
 # Completion based on project type
@@ -176,8 +116,6 @@ _smart_project_completion() {
         _npm_scripts
     elif [[ -f go.mod ]]; then
         _go_modules
-    elif [[ -f pubspec.yaml ]]; then
-        _flutter_devices
     fi
 }
 
@@ -190,7 +128,3 @@ compdef _smart_project_completion dev
 if [[ -d ~/.zsh/completions ]]; then
     fpath=(~/.zsh/completions $fpath)
 fi
-
-# Initialize completion system
-autoload -Uz compinit
-compinit
