@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Gource repository visualization — interactive viewer and video renderer
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: gource-viz [view|render] [options]
+
+Commands:
+  view   [repo] [resolution] [speed]           Interactive viewer (ffplay)
+  render [repo] [output] [resolution] [fps] [speed] [bitrate]  Render to MP4
+
+Defaults:
+  view   .  1280x720  0.05
+  render .  gource.mp4  1920x1080  60  0.05  12000k
+
+Examples:
+  gource-viz view
+  gource-viz view ~/myrepo 1920x1080
+  gource-viz render . demo.mp4
+EOF
+}
+
+require() {
+    command -v "$1" >/dev/null 2>&1 || {
+        echo "Error: $1 is not installed" >&2
+        exit 1
+    }
+}
+
+view() {
+    require gource
+    require ffplay
+
+    local repo="${1:-.}"
+    local res="${2:-1280x720}"
+    local spd="${3:-0.05}"
+    local title
+    title="$(basename "$(cd "$repo" && pwd)")"
+
+    cd "$repo" || exit 1
+    gource \
+        --multi-sampling \
+        --seconds-per-day "$spd" \
+        --max-files 400 \
+        --file-idle-time 12 \
+        --highlight-all-users \
+        --auto-skip-seconds 1 \
+        --background-colour 000000 \
+        --title "$title" \
+        --key \
+        --camera-mode overview \
+        --hide-dirnames \
+        --output-ppm-stream - \
+        -"$res" |
+        ffplay -loglevel warning -framerate 60 -i -
+}
+
+render() {
+    require gource
+    require ffmpeg
+
+    local repo="${1:-.}"
+    local out="${2:-gource.mp4}"
+    local res="${3:-1920x1080}"
+    local fr="${4:-60}"
+    local spd="${5:-0.05}"
+    local bitrate="${6:-12000k}"
+    local title
+    title="$(basename "$(cd "$repo" && pwd)")"
+
+    cd "$repo" || exit 1
+    gource \
+        --seconds-per-day "$spd" \
+        --max-files 500 \
+        --file-idle-time 10 \
+        --highlight-all-users \
+        --auto-skip-seconds 1 \
+        --background-colour 000000 \
+        --title "$title" \
+        --key \
+        --camera-mode overview \
+        -"$res" \
+        --output-ppm-stream - |
+        ffmpeg -y -r "$fr" -f image2pipe -vcodec ppm -i - \
+            -vcodec libx264 -preset slow -pix_fmt yuv420p -crf 18 -b:v "$bitrate" "$out"
+}
+
+case "${1:-}" in
+    view)
+        shift
+        view "$@"
+        ;;
+    render)
+        shift
+        render "$@"
+        ;;
+    -h | --help) usage ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac
