@@ -19,7 +19,7 @@ configurations.
 
 - **Fast Shell**: Sub-200ms startup with lazy loading
 - **Modern CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
-- **Git Helpers**: Extensive git aliases, quick commit shortcuts (qc, acp)
+- **Git Helpers**: Extensive git aliases and workflow scripts
 - **Organized Functions**: Shell functions in logical categories
 - **Cross-Platform**: macOS, Linux, WSL
 - **Quality**: Pre-commit hooks and automated tests
@@ -121,14 +121,12 @@ shell-bench        # Measure startup time
 **Customize in**:
 
 - `config/zsh/personal-aliases` - Your shortcuts
-- `config/zsh/personal-functions` - Your utilities
 - `config/zsh/personal.local` - Local overrides (gitignored)
 
 ### Git Integration
 
-- Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`, `git-cleanup`
-- Quick commits: `qc` (quick commit), `acp` (add, commit, push)
-- Smart workflow helpers (optional): `gw`, `gws`
+- Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`
+- Workflow helpers: `gsave`, `gpull`, `gclean` (via git-helpers script)
 - Enhanced diffs with delta integration
 - Global gitignore covering major platforms
 - SSH signing support
@@ -159,7 +157,7 @@ during install) with your name, email, and signing key.
 
 **Personal Aliases**: Add shortcuts to `config/zsh/personal-aliases`.
 
-**Personal Functions**: Add utilities to `config/zsh/personal-functions`.
+**Personal Functions**: Add utilities to `config/zsh/personal.local`.
 
 **Local Overrides**: Use `config/zsh/personal.local` (gitignored)
 for machine-specific config.
