@@ -40,7 +40,7 @@ testwatch() {
 
 # Simple project setup
 project_setup() {
-    echo "🚀 Setting up project..."
+    echo "Setting up project..."
 
     # Initialize git if not exists
     [[ ! -d .git ]] && git init
@@ -64,7 +64,7 @@ project_setup() {
         fi
     fi
 
-    echo "✅ Project setup complete!"
+    echo "Done: Project setup complete!"
 }
 
 alias rt='run_tests'

@@ -1,5 +1,5 @@
-# Modern CLI Tools Initialization
-# Sources all modern tool configurations and sets up integrations
+# CLI Tools Initialization
+# Sources tool configurations and sets up integrations
 
 # Get the directory where this script is located
 local cli_tools_dir="${0:A:h}"
@@ -32,16 +32,16 @@ fi
 
 # Tool availability check function
 check_modern_tools() {
-    echo "Modern CLI Tools Status:"
+    echo "CLI Tools Status:"
     echo "========================"
 
     local tools=(
-        "eza:Better ls"
-        "bat:Better cat"
-        "rg:Better grep"
-        "fd:Better find"
-        "delta:Better git diff"
-        "zoxide:Smart cd"
+        "eza:ls replacement"
+        "bat:cat replacement"
+        "rg:grep replacement"
+        "fd:find replacement"
+        "delta:git diff viewer"
+        "zoxide:directory jumper"
     )
 
     for tool_info in "${tools[@]}"; do

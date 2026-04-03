@@ -1,9 +1,7 @@
 # Cross-platform compatibility configuration
 # Cross-Platform Compatibility
 
-# =============================================================================
 # Platform Detection
-# =============================================================================
 
 # Detect platform and environment
 detect_platform() {
@@ -22,9 +20,7 @@ detect_platform() {
     [[ -n "$GITPOD_WORKSPACE_ID" ]] && export DOTFILES_ENV="gitpod"
 }
 
-# =============================================================================
 # Platform Configurations
-# =============================================================================
 
 # Setup clipboard commands
 setup_clipboard() {
@@ -67,9 +63,7 @@ setup_platform_paths() {
     fi
 }
 
-# =============================================================================
 # Unified Keybindings
-# =============================================================================
 
 setup_unified_keybindings() {
     # Word movement
@@ -92,9 +86,7 @@ setup_unified_keybindings() {
     bindkey '^W' backward-kill-word
 }
 
-# =============================================================================
 # Environment Optimizations
-# =============================================================================
 
 # Container optimizations
 optimize_for_containers() {
@@ -119,9 +111,7 @@ optimize_for_cloud() {
     export CLOUD_MODE="true"
 }
 
-# =============================================================================
 # Commands and Setup
-# =============================================================================
 
 # Show environment info
 env_info() {

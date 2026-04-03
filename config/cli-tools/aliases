@@ -1,7 +1,7 @@
-# Modern CLI Tool Aliases
-# Enhanced replacements for common commands
+# CLI Tool Aliases
+# Replacements for common commands
 
-# File listing with eza (better ls)
+# File listing with eza
 if command -v eza >/dev/null 2>&1; then
     alias ls='eza --color=auto --group-directories-first'
     alias ll='eza -la --color=auto --group-directories-first --git'
@@ -11,26 +11,26 @@ if command -v eza >/dev/null 2>&1; then
     alias ltg='eza --tree --level=2 --color=auto --git'
 fi
 
-# File viewing with bat (better cat) - using wrapper function from main aliases
+# File viewing with bat - using wrapper function from main aliases
 if command -v bat >/dev/null 2>&1; then
     alias less='bat --style=auto --paging=always'
     alias bathelp='bat --list-themes'
 fi
 
-# File searching with ripgrep (better grep)
+# File searching with ripgrep
 if command -v rg >/dev/null 2>&1; then
     alias rga='rg --no-ignore --hidden'
     alias rgf='rg --files'
 fi
 
-# File finding with fd (better find)
+# File finding with fd
 if command -v fd >/dev/null 2>&1; then
     alias fda='fd --no-ignore --hidden'
     alias fdt='fd --type f'
     alias fdd='fd --type d'
 fi
 
-# Smart navigation with zoxide (initialized in cli-tools/init)
+# Navigation with zoxide (initialized in cli-tools/init)
 if command -v zoxide >/dev/null 2>&1; then
     alias zb='z -'
 fi

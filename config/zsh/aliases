@@ -1,8 +1,6 @@
 # Zsh aliases
 
-# =============================================================================
 # Core System Aliases
-# =============================================================================
 
 # Navigation
 alias ..='cd ..'
@@ -32,9 +30,7 @@ alias lx='ll -BX'                   # sort by extension
 alias lz='ll -rS'                   # sort by size
 alias lm='la | $PAGER'              # pipe through pager
 
-# =============================================================================
 # Safety First - Dangerous Command Protection
-# =============================================================================
 
 alias rm='rm -i'
 alias cp='cp -i'
@@ -51,9 +47,7 @@ alias shh='ssh'
 alias sduo='sudo'
 alias suod='sudo'
 
-# =============================================================================
 # System Information & Monitoring
-# =============================================================================
 
 # System info
 alias df='df -h'
@@ -93,9 +87,7 @@ alias path='echo $PATH | tr ":" "\n"'
 # Weather (requires curl)
 alias forecast='curl -s "https://wttr.in/"'  # weather() function in functions file
 
-# =============================================================================
 # Development Tools
-# =============================================================================
 
 # Git shortcuts (more extensive git aliases in gitconfig)
 alias g='git'
@@ -111,7 +103,7 @@ alias gst='git status'
 alias gup='git pull && git submodule update'
 alias gcl='git clean -fd && git reset --hard'
 
-# Enhanced git workflow aliases
+# Git workflow aliases
 alias mygh='$DOTFILES/config/workflow/git-helpers'
 alias gsave='$DOTFILES/config/workflow/git-helpers save'
 alias gpull='$DOTFILES/config/workflow/git-helpers pull'
@@ -127,7 +119,7 @@ alias go.fmt='go fmt ./...'
 alias go.vet='go vet ./...'
 alias go.tidy='go mod tidy'
 
-# Modern alternatives - Define cat function to use brew-installed bat
+# Alternatives - Define cat function to use brew-installed bat
 cat() {
     if command -v bat >/dev/null 2>&1; then
         # If it looks like help or BSD cat usage, use original cat
@@ -147,9 +139,7 @@ alias vim='$EDITOR'
 alias vi='$EDITOR'
 alias e='$EDITOR'
 
-# =============================================================================
 # Development Environment
-# =============================================================================
 
 # Node.js
 alias npm-update='npm update -g'
@@ -177,9 +167,7 @@ alias kgp='kubectl get pods'
 alias kgs='kubectl get services'
 alias kgd='kubectl get deployments'
 
-# =============================================================================
 # File Operations & Archives
-# =============================================================================
 
 # Create directories with parents
 alias mkdir='mkdir -pv'
@@ -192,9 +180,7 @@ alias tar-list='tar -tzf'
 # Find large files - see functions file for findbig implementation
 alias ducks='du -cks * 2>/dev/null | sort -rn | head'
 
-# =============================================================================
 # Network & Web
-# =============================================================================
 
 # HTTP requests
 alias get='curl --location --progress-bar'
@@ -205,32 +191,30 @@ alias header='curl --location --head'
 alias serve='python3 -m http.server'
 alias serve-here='python3 -m http.server 8000'
 
-# =============================================================================
 # Utility Functions as Aliases
-# =============================================================================
 
-# Enhanced curl with timing and response details
+# curl with timing and response details
 curly() {
     if [[ $# -eq 0 ]]; then
         echo "Usage: curly <url> [curl options]"
-        echo "Enhanced curl with headers and detailed timing information"
+        echo "curl with headers and detailed timing information"
         return 1
     fi
 
     local url="$1"
     shift
 
-    echo "🌐 Fetching: $url"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Fetching: $url"
+    echo "---"
 
     # Show headers
-    echo "📋 Headers:"
+    echo "Headers:"
     curl -Is "$url" "$@" | while IFS= read -r line; do
         echo "   $line"
     done
 
     echo
-    echo "⏱️  Timing Details:"
+    echo "Timing Details:"
     curl -o /dev/null -s -w "\
    DNS Lookup:        %{time_namelookup}s
    TCP Connect:       %{time_connect}s
@@ -238,7 +222,7 @@ curly() {
    Pre-transfer:      %{time_pretransfer}s
    Redirect:          %{time_redirect}s
    Start Transfer:    %{time_starttransfer}s
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ---
    Total Time:        %{time_total}s
 
    HTTP Code:         %{http_code}
@@ -247,12 +231,12 @@ curly() {
 " "$url" "$@"
 }
 
-# Enhanced grep with useful defaults
+# grep with useful defaults
 alias grep='grep --color=auto -n -H'
 alias egrep='egrep --color=auto -n -H'
 alias fgrep='fgrep --color=auto -n -H'
 
-# Smart grep using fd and ripgrep
+# grep using fd and ripgrep
 if command -v fd >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
     alias vgrep='fd --type f --exclude node_modules --exclude .git --exclude logs --exclude doc --exclude vendor --exclude dist --exclude webpack --exclude static --exec rg --line-number --ignore-case'
 else
@@ -268,9 +252,7 @@ alias now='date +"%T"'
 alias nowtime=now
 alias nowdate='date +"%d-%m-%Y"'
 
-# =============================================================================
 # System Specific Aliases
-# =============================================================================
 
 # macOS specific
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -312,9 +294,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     fi
 fi
 
-# =============================================================================
 # Dotfiles Management
-# =============================================================================
 
 alias dotfiles='cd $DOTFILES'
 # reload function defined in functions file

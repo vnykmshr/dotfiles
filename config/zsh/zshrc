@@ -70,7 +70,7 @@ load_config "personal-aliases"
 # Load optional modules (can be disabled)
 [[ "$DOTFILES_SKIP_CROSS_PLATFORM" != "1" ]] && load_config "cross-platform"
 [[ "$DOTFILES_SKIP_DIRENV" != "1" ]] && load_config "direnv-integration"
-[[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "intelligent-history"
+[[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "history"
 [[ "$DOTFILES_SKIP_SECURITY" != "1" ]] && load_config "security-automation"
 [[ "$DOTFILES_SKIP_PERFORMANCE" != "1" ]] && load_config "performance"
 load_config "prompt"
@@ -116,5 +116,5 @@ load_config "personal.local"
 # Local overrides
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
-# === ALIAS REMINDERS ===
+# Alias reminders
 [[ "$DOTFILES_SKIP_ALIAS_REMINDER" != "1" ]] && load_config "alias-reminder"

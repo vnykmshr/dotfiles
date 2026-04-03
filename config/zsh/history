@@ -1,8 +1,6 @@
-# Intelligent Shell History
+# Shell History
 
-# =============================================================================
 # Configuration
-# =============================================================================
 
 # History options (these extend base zshrc settings)
 setopt HIST_FIND_NO_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_SAVE_NO_DUPS HIST_VERIFY
@@ -11,9 +9,7 @@ setopt HIST_FIND_NO_DUPS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_SAVE_NO_DU
 export HISTORY_STATS_FILE="$HOME/.zsh_history_stats"
 export HISTORY_SENSITIVE_PATTERNS="$HOME/.config/zsh/sensitive-patterns"
 
-# =============================================================================
 # Sensitive Command Filtering
-# =============================================================================
 
 # Initialize patterns file
 init_sensitive_patterns() {
@@ -47,9 +43,7 @@ is_sensitive_command() {
     return 1
 }
 
-# =============================================================================
 # Statistics
-# =============================================================================
 
 # Update stats (called periodically)
 update_history_stats() {
@@ -82,9 +76,7 @@ history_suggest() {
     grep -i "$1" "$HISTFILE" 2>/dev/null | sort | uniq -c | sort -nr | head -5 | awk '{$1=""; print substr($0,2)}'
 }
 
-# =============================================================================
 # Search
-# =============================================================================
 
 # Search with context
 hsearch() {
@@ -98,9 +90,7 @@ history_time() {
     fc -lt '%m-%d %H:%M' -"${1:-10}"
 }
 
-# =============================================================================
 # Cleanup
-# =============================================================================
 
 # Remove duplicates
 history_dedupe() {
@@ -133,9 +123,7 @@ smart_suggest() {
     [[ -d ".git" ]] && echo "  git status, git add ., git commit, git push"
 }
 
-# =============================================================================
 # Hooks and Setup
-# =============================================================================
 
 # Filter sensitive commands before execution
 preexec_history_filter() {
@@ -166,4 +154,4 @@ add-zsh-hook preexec preexec_history_filter
 add-zsh-hook precmd precmd_history_stats
 
 # Initialize
-[[ -z "$INTELLIGENT_HISTORY_LOADED" ]] && { init_sensitive_patterns; export INTELLIGENT_HISTORY_LOADED=1; }
+[[ -z "$HISTORY_LOADED" ]] && { init_sensitive_patterns; export HISTORY_LOADED=1; }

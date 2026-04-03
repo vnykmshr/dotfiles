@@ -1,8 +1,6 @@
 # Security Automation
 
-# =============================================================================
 # Environment File Security
-# =============================================================================
 
 # Secure .env files
 secure_env_files() {
@@ -52,9 +50,7 @@ EOF
     chmod +x "$hook"
 }
 
-# =============================================================================
 # SSH Security
-# =============================================================================
 
 # Check SSH key permissions
 check_ssh_security() {
@@ -74,9 +70,7 @@ check_ssh_security() {
     done
 }
 
-# =============================================================================
 # Automatic Security
-# =============================================================================
 
 # Run security checks on directory change
 security_check_on_cd() {
@@ -93,17 +87,13 @@ security_check_on_cd() {
     install_security_hooks
 }
 
-# =============================================================================
 # Commands
-# =============================================================================
 
 alias seccheck='check_ssh_security'
 alias envcheck='secure_env_files'
 alias gitsec='install_security_hooks'
 
-# =============================================================================
 # Setup
-# =============================================================================
 
 autoload -U add-zsh-hook
 add-zsh-hook chpwd security_check_on_cd

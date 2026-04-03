@@ -1,7 +1,7 @@
-# Modern Enhanced Prompt Configuration
+# Prompt Configuration
 #
 # Features:
-# - Smart directory truncation for long paths
+# - Directory truncation for long paths
 # - Comprehensive git status with symbols:
 #   ● = staged changes    ± = modified files    ? = untracked files
 #   ⚑ = stashed changes   ↑ = ahead of remote   ↓ = behind remote
@@ -58,7 +58,7 @@ fi
 # Enable prompt substitution
 setopt PROMPT_SUBST
 
-# Git status function with enhanced information
+# Git status function
 git_prompt() {
     local branch status_symbols ahead behind stash_count
 
@@ -136,7 +136,7 @@ dir_prompt() {
     echo "%F{blue}$result%f"
 }
 
-# Exit status with enhanced indicators
+# Exit status indicator
 exit_status() {
     echo "%(?..%F{red}✗ %?%f )"
 }
@@ -179,14 +179,14 @@ k8s_prompt() {
     fi
 }
 
-# Set the enhanced prompt
+# Set the prompt
 PROMPT='$(time_prompt)$(exit_status)$(venv_prompt)$(jobs_prompt)$(dir_prompt)$(git_prompt)
 %F{green}❯%f '
 
 # Right-side prompt with optional information
 RPROMPT='$(docker_prompt)$(k8s_prompt)$(node_prompt)'
 
-# Enhanced continuation prompt
+# Continuation prompt
 PS2='%F{yellow}❯❯%f '
 
 # Selection prompt (for select command)

@@ -1,11 +1,9 @@
 
-# Custom completions for enhanced productivity
+# Custom completions
 
-# =============================================================================
 # Make Target Completion (You use make commands frequently)
-# =============================================================================
 
-# Intelligent make target completion
+# Make target completion
 _make_targets() {
     local context state line
     local -a targets
@@ -25,11 +23,9 @@ _make_targets() {
 # Override make completion
 compdef _make_targets make
 
-# =============================================================================
 # Git Completion Enhancements
-# =============================================================================
 
-# Enhanced git branch completion for your frequent branch switching
+# Git branch completion
 _git_branches() {
     local branches
     branches=(${(f)"$(git branch 2>/dev/null | sed 's/^..//' | grep -v '^$')"})
@@ -39,9 +35,7 @@ _git_branches() {
 # Git workflow completions for your aliases
 compdef _git_branches gco  # git checkout completion
 
-# =============================================================================
 # Custom Command Completions
-# =============================================================================
 
 # workflow-helper completion
 _workflow_helper() {
@@ -49,7 +43,7 @@ _workflow_helper() {
     commands=(
         'commit:Quick commit workflow'
         'deploy:Build and deploy workflow'
-        'status:Enhanced project status'
+        'status:Project status'
         'setup:Project dependency setup'
         'clean:Clean workspace'
         'sync:Full sync workflow'
@@ -74,11 +68,9 @@ _ccusage() {
 
 compdef _ccusage ccusage
 
-# =============================================================================
 # Directory Completion Enhancements
-# =============================================================================
 
-# Smart cd completion for common workspace structure
+# cd completion for common workspace structure
 _workspace_dirs() {
     local -a dirs
     if [[ -d ~/workspace ]]; then
@@ -87,13 +79,11 @@ _workspace_dirs() {
     fi
 }
 
-# Enhanced completion for workspace navigation aliases
+# Completion for workspace navigation aliases
 compdef _workspace_dirs workspace
 compdef _workspace_dirs ws
 
-# =============================================================================
 # Node.js/npm Completion Enhancements
-# =============================================================================
 
 # npm script completion from package.json
 _npm_scripts() {
@@ -104,12 +94,10 @@ _npm_scripts() {
     fi
 }
 
-# Enhanced npm run completion
+# npm run completion
 compdef _npm_scripts 'npm run'
 
-# =============================================================================
 # Go Completion Enhancements
-# =============================================================================
 
 # Go module completion for go mod commands
 _go_modules() {
@@ -120,9 +108,7 @@ _go_modules() {
     fi
 }
 
-# =============================================================================
 # Flutter Completion Enhancements
-# =============================================================================
 
 # Flutter device completion for flutter run
 _flutter_devices() {
@@ -157,11 +143,9 @@ _flutter_enhanced() {
 compdef _flutter_enhanced flutter
 compdef _flutter_enhanced fl
 
-# =============================================================================
 # Brew Completion Enhancements
-# =============================================================================
 
-# Enhanced brew completion for your frequent package management
+# Brew completion
 _brew_enhanced() {
     local context state line
     local -a commands
@@ -182,11 +166,9 @@ _brew_enhanced() {
 
 compdef _brew_enhanced brew
 
-# =============================================================================
-# Project Type Detection for Smart Completions
-# =============================================================================
+# Project Type Detection for Completions
 
-# Smart completion based on project type
+# Completion based on project type
 _smart_project_completion() {
     if [[ -f Makefile ]]; then
         _make_targets
@@ -202,9 +184,7 @@ _smart_project_completion() {
 # Apply smart completion to the dev function
 compdef _smart_project_completion dev
 
-# =============================================================================
 # Load Additional Completions
-# =============================================================================
 
 # Load additional completions if available
 if [[ -d ~/.zsh/completions ]]; then
