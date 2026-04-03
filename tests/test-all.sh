@@ -60,22 +60,32 @@ echo "Running Critical Path Tests..."
 echo "=============================="
 echo ""
 
+SUITE_FAILED=0
+
 if [[ -x "$TEST_DIR/test-critical-path.sh" ]]; then
-    if "$TEST_DIR/test-critical-path.sh"; then
-        echo ""
-        echo "✅ All test suites passed!"
-        exit 0
-    else
-        echo ""
-        echo "❌ Critical path tests failed"
-        exit 1
-    fi
+    "$TEST_DIR/test-critical-path.sh" || SUITE_FAILED=1
 else
-    echo "⚠️  Critical path tests not found or not executable"
-    if [[ $TESTS_FAILED -gt 0 ]]; then
-        exit 1
-    else
-        echo "Basic tests passed (critical tests skipped)"
-        exit 0
-    fi
+    echo "Warning: critical path tests not found or not executable"
+fi
+
+# Run functionality tests
+echo ""
+echo "Running Functionality Tests..."
+echo "=============================="
+echo ""
+
+if [[ -x "$TEST_DIR/test-functionality.sh" ]]; then
+    "$TEST_DIR/test-functionality.sh" || SUITE_FAILED=1
+else
+    echo "Warning: functionality tests not found or not executable"
+fi
+
+if [[ $SUITE_FAILED -eq 0 && $TESTS_FAILED -eq 0 ]]; then
+    echo ""
+    echo "All test suites passed!"
+    exit 0
+else
+    echo ""
+    echo "Some tests failed"
+    exit 1
 fi

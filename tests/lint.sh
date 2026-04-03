@@ -31,6 +31,17 @@ check_file() {
     fi
 }
 
+check_zsh_file() {
+    local file="$1"
+    if zsh -n "$file" 2>/dev/null; then
+        log_success "$(basename "$file")"
+        PASSED=$((PASSED + 1))
+    else
+        log_error "$(basename "$file")"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
 main() {
     log_info "Shell Script Linting"
     log_info "===================="
@@ -38,6 +49,23 @@ main() {
     while IFS= read -r -d '' file; do
         check_file "$file"
     done < <(find "$PROJECT_ROOT" -name "*.sh" -type f -print0)
+
+    log_info ""
+    log_info "Zsh Config Linting"
+    log_info "===================="
+
+    for f in "$PROJECT_ROOT"/config/zsh/*; do
+        [ -f "$f" ] || continue
+        name=$(basename "$f")
+        [[ $name == *.template ]] && continue
+        [[ $name == *.local ]] && continue
+        [[ $name == exports.local ]] && continue
+        check_zsh_file "$f"
+    done
+
+    if [ -f "$PROJECT_ROOT/config/cli-tools/init" ]; then
+        check_zsh_file "$PROJECT_ROOT/config/cli-tools/init"
+    fi
 
     echo
     log_info "Results: $PASSED passed, $FAILED failed"
