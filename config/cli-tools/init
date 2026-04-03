@@ -1,67 +1,68 @@
-# CLI Tools Initialization
-# Sources tool configurations and sets up integrations
+# CLI Tools - merged configuration
+# Initializes modern CLI replacements: eza, bat, rg, fd, delta, zoxide
 
-# Get the directory where this script is located
-local cli_tools_dir="${0:A:h}"
+# --- eza ---
+if command -v eza >/dev/null 2>&1; then
+    export EZA_COLORS="ur=1;32:uw=1;31:ux=1;36:ue=1;36:gr=1;32:gw=1;31:gx=1;36:tr=1;32:tw=1;31:tx=1;36:su=1;37:sf=1;37:xa=1;34:da=1;34:in=1;33:bl=1;33:ex=1;32:"
 
-# Source all configuration files in order
-source_if_exists() {
-    local file="$1"
-    if [[ -f "$file" ]]; then
-        source "$file"
-    fi
-}
-
-# Load tool configurations
-source_if_exists "$cli_tools_dir/eza.conf"
-source_if_exists "$cli_tools_dir/bat.conf"
-source_if_exists "$cli_tools_dir/ripgrep.conf"
-source_if_exists "$cli_tools_dir/fd.conf"
-source_if_exists "$cli_tools_dir/delta.conf"
-source_if_exists "$cli_tools_dir/zoxide.conf"
-
-# Load aliases (must be last to override any conflicts)
-source_if_exists "$cli_tools_dir/aliases"
-
-# Initialize tools that require setup
-if command -v zoxide >/dev/null 2>&1; then
-    eval "$(zoxide init zsh)"
+    alias ls='eza --color=auto --group-directories-first'
+    alias ll='eza -la --color=auto --group-directories-first --git'
+    alias la='eza -la --color=auto --group-directories-first'
+    alias lt='eza --tree --level=2 --color=auto'
+    alias lta='eza --tree --level=2 --color=auto --all'
 fi
 
-# Note: export -f not needed in zsh, functions are available by default
+# --- bat ---
+if command -v bat >/dev/null 2>&1; then
+    export BAT_THEME="Monokai Extended"
+    export BAT_STYLE="numbers,changes,header,grid"
+    export BAT_PAGER="less -RF"
+    export BAT_TABS="4"
 
-# Tool availability check function
+    alias less='bat --style=auto --paging=always'
+fi
+
+# --- ripgrep ---
+if command -v rg >/dev/null 2>&1; then
+    [[ -f "$HOME/.config/ripgrep/config" ]] && export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+
+    alias rga='rg --no-ignore --hidden'
+    alias rgf='rg --files'
+fi
+
+# --- fd ---
+if command -v fd >/dev/null 2>&1; then
+    alias fda='fd --no-ignore --hidden'
+    alias fdt='fd --type f'
+    alias fdd='fd --type d'
+fi
+
+# --- delta ---
+if command -v delta >/dev/null 2>&1; then
+    alias gd='git diff'
+    alias gdc='git diff --cached'
+    alias gds='git diff --stat'
+    alias gshow='git show'
+fi
+
+# --- zoxide ---
+if command -v zoxide >/dev/null 2>&1; then
+    export _ZO_ECHO=1
+    export _ZO_RESOLVE_SYMLINKS=1
+    eval "$(zoxide init zsh)"
+    alias zb='z -'
+fi
+
+# --- diagnostics ---
 check_modern_tools() {
-    echo "CLI Tools Status:"
-    echo "========================"
-
-    local tools=(
-        "eza:ls replacement"
-        "bat:cat replacement"
-        "rg:grep replacement"
-        "fd:find replacement"
-        "delta:git diff viewer"
-        "zoxide:directory jumper"
-    )
-
-    for tool_info in "${tools[@]}"; do
-        local tool="${tool_info%%:*}"
-        local description="${tool_info##*:}"
-
-        if command -v "$tool" >/dev/null 2>&1; then
-            echo "✓ $tool ($description)"
+    local tools=("eza:ls" "bat:cat" "rg:grep" "fd:find" "delta:diff" "zoxide:cd")
+    for entry in "${tools[@]}"; do
+        local cmd="${entry%%:*}" desc="${entry##*:}"
+        if command -v "$cmd" >/dev/null 2>&1; then
+            printf '  installed  %s (%s replacement)\n' "$cmd" "$desc"
         else
-            echo "✗ $tool ($description) - not installed"
+            printf '  MISSING    %s (%s replacement)\n' "$cmd" "$desc"
         fi
     done
-
-    echo ""
-    echo "Run 'brew install <tool>' to install missing tools."
 }
-
-# Note: export -f not needed in zsh, functions are available by default
-
-# Add helpful aliases for the check function
-alias toolcheck='check_modern_tools'
 alias tools='check_modern_tools'
-alias clitools='check_modern_tools'
