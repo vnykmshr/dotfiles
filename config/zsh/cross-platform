@@ -61,19 +61,10 @@ setup_open_command() {
 
 # Platform-specific PATH
 setup_platform_paths() {
-    case "$DOTFILES_OS" in
-        macos)
-            [[ -d "/opt/homebrew/bin" ]] && export PATH="/opt/homebrew/bin:$PATH"
-            [[ -d "/opt/homebrew/sbin" ]] && export PATH="/opt/homebrew/sbin:$PATH"
-            ;;
-        linux)
-            [[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
-            if [[ "$DOTFILES_ENV" == "wsl" ]]; then
-                # Clean Windows paths that cause issues
-                export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "/mnt/c" | tr '\n' ':' | sed 's/:$//')
-            fi
-            ;;
-    esac
+    if [[ "$DOTFILES_OS" == "linux" && "$DOTFILES_ENV" == "wsl" ]]; then
+        # Clean Windows paths that cause issues
+        export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "/mnt/c" | tr '\n' ':' | sed 's/:$//')
+    fi
 }
 
 # =============================================================================
@@ -138,7 +129,6 @@ env_info() {
     [[ "$DOTFILES_ENV" == "wsl" ]] && echo "WSL Distro: ${WSL_DISTRO_NAME:-unknown}"
 }
 
-# envinfo function defined in environment-detection file
 alias platform='echo "$DOTFILES_OS ($DOTFILES_ENV)"'
 
 # Initialize all cross-platform features

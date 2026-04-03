@@ -2,8 +2,6 @@
 
 # Environment setup
 setup_go_env() {
-    export GOPATH="$HOME/workspace/gocode"
-    [[ -d "$GOPATH/bin" && ":$PATH:" != *":$GOPATH/bin:"* ]] && export PATH="$GOPATH/bin:$PATH"
     [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
 }
 

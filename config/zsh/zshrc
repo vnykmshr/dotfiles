@@ -1,4 +1,4 @@
-# Modern Zsh Configuration - Clean Version
+# Zsh Configuration
 
 # Performance and debug mode
 [[ "$ZSH_PROF" == "1" ]] && zmodload zsh/zprof
@@ -31,12 +31,17 @@ export EDITOR="${EDITOR:-nvim}" VISUAL="$EDITOR" PAGER="${PAGER:-less}"
 export LESS='-R -i -w -M -z-4' LESSHISTFILE=/dev/null
 export LANG="${LANG:-en_US.UTF-8}" LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
-# Path configuration
+# Go environment (must be set before path array)
+export GOPATH="${GOPATH:-$HOME/workspace/gocode}"
+export GOBIN="${GOBIN:-$GOPATH/bin}"
+
+# Path configuration (single source of truth — user-specific paths go in personal.local)
 typeset -gU path PATH
 path=(
     "$HOME/.local/bin"
     "$HOME/bin"
     "$DOTFILES/bin"
+    "${GOBIN:-${GOPATH:-$HOME/go}/bin}"
     $path
 )
 
@@ -61,11 +66,9 @@ done
 
 # Load user customizations
 load_config "personal-aliases"
-load_config "personal-functions"
 
 # Load optional modules (can be disabled)
 [[ "$DOTFILES_SKIP_CROSS_PLATFORM" != "1" ]] && load_config "cross-platform"
-[[ "$DOTFILES_SKIP_ENV_DETECTION" != "1" ]] && load_config "environment-detection"
 [[ "$DOTFILES_SKIP_DIRENV" != "1" ]] && load_config "direnv-integration"
 [[ "$DOTFILES_SKIP_HISTORY" != "1" ]] && load_config "intelligent-history"
 [[ "$DOTFILES_SKIP_SECURITY" != "1" ]] && load_config "security-automation"
@@ -78,19 +81,6 @@ load_config "prompt"
 
 # Override any conflicting aliases with our functions (must be after CLI tools)
 unalias cat 2>/dev/null || true  # cat() function defined in aliases
-
-# Tool integrations (lazy load heavy ones)
-# Brew shellenv - only run if brew works properly
-if [[ -x "/usr/local/bin/brew" ]]; then
-    # Test if brew can run without errors before eval
-    if /usr/local/bin/brew --version >/dev/null 2>&1; then
-        eval "$(/usr/local/bin/brew shellenv)"
-    fi
-elif [[ -x "/opt/homebrew/bin/brew" ]]; then
-    if /opt/homebrew/bin/brew --version >/dev/null 2>&1; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
-fi
 
 # Lazy load fzf
 if command -v fzf >/dev/null 2>&1; then
@@ -134,21 +124,3 @@ load_config "personal.local"
 
 # === ALIAS REMINDERS ===
 [[ "$DOTFILES_SKIP_ALIAS_REMINDER" != "1" ]] && load_config "alias-reminder"
-
-# bun completions
-[ -s "/Users/vmx/.bun/_bun" ] && source "/Users/vmx/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-. "$HOME/.local/share/../bin/env"
-
-alias claude-mem='/Users/vmx/.bun/bin/bun "/Users/vmx/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-# .npm-global (npm config get prefix)
-export PATH="$HOME/.npm-global/bin:$PATH"

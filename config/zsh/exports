@@ -29,9 +29,7 @@ export NODE_REPL_SAVE_HISTORY='true'
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 
-# Go
-export GOPATH="$HOME/workspace/gocode"
-export GOBIN="$GOPATH/bin"
+# Go (GOPATH/GOBIN set in zshrc before path array)
 
 # Rust
 export CARGO_HOME="$HOME/.cargo"
@@ -108,6 +106,7 @@ if [[ -x "/usr/local/bin/brew" ]] || [[ -x "/opt/homebrew/bin/brew" ]]; then
         fi
     fi
     export HOMEBREW_PREFIX
+    export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_INSECURE_REDIRECT=1
     export HOMEBREW_CASK_OPTS="--require-sha"
