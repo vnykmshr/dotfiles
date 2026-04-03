@@ -189,9 +189,6 @@ alias tar-create='tar -czf'
 alias tar-extract='tar -xzf'
 alias tar-list='tar -tzf'
 
-# Quick file creation
-alias touch='touch -c'
-
 # Find large files - see functions file for findbig implementation
 alias ducks='du -cks * 2>/dev/null | sort -rn | head'
 

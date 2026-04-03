@@ -5,13 +5,8 @@
 # Development Environment
 # =============================================================================
 
-# Default editor
-export EDITOR="${EDITOR:-nvim}"
-export VISUAL="$EDITOR"
-
 # Pager
-export PAGER="${PAGER:-less}"
-export MANPAGER="$PAGER"
+export MANPAGER="${PAGER:-less}"
 
 # Browser
 export BROWSER="${BROWSER:-open}"
@@ -46,12 +41,6 @@ export FZF_DEFAULT_OPTS='--height 40% --layout=reverse --border'
 
 # ripgrep configuration handled by cli-tools/ripgrep.conf
 
-# bat
-export BAT_THEME="TwoDark"
-
-# less
-export LESS='-R -i -w -M -z-4'
-export LESSHISTFILE=/dev/null
 
 # =============================================================================
 # Directory Colors
@@ -70,10 +59,6 @@ export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=
 # History Configuration
 # =============================================================================
 
-# Zsh history (also set in zshrc, but keeping here for completeness)
-export HISTFILE="$HOME/.zsh_history"
-export HISTSIZE=50000
-export SAVEHIST=50000
 
 # =============================================================================
 # XDG Base Directory Specification
@@ -117,10 +102,7 @@ fi
 # =============================================================================
 
 # GPG
-export GPG_TTY=$(/usr/bin/tty)
-
-# SSH
-export SSH_KEY_PATH="$HOME/.ssh/id_ed25519"
+export GPG_TTY=$(tty 2>/dev/null)
 
 # =============================================================================
 # Performance

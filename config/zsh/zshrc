@@ -82,14 +82,8 @@ load_config "prompt"
 # Override any conflicting aliases with our functions (must be after CLI tools)
 unalias cat 2>/dev/null || true  # cat() function defined in aliases
 
-# Lazy load fzf
-if command -v fzf >/dev/null 2>&1; then
-    fzf() {
-        unfunction fzf
-        eval "$(command fzf --zsh)"
-        fzf "$@"
-    }
-fi
+# fzf keybindings and completion
+command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"
 
 # Completion system (optimized)
 autoload -Uz compinit

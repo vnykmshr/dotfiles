@@ -67,5 +67,4 @@ project_setup() {
     echo "✅ Project setup complete!"
 }
 
-# Alias for backwards compatibility
-alias test='run_tests'
+alias rt='run_tests'

@@ -299,15 +299,9 @@ json() {
     fi
 }
 
-# URL encode
-urlencode() {
-    python3 -c "import urllib.parse; print(urllib.parse.quote('$1'))"
-}
-
-# URL decode
-urldecode() {
-    python3 -c "import urllib.parse; print(urllib.parse.unquote('$1'))"
-}
+# URL encode/decode
+urlencode() { python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
+urldecode() { python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(sys.argv[1]))" "$1"; }
 
 # =============================================================================
 # UTILITIES
@@ -319,19 +313,8 @@ weather() {
     curl -s "https://wttr.in/$location?format=3"
 }
 
-# QR code generator
-qr() {
-    if [[ -z "$1" ]]; then
-        echo "Usage: qr <text>"
-        return 1
-    fi
-    curl -s "https://qr-server.com/api/v1/create-qr-code/?size=200x200&data=$1"
-}
-
 # Calculator
-calc() {
-    python3 -c "print($*)"
-}
+calc() { echo "$*" | bc -l; }
 
 # Benchmark command execution time
 timecmd() {
