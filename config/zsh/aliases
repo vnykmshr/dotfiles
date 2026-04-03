@@ -1,6 +1,4 @@
-# Zsh aliases configuration
-
-# Modern aliases for enhanced productivity
+# Zsh aliases
 
 # =============================================================================
 # Core System Aliases
@@ -16,17 +14,13 @@ alias -- -='cd -'
 alias ws='cd ~/workspace'
 alias proj='cd ~/workspace/projects'
 
-# List files with modern options
-if command -v eza >/dev/null 2>&1; then
-    # Modern replacement for ls
-    alias ls='eza --group-directories-first'
-    alias ll='eza -l --group-directories-first --time-style=long-iso'
-    alias la='eza -la --group-directories-first --time-style=long-iso'
-    alias lt='eza --tree --level=2'
-    alias lta='eza --tree --all --level=2'
-else
-    # Traditional ls with good defaults
-    alias ls='ls -hFG --color=auto'
+# List files — eza aliases defined in cli-tools/aliases when eza is available
+if ! command -v eza >/dev/null 2>&1; then
+    if [[ "$OSTYPE" == darwin* ]]; then
+        alias ls='ls -hFG'
+    else
+        alias ls='ls -hF --color=auto'
+    fi
     alias ll='ls -la'
     alias la='ls -A'
     alias lt='tree -L 2'
@@ -146,17 +140,6 @@ cat() {
         command cat "$@"
     fi
 }
-
-# Set up other bat-related aliases if bat is available
-if command -v bat >/dev/null 2>&1; then
-    alias less='bat --style=plain --paging=always'
-fi
-
-# fd is available as independent command (not aliased to find)
-
-
-# zoxide is initialized in cli-tools/aliases
-# cd remains the builtin command, use 'z' for zoxide smart jumping
 
 # Editor shortcuts
 alias v='$EDITOR'
@@ -300,10 +283,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
     # Empty trash
     alias emptytrash='sudo rm -rfv /Volumes/*/.Trashes; sudo rm -rfv ~/.Trash; sudo rm -rfv /private/var/log/asl/*.asl; sqlite3 ~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV* "delete from LSQuarantineEvent"'
-
-    # Copy/paste from command line
-    alias pbcopy='pbcopy'
-    alias pbpaste='pbpaste'
 
     # Lock screen
     alias lock='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
