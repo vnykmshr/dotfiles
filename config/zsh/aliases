@@ -95,7 +95,6 @@ alias ga='git add'
 alias gb='git branch'
 alias gc='git commit'
 alias gco='git checkout'
-alias gd='git diff'
 alias gl='git log --oneline'
 alias gp='git push'
 alias gs='git status'
@@ -268,15 +267,6 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 
 # Linux specific
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Copy/paste for X11
-    if command -v xclip >/dev/null 2>&1; then
-        alias pbcopy='xclip -selection clipboard'
-        alias pbpaste='xclip -selection clipboard -o'
-    elif command -v xsel >/dev/null 2>&1; then
-        alias pbcopy='xsel --clipboard --input'
-        alias pbpaste='xsel --clipboard --output'
-    fi
-
     # Package managers
     if command -v apt >/dev/null 2>&1; then
         alias update='sudo apt update && sudo apt upgrade'

@@ -1,8 +1,5 @@
 # Personal Aliases
 
-# Git workflow combinations
-alias gacp='git add -u && git commit && git push'
-alias gac='git add -u && git commit'
 alias lg='git log --oneline --graph --decorate'
 
 # Make shortcuts

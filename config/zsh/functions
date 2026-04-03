@@ -104,21 +104,6 @@ gsl() {
     }'
 }
 
-# Quick commit with auto-generated message
-qc() {
-    local message="$*"
-    [[ -z "$message" ]] && message="update: $(git diff --name-only --cached | tr '\n' ' ')"
-    [[ -z "$message" ]] && message="misc: updates"
-    git add -u && git commit -m "$message"
-}
-
-# Add, commit, push workflow
-acp() {
-    git add -u
-    git commit -m "${*:-update}"
-    git push
-}
-
 # DEVELOPMENT & PROCESSES
 
 # Start a simple HTTP server
@@ -323,22 +308,4 @@ status() {
     [[ -d .git ]] && echo "$(git branch --show-current) | $(git status --porcelain | wc -l | tr -d ' ') changes"
     echo "$(df -h . | awk 'NR==2 {print $4}') free"
     echo "$(uptime | cut -d, -f1)"
-}
-
-# Git workflow automation helper
-workflowutil() {
-    case "$1" in
-        init) git init && git add . && git commit -m "initial commit" ;;
-        push) git add -u && git commit -m "${2:-update}" && git push ;;
-        pull) git pull && git submodule update ;;
-        clean) git clean -fd && git reset --hard ;;
-        *) echo "Usage: workflowutil {init|push [msg]|pull|clean}" ;;
-    esac
-}
-
-# Create project directory with git init
-mkproject() {
-    local name="$1"
-    [[ -z "$name" ]] && { echo "Usage: mkproject <name>"; return 1; }
-    mkdir "$name" && cd "$name" && git init
 }
