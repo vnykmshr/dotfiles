@@ -12,3 +12,4 @@ log_info() { printf "${BLUE}i %s${NC}\n" "$*" >&2; }
 log_success() { printf "${GREEN}ok %s${NC}\n" "$*" >&2; }
 log_warn() { printf "${YELLOW}! %s${NC}\n" "$*" >&2; }
 log_error() { printf "${RED}x %s${NC}\n" "$*" >&2; }
+log_step() { printf "\n${BLUE}-- %s${NC}\n" "$*" >&2; }
