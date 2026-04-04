@@ -151,7 +151,8 @@ backup_existing_hooks() {
     local git_hooks_dir=".git/hooks"
 
     if [[ -d $git_hooks_dir ]]; then
-        local backup_dir="${git_hooks_dir}.backup.$(date +%Y%m%d-%H%M%S)"
+        local backup_dir
+        backup_dir="${git_hooks_dir}.backup.$(date +%Y%m%d-%H%M%S)"
 
         log_info "Backing up existing git hooks to $backup_dir"
         cp -r "$git_hooks_dir" "$backup_dir"

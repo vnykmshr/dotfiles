@@ -63,7 +63,7 @@ detect_os() {
             OS_VERSION="$(lsb_release -sr)"
         elif [[ -f /etc/redhat-release ]]; then
             OS_NAME="redhat"
-            OS_VERSION="$(cat /etc/redhat-release | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+            OS_VERSION="$(grep -oE '[0-9]+\.[0-9]+' /etc/redhat-release | head -1)"
             PACKAGE_MANAGER="yum"
         elif [[ -f /etc/debian_version ]]; then
             OS_NAME="debian"

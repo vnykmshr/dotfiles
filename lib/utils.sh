@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Essential utility functions
 
 # Check if command exists

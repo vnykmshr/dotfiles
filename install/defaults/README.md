@@ -6,7 +6,8 @@ Practical system preferences configuration for developer productivity.
 
 Configures essential macOS settings that improve development workflow:
 
-- **Keyboard**: Fast key repeat, disable text transformations that interfere with code
+- **Keyboard**: Fast key repeat, disable text transformations
+  that interfere with code
 - **Finder**: Show file extensions, hidden files, path bar, disable .DS_Store files
 - **Dock**: Auto-hide with fast response, optimal sizing, hide recent apps
 - **Security**: Prevent data loss, require password after sleep

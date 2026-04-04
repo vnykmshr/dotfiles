@@ -91,7 +91,8 @@ cmd_commit() {
         log_success "Committed: $message"
     else
         # Auto-generate message from changed files
-        local changed_files=$(git diff --cached --name-only | head -3 | tr '\n' ' ')
+        local changed_files
+        changed_files=$(git diff --cached --name-only | head -3 | tr '\n' ' ')
         local auto_message="update: $changed_files"
         git commit -m "$auto_message"
         log_success "Auto-committed: $auto_message"
@@ -110,7 +111,8 @@ cmd_commit() {
 cmd_deploy() {
     log_info "Running deploy workflow..."
 
-    local project_type=$(detect_project_type)
+    local project_type
+    project_type=$(detect_project_type)
 
     case "$project_type" in
         make)
@@ -119,7 +121,8 @@ cmd_deploy() {
                 make build
 
                 # Check for common build artifacts using project basename
-                local project_name="$(basename "$(pwd)")"
+                local project_name
+                project_name="$(basename "$(pwd)")"
                 if [[ -f "./build/$project_name" ]]; then
                     log_info "Starting production server: $project_name"
                     ENVIRONMENT=production GIN_MODE=release "./build/$project_name"
@@ -176,7 +179,8 @@ cmd_status() {
     echo "Directory: $(pwd)"
     echo "Files: $(find . -maxdepth 1 -type f | wc -l | tr -d ' ')"
 
-    local project_type=$(detect_project_type)
+    local project_type
+    project_type=$(detect_project_type)
     case "$project_type" in
         go)
             echo "Type: Go project"
@@ -212,7 +216,8 @@ cmd_status() {
 cmd_setup() {
     log_info "Setting up project dependencies..."
 
-    local project_type=$(detect_project_type)
+    local project_type
+    project_type=$(detect_project_type)
 
     case "$project_type" in
         go)
@@ -256,7 +261,8 @@ cmd_clean() {
         git clean -fd
     fi
 
-    local project_type=$(detect_project_type)
+    local project_type
+    project_type=$(detect_project_type)
 
     case "$project_type" in
         go)
@@ -297,7 +303,8 @@ cmd_sync() {
     cmd_setup
 
     # Build if possible
-    local project_type=$(detect_project_type)
+    local project_type
+    project_type=$(detect_project_type)
     case "$project_type" in
         make)
             if grep -q "build" Makefile; then
