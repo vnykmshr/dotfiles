@@ -62,9 +62,11 @@ else
 fi
 
 # Zsh config loads without error
+# Set DOTFILES so zshrc can find modules (no ~/.dotfiles symlink in CI)
 echo ""
 echo "Config loading..."
-if zsh -c "source $PROJECT_ROOT/config/zsh/zshrc" 2>/dev/null; then
+ZSH_SOURCE="DOTFILES=$PROJECT_ROOT source $PROJECT_ROOT/config/zsh/zshrc"
+if zsh -c "$ZSH_SOURCE" 2>/dev/null; then
     pass "zshrc loads"
 else
     fail "zshrc loads"
@@ -76,7 +78,7 @@ echo "Alias checks..."
 for alias_check in "gs:git status" "rm:rm -i" "..:"; do
     name="${alias_check%%:*}"
     expected="${alias_check#*:}"
-    if zsh -c "source $PROJECT_ROOT/config/zsh/zshrc 2>/dev/null; alias $name" 2>/dev/null | grep -q "$expected"; then
+    if zsh -c "$ZSH_SOURCE 2>/dev/null; alias $name" 2>/dev/null | grep -q "$expected"; then
         pass "alias: $name"
     else
         fail "alias: $name"
@@ -87,7 +89,7 @@ done
 echo ""
 echo "Function checks..."
 for func in mkcd backup extract gitlog gsl reload status; do
-    if zsh -c "source $PROJECT_ROOT/config/zsh/zshrc 2>/dev/null; type $func" 2>/dev/null | grep -q function; then
+    if zsh -c "$ZSH_SOURCE 2>/dev/null; type $func" 2>/dev/null | grep -q function; then
         pass "function: $func"
     else
         fail "function: $func"
