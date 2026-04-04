@@ -66,7 +66,9 @@ fi
 echo ""
 echo "Config loading..."
 ZSH_SOURCE="DOTFILES=$PROJECT_ROOT source $PROJECT_ROOT/config/zsh/zshrc"
-if zsh -c "$ZSH_SOURCE" 2>/dev/null; then
+# Allow non-zero exit from warnings (e.g., missing ~/.dotfiles symlink)
+# but verify aliases/functions loaded (tested below)
+if zsh -c "$ZSH_SOURCE; type load_config" 2>/dev/null | grep -q function; then
     pass "zshrc loads"
 else
     fail "zshrc loads"
