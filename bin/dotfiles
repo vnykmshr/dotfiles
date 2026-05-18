@@ -5,21 +5,17 @@
 
 set -euo pipefail
 
-# Configuration
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 SCRIPT_NAME="$(basename "$0")"
 
-# Colors will be loaded from logging.sh
+for lib in utils.sh os-detect.sh logging.sh; do
+    source "$DOTFILES_DIR/lib/$lib" || {
+        printf "Error: required library not found: %s/lib/%s\n" "$DOTFILES_DIR" "$lib" >&2
+        exit 1
+    }
+done
+detect_os
 
-# Source utilities if available
-if [[ -f "$DOTFILES_DIR/lib/utils.sh" ]]; then
-    source "$DOTFILES_DIR/lib/utils.sh"
-    source "$DOTFILES_DIR/lib/os-detect.sh"
-    source "$DOTFILES_DIR/lib/logging.sh"
-    detect_os
-fi
-
-# Usage information
 usage() {
     cat <<EOF
 $SCRIPT_NAME - Dotfiles management tool
@@ -53,9 +49,6 @@ EXAMPLES:
 EOF
 }
 
-# Logging functions loaded from lib/logging.sh
-
-# Check if we're in a git repository
 check_git_repo() {
     if ! git -C "$DOTFILES_DIR" rev-parse --git-dir >/dev/null 2>&1; then
         log_error "Not a git repository: $DOTFILES_DIR"
@@ -63,7 +56,6 @@ check_git_repo() {
     fi
 }
 
-# Install dotfiles
 cmd_install() {
     log_info "Installing dotfiles..."
 
@@ -75,27 +67,23 @@ cmd_install() {
     fi
 }
 
-# Update from remote repository
 cmd_update() {
     log_info "Updating dotfiles from remote repository..."
     check_git_repo
 
     cd "$DOTFILES_DIR"
 
-    # Check if there are uncommitted changes
     if ! git diff-index --quiet HEAD --; then
         log_warn "You have uncommitted changes. Stashing them..."
         git stash push -m "Auto-stash before update $(date)"
     fi
 
-    # Pull latest changes
     git pull origin "$(git branch --show-current)"
 
     log_success "Dotfiles updated successfully"
     log_info "Run '$SCRIPT_NAME install' to apply changes"
 }
 
-# Sync: update and reinstall
 cmd_sync() {
     log_info "Syncing dotfiles (update + install)..."
 
@@ -103,7 +91,6 @@ cmd_sync() {
     cmd_install "$@"
 }
 
-# Create backup
 cmd_backup() {
     local backup_dir
     backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
@@ -111,7 +98,6 @@ cmd_backup() {
     log_info "Creating backup at: $backup_dir"
     mkdir -p "$backup_dir"
 
-    # List of common config files to backup
     local configs=(
         ".zshrc"
         ".bashrc"
@@ -129,7 +115,6 @@ cmd_backup() {
         fi
     done
 
-    # Backup config directories
     local config_dirs=(
         ".config/nvim"
         ".config/tmux"
@@ -146,7 +131,6 @@ cmd_backup() {
     log_success "Backup created at: $backup_dir"
 }
 
-# Restore from backup
 cmd_restore() {
     local backup_dir="${1:-}"
 
@@ -163,7 +147,6 @@ cmd_restore() {
 
     log_info "Restoring from backup: $backup_dir"
 
-    # Restore files
     find "$backup_dir" -type f -name ".*" | while read -r file; do
         local basename
         basename="$(basename "$file")"
@@ -178,12 +161,10 @@ cmd_restore() {
     log_success "Restore complete"
 }
 
-# Show status
 cmd_status() {
     log_info "Dotfiles Status Report"
     echo "======================="
 
-    # Git status
     if check_git_repo 2>/dev/null; then
         cd "$DOTFILES_DIR"
         echo
@@ -195,14 +176,12 @@ cmd_status() {
         git log --oneline -5
     fi
 
-    # System info
     echo
     echo "System Info:"
     echo "OS: $(uname -s) $(uname -r)"
     echo "Shell: $SHELL"
     echo "Editor: ${EDITOR:-not set}"
 
-    # Check important tools
     echo
     echo "Tool Status:"
     local tools=(git zsh tmux nvim)
@@ -215,27 +194,22 @@ cmd_status() {
     done
 }
 
-# Edit dotfiles
 cmd_edit() {
     local editor="${EDITOR:-vim}"
 
     log_info "Opening dotfiles in $editor..."
 
     if [[ $editor == "nvim" || $editor == "vim" ]]; then
-        # Open in editor with file explorer
         exec "$editor" "$DOTFILES_DIR"
     elif [[ $editor == "code" ]]; then
-        # Open in VS Code
         exec code "$DOTFILES_DIR"
     else
-        # Fallback to cd into directory
         log_info "Changed directory to: $DOTFILES_DIR"
         cd "$DOTFILES_DIR"
         exec "$SHELL"
     fi
 }
 
-# Run tests
 cmd_test() {
     log_info "Running dotfiles tests..."
 
@@ -246,10 +220,8 @@ cmd_test() {
         log_warn "Test script not found: $test_script"
         log_info "Running basic validation..."
 
-        # Basic validation
         local errors=0
 
-        # Check if essential files exist
         local essential_files=(
             "install/setup.sh"
             "config/zsh/zshrc"
@@ -272,20 +244,15 @@ cmd_test() {
     fi
 }
 
-# Clean up
 cmd_clean() {
     log_info "Cleaning up temporary files and old backups..."
 
-    # Clean backup files older than 30 days
     find "$HOME" -maxdepth 1 -name ".dotfiles-backup-*" -type d -mtime +30 -exec rm -rf {} + 2>/dev/null || true
-
-    # Clean temporary files
     rm -rf /tmp/dotfiles-* 2>/dev/null || true
 
     log_success "Cleanup complete"
 }
 
-# Main command dispatcher
 main() {
     local command="${1:-help}"
     shift || true
@@ -330,5 +297,4 @@ main() {
     esac
 }
 
-# Run main function
 main "$@"

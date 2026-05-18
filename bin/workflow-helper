@@ -5,21 +5,14 @@
 
 set -euo pipefail
 
-# Source logging utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-if [[ -f "$DOTFILES_DIR/lib/logging.sh" ]]; then
-    source "$DOTFILES_DIR/lib/logging.sh"
-else
-    # Fallback logging if library not available
-    log_info() { printf "ℹ %s\n" "$*" >&2; }
-    log_success() { printf "✓ %s\n" "$*" >&2; }
-    log_warn() { printf "⚠ %s\n" "$*" >&2; }
-    log_error() { printf "✗ %s\n" "$*" >&2; }
-fi
+source "$DOTFILES_DIR/lib/logging.sh" || {
+    printf "Error: required library not found: %s/lib/logging.sh\n" "$DOTFILES_DIR" >&2
+    exit 1
+}
 
-# Usage
 usage() {
     cat <<EOF
 Workflow Helper - Based on your shell usage patterns
@@ -44,7 +37,6 @@ EXAMPLES:
 EOF
 }
 
-# Detect project type
 detect_project_type() {
     if [[ -f "go.mod" ]]; then
         echo "go"
@@ -59,38 +51,31 @@ detect_project_type() {
     fi
 }
 
-# Quick commit workflow (your most common pattern)
 cmd_commit() {
     local message="$*"
 
     log_info "Running commit workflow..."
 
-    # Check if we're in a git repo
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
         log_error "Not a git repository"
         return 1
     fi
 
-    # Show status first (like your gst usage)
     log_info "Current status:"
     git status --short --branch
 
-    # Add all modified files (your git add -u pattern)
     log_info "Staging changes..."
     git add -u
 
-    # Check if there are changes to commit
     if git diff --cached --quiet; then
         log_warn "No changes to commit"
         return 0
     fi
 
-    # Commit with message
     if [[ -n $message ]]; then
         git commit -m "$message"
         log_success "Committed: $message"
     else
-        # Auto-generate message from changed files
         local changed_files
         changed_files=$(git diff --cached --name-only | head -3 | tr '\n' ' ')
         local auto_message="update: $changed_files"
@@ -98,7 +83,6 @@ cmd_commit() {
         log_success "Auto-committed: $auto_message"
     fi
 
-    # Ask if user wants to push (common in your workflow)
     echo -n "Push to remote? (y/N): "
     read -r push_answer
     if [[ $push_answer =~ ^[Yy]$ ]]; then
@@ -107,7 +91,6 @@ cmd_commit() {
     fi
 }
 
-# Deploy workflow (based on your make build + environment patterns)
 cmd_deploy() {
     log_info "Running deploy workflow..."
 
@@ -120,7 +103,6 @@ cmd_deploy() {
                 log_info "Building project..."
                 make build
 
-                # Check for common build artifacts using project basename
                 local project_name
                 project_name="$(basename "$(pwd)")"
                 if [[ -f "./build/$project_name" ]]; then
@@ -159,11 +141,9 @@ cmd_deploy() {
     esac
 }
 
-# Enhanced status (your gst usage pattern)
 cmd_status() {
     log_info "Project Status Overview"
 
-    # Git status (your most used command)
     if git rev-parse --git-dir >/dev/null 2>&1; then
         echo -e "\n${BLUE}Git Status:${NC}"
         git status --short --branch
@@ -174,7 +154,6 @@ cmd_status() {
         log_warn "Not a git repository"
     fi
 
-    # Project info
     echo -e "\n${BLUE}Project Info:${NC}"
     echo "Directory: $(pwd)"
     echo "Files: $(find . -maxdepth 1 -type f | wc -l | tr -d ' ')"
@@ -212,7 +191,6 @@ cmd_status() {
     esac
 }
 
-# Project setup (based on your npm install, go mod tidy patterns)
 cmd_setup() {
     log_info "Setting up project dependencies..."
 
@@ -230,7 +208,6 @@ cmd_setup() {
             log_info "Running npm install..."
             npm install
 
-            # Run audit if you have it (you use npm audit fix often)
             if npm audit >/dev/null 2>&1; then
                 log_info "Running npm audit..."
                 npm audit --audit-level moderate
@@ -251,11 +228,9 @@ cmd_setup() {
     log_success "Project setup complete"
 }
 
-# Clean workspace
 cmd_clean() {
     log_info "Cleaning workspace..."
 
-    # Git clean
     if git rev-parse --git-dir >/dev/null 2>&1; then
         log_info "Cleaning git working directory..."
         git clean -fd
@@ -289,20 +264,16 @@ cmd_clean() {
     log_success "Workspace cleaned"
 }
 
-# Sync workflow (pull + setup + build)
 cmd_sync() {
     log_info "Running sync workflow..."
 
-    # Git pull
     if git rev-parse --git-dir >/dev/null 2>&1; then
         log_info "Pulling latest changes..."
         git pull
     fi
 
-    # Setup dependencies
     cmd_setup
 
-    # Build if possible
     local project_type
     project_type=$(detect_project_type)
     case "$project_type" in
@@ -327,7 +298,6 @@ cmd_sync() {
     log_success "Sync complete"
 }
 
-# Main command dispatcher
 main() {
     local command="${1:-help}"
     shift || true

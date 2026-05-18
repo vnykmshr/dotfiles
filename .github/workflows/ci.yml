@@ -46,13 +46,5 @@ jobs:
       run: DRY_RUN=true ./install/setup.sh
 
   security:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
-
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Shared workflow: https://github.com/1mb-dev/.github/blob/main/.github/workflows/secret-scan.yml
+    uses: 1mb-dev/.github/.github/workflows/secret-scan.yml@decd3ad8b42c0f5c20f2017571ca8061521637bb
