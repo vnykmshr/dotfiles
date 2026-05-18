@@ -29,9 +29,6 @@ alias lr='ls -R'
 
 # Safety First - Dangerous Command Protection
 
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
 # BSD chmod (macOS) doesn't support --preserve-root
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     alias chmod='chmod --preserve-root'
