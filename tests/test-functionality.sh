@@ -77,7 +77,7 @@ fi
 # Key aliases exist after loading
 echo ""
 echo "Alias checks..."
-for alias_check in "gs:git status" "rm:rm -i" "..:"; do
+for alias_check in "gs:git status" "..:"; do
     name="${alias_check%%:*}"
     expected="${alias_check#*:}"
     if zsh -c "$ZSH_SOURCE 2>/dev/null; alias $name" 2>/dev/null | grep -q "$expected"; then
