@@ -152,6 +152,21 @@ assert_contains "| preserved verbatim"      "/with|pipe/key"   "$out"
 assert_contains "\\1 preserved verbatim"    "\\1backref"       "$out"
 assert_not_contains "no leftover placeholder" "{{" "$out"
 
+# Chained substitution: a value containing {{OTHER_KEY}} gets re-substituted on
+# the next iteration. Document the current behavior so a future change to make
+# substitution single-pass is a deliberate, test-detected choice.
+chain_template="$TEST_DIR/chain.tpl"
+chain_output="$TEST_DIR/chain.out"
+cat > "$chain_template" <<'TPL'
+first  = {{FIRST}}
+second = {{SECOND}}
+TPL
+process_template_generic "$chain_template" "$chain_output" "chain fixture" \
+    "FIRST" 'A{{SECOND}}B' \
+    "SECOND" 'X' >/dev/null
+chain_out=$(cat "$chain_output")
+assert_contains "chained subst documented" "first  = AXB" "$chain_out"
+
 # --- End-to-end process_templates against fixture ---
 # process_gitconfig_template prompts interactively if name/email look default.
 # Our fixture supplies non-default values so prompts are skipped.

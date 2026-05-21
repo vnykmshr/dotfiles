@@ -14,6 +14,16 @@ DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 
+# Bash 5.2+ with patsub_replacement on (default) treats `&` in the replacement
+# of ${var//pat/repl} as the matched text. Older bash (macOS 3.2, Ubuntu 22.04
+# 5.1) has no such handling — `&` is literal. The template substitution below
+# conditionalizes on this so a value containing `&` survives on either.
+if shopt -q patsub_replacement 2>/dev/null; then
+    _PATSUB_BACKREF=1
+else
+    _PATSUB_BACKREF=0
+fi
+
 # Colors are defined in lib/logging.sh
 
 # Source utilities
@@ -354,15 +364,20 @@ process_template_generic() {
         return 0
     fi
 
-    # Bash 5.2's ${var//pat/repl} treats `&` and `\` as special in the
-    # replacement string (same as sed); escape both in the value first.
+    # Escape `\` and `&` in the value only on bashes where they're special in
+    # the replacement string (bash 5.2+ with patsub_replacement on — see top of
+    # file). On older bash they're literal, so escaping would double them up.
     local content placeholder value escaped
     content=$(<"$template_file")
     while (($# >= 2)); do
         placeholder="$1"
         value="$2"
-        escaped="${value//\\/\\\\}"   # \ -> \\
-        escaped="${escaped//&/\\&}"   # & -> \&
+        if (( _PATSUB_BACKREF )); then
+            escaped="${value//\\/\\\\}"   # \ -> \\
+            escaped="${escaped//&/\\&}"   # & -> \&
+        else
+            escaped="$value"
+        fi
         content="${content//\{\{${placeholder}\}\}/$escaped}"
         shift 2
     done
