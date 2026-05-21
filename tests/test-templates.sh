@@ -187,13 +187,14 @@ else
 fi
 
 if [[ -f $zsh_out ]]; then
+    zsh_content=$(cat "$zsh_out")
     # Comments in exports.local.template intentionally retain {{KEY}} for keys
     # callers don't supply (GITHUB_TOKEN, OPENAI_API_KEY, etc.). Only check
     # uncommented lines for leftover placeholders.
     zsh_active=$(grep -v '^[[:space:]]*#' "$zsh_out" || true)
     assert_not_contains "zsh: no leftover {{ in active lines" "{{" "$zsh_active"
-    assert_contains    "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$(cat "$zsh_out")"
-    assert_contains    "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$(cat "$zsh_out")"
+    assert_contains    "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$zsh_content"
+    assert_contains    "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$zsh_content"
 else
     fail "zsh exports generated" "$zsh_out missing"
 fi

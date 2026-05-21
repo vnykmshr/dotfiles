@@ -6,6 +6,8 @@
 set -euo pipefail
 
 # Configuration
+# DOTFILES_DIR may be overridden by callers (e.g. tests/test-templates.sh
+# sources this file and redirects at a fixture).
 DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN="${DRY_RUN:-false}"
@@ -352,18 +354,15 @@ process_template_generic() {
         return 0
     fi
 
-    # Read template; perform literal string substitution per placeholder.
-    # Values are treated as literal strings — no shell evaluation. Bash 5.2's
-    # ${var//pat/repl} treats `&` and `\` as special in the replacement, so
-    # escape them in the value first. See
-    # docs/decisions/0001-template-processor-hardening.md.
-    local content
+    # Bash 5.2's ${var//pat/repl} treats `&` and `\` as special in the
+    # replacement string (same as sed); escape both in the value first.
+    local content placeholder value escaped
     content=$(<"$template_file")
     while (($# >= 2)); do
-        local placeholder="$1"
-        local value="$2"
-        local escaped="${value//\\/\\\\}"   # \ -> \\
-        escaped="${escaped//&/\\&}"         # & -> \&
+        placeholder="$1"
+        value="$2"
+        escaped="${value//\\/\\\\}"   # \ -> \\
+        escaped="${escaped//&/\\&}"   # & -> \&
         content="${content//\{\{${placeholder}\}\}/$escaped}"
         shift 2
     done
