@@ -6,11 +6,23 @@
 set -euo pipefail
 
 # Configuration
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# DOTFILES_DIR may be overridden by callers (e.g. tests/test-templates.sh
+# sources this file and redirects at a fixture).
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
+
+# Bash 5.2+ with patsub_replacement on (default) treats `&` in the replacement
+# of ${var//pat/repl} as the matched text. Older bash (macOS 3.2, Ubuntu 22.04
+# 5.1) has no such handling — `&` is literal. The template substitution below
+# conditionalizes on this so a value containing `&` survives on either.
+if shopt -q patsub_replacement 2>/dev/null; then
+    _PATSUB_BACKREF=1
+else
+    _PATSUB_BACKREF=0
+fi
 
 # Colors are defined in lib/logging.sh
 
@@ -283,6 +295,13 @@ get_config_value() {
         local value
         value=$(jq -r "$key // \"$default\"" "$config_file" 2>/dev/null)
         if [[ $value != "null" && -n $value ]]; then
+            # Normalize leading $HOME (deprecated) or ~/ to absolute path.
+            if [[ $value == \$HOME* ]]; then
+                log_warn "config.json key '$key' uses \$HOME — prefer '~' (auto-normalized)"
+                value="${value/#\$HOME/$HOME}"
+            elif [[ $value == \~/* ]]; then
+                value="${value/#\~/$HOME}"
+            fi
             echo "$value"
         else
             echo "$default"
@@ -321,7 +340,12 @@ process_templates() {
     log_info "Template processing complete"
 }
 
-# Generic template processor
+# Substitute {{KEY}} placeholders in a template with caller-supplied values.
+# Values are treated as literal strings — no shell evaluation, no sed
+# metacharacter interpretation. Safe against &, |, \1, $(...), backticks, etc.
+# Substitution is per-placeholder, not single-pass: a value containing
+# {{OTHER_KEY}} will be re-substituted on a later iteration.
+# Args: template_file output_file description placeholder1 value1 [placeholder2 value2 ...]
 process_template_generic() {
     local template_file="$1"
     local output_file="$2"
@@ -340,20 +364,28 @@ process_template_generic() {
         return 0
     fi
 
-    # Build sed command with all placeholder replacements
-    local sed_cmd=""
+    # Escape `\` and `&` in the value only on bashes where they're special in
+    # the replacement string (bash 5.2+ with patsub_replacement on — see top of
+    # file). On older bash they're literal, so escaping would double them up.
+    local content placeholder value escaped
+    content=$(<"$template_file")
     while (($# >= 2)); do
-        local placeholder="$1"
-        local value="$2"
-        sed_cmd+="-e 's|{{${placeholder}}}|${value}|g' "
+        placeholder="$1"
+        value="$2"
+        if (( _PATSUB_BACKREF )); then
+            escaped="${value//\\/\\\\}"   # \ -> \\
+            escaped="${escaped//&/\\&}"   # & -> \&
+        else
+            escaped="$value"
+        fi
+        content="${content//\{\{${placeholder}\}\}/$escaped}"
         shift 2
     done
 
     # Create output directory if needed
     mkdir -p "$(dirname "$output_file")"
 
-    # Process template
-    eval "sed $sed_cmd '$template_file' > '$output_file'"
+    printf '%s' "$content" > "$output_file"
     log_success "Generated $description"
 }
 
@@ -677,5 +709,7 @@ apply_os_defaults() {
     fi
 }
 
-# Run main function
-main "$@"
+# Run main only when executed directly (skipped when sourced for testing)
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

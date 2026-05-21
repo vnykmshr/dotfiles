@@ -9,6 +9,7 @@ DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 SCRIPT_NAME="$(basename "$0")"
 
 for lib in utils.sh os-detect.sh logging.sh; do
+    # shellcheck source=/dev/null
     source "$DOTFILES_DIR/lib/$lib" || {
         printf "Error: required library not found: %s/lib/%s\n" "$DOTFILES_DIR" "$lib" >&2
         exit 1
