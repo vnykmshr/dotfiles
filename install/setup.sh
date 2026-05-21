@@ -283,6 +283,13 @@ get_config_value() {
         local value
         value=$(jq -r "$key // \"$default\"" "$config_file" 2>/dev/null)
         if [[ $value != "null" && -n $value ]]; then
+            # Normalize leading $HOME (deprecated) or ~/ to absolute path.
+            if [[ $value == \$HOME* ]]; then
+                log_warn "config.json key '$key' uses \$HOME — prefer '~' (auto-normalized)"
+                value="${value/#\$HOME/$HOME}"
+            elif [[ $value == "~/"* ]]; then
+                value="${value/#\~/$HOME}"
+            fi
             echo "$value"
         else
             echo "$default"
