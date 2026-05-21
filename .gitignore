@@ -58,6 +58,8 @@ private
 
 ## Project specific
 todos/
+plan/
+.claude/
 
 # Generated configuration files (user-specific)
 config/git/gitconfig
