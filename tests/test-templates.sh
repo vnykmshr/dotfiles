@@ -157,9 +157,11 @@ assert_not_contains "no leftover placeholder" "{{" "$out"
 # Our fixture supplies non-default values so prompts are skipped.
 process_ssh_template >/dev/null 2>&1
 process_gitconfig_template >/dev/null 2>&1
+process_zsh_exports_template >/dev/null 2>&1
 
 ssh_out="$TEST_DIR/config/ssh/config"
 git_out="$TEST_DIR/config/git/gitconfig"
+zsh_out="$TEST_DIR/config/zsh/exports.local"
 
 if [[ -f $ssh_out ]]; then
     ssh_content=$(cat "$ssh_out")
@@ -182,6 +184,18 @@ if [[ -f $git_out ]]; then
     assert_contains    "git: name with & preserved" "Tom & Jerry" "$git_content"
 else
     fail "git config generated" "$git_out missing"
+fi
+
+if [[ -f $zsh_out ]]; then
+    # Comments in exports.local.template intentionally retain {{KEY}} for keys
+    # callers don't supply (GITHUB_TOKEN, OPENAI_API_KEY, etc.). Only check
+    # uncommented lines for leftover placeholders.
+    zsh_active=$(grep -v '^[[:space:]]*#' "$zsh_out" || true)
+    assert_not_contains "zsh: no leftover {{ in active lines" "{{" "$zsh_active"
+    assert_contains    "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$(cat "$zsh_out")"
+    assert_contains    "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$(cat "$zsh_out")"
+else
+    fail "zsh exports generated" "$zsh_out missing"
 fi
 
 # --- Command injection guard ---

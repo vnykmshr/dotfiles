@@ -331,6 +331,8 @@ process_templates() {
 # Substitute {{KEY}} placeholders in a template with caller-supplied values.
 # Values are treated as literal strings — no shell evaluation, no sed
 # metacharacter interpretation. Safe against &, |, \1, $(...), backticks, etc.
+# Substitution is per-placeholder, not single-pass: a value containing
+# {{OTHER_KEY}} will be re-substituted on a later iteration.
 # Args: template_file output_file description placeholder1 value1 [placeholder2 value2 ...]
 process_template_generic() {
     local template_file="$1"
