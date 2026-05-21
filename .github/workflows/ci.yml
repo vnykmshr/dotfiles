@@ -24,7 +24,7 @@ jobs:
     - name: Ensure scripts are executable
       run: |
         chmod +x tests/test-all.sh tests/test-critical-path.sh
-        chmod +x tests/test-functionality.sh tests/lint.sh
+        chmod +x tests/test-functionality.sh tests/test-templates.sh tests/lint.sh
         chmod +x install/setup.sh
 
     - name: Run tests

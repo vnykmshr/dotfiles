@@ -80,6 +80,18 @@ else
     echo "Warning: functionality tests not found or not executable"
 fi
 
+# Run template processor tests
+echo ""
+echo "Running Template Processor Tests..."
+echo "==================================="
+echo ""
+
+if [[ -x "$TEST_DIR/test-templates.sh" ]]; then
+    "$TEST_DIR/test-templates.sh" || SUITE_FAILED=1
+else
+    echo "Warning: template tests not found or not executable"
+fi
+
 if [[ $SUITE_FAILED -eq 0 && $TESTS_FAILED -eq 0 ]]; then
     echo ""
     echo "All test suites passed!"

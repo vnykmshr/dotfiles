@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
@@ -328,7 +328,10 @@ process_templates() {
     log_info "Template processing complete"
 }
 
-# Generic template processor
+# Substitute {{KEY}} placeholders in a template with caller-supplied values.
+# Values are treated as literal strings — no shell evaluation, no sed
+# metacharacter interpretation. Safe against &, |, \1, $(...), backticks, etc.
+# Args: template_file output_file description placeholder1 value1 [placeholder2 value2 ...]
 process_template_generic() {
     local template_file="$1"
     local output_file="$2"
@@ -348,15 +351,18 @@ process_template_generic() {
     fi
 
     # Read template; perform literal string substitution per placeholder.
-    # Values are treated as literal strings — no shell evaluation, no sed
-    # metacharacter interpretation. See
+    # Values are treated as literal strings — no shell evaluation. Bash 5.2's
+    # ${var//pat/repl} treats `&` and `\` as special in the replacement, so
+    # escape them in the value first. See
     # docs/decisions/0001-template-processor-hardening.md.
     local content
     content=$(<"$template_file")
     while (($# >= 2)); do
         local placeholder="$1"
         local value="$2"
-        content="${content//\{\{${placeholder}\}\}/$value}"
+        local escaped="${value//\\/\\\\}"   # \ -> \\
+        escaped="${escaped//&/\\&}"         # & -> \&
+        content="${content//\{\{${placeholder}\}\}/$escaped}"
         shift 2
     done
 
@@ -687,5 +693,7 @@ apply_os_defaults() {
     fi
 }
 
-# Run main function
-main "$@"
+# Run main only when executed directly (skipped when sourced for testing)
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

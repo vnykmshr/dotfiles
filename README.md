@@ -53,7 +53,7 @@ commits of sensitive information and makes customization explicit.
     "email": "you@example.com"
   },
   "git": {
-    "signing_key": "$HOME/.ssh/id_edxyz.pub"
+    "signing_key": "~/.ssh/id_edxyz.pub"
   }
 }
 ```
@@ -153,7 +153,9 @@ Integrated with fallbacks to traditional tools:
 ## Customization Guide
 
 **Personal Info**: Edit `config.json` (created from `config.json.example`
-during install) with your name, email, and signing key.
+during install) with your name, email, and signing key. Path values may use
+`~/...` (recommended) or absolute paths; literal `$HOME` is deprecated and
+auto-normalized with a warning.
 
 **Personal Aliases**: Add shortcuts to `config/zsh/personal-aliases`.
 
