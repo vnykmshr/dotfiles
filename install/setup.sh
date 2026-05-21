@@ -340,20 +340,23 @@ process_template_generic() {
         return 0
     fi
 
-    # Build sed command with all placeholder replacements
-    local sed_cmd=""
+    # Read template; perform literal string substitution per placeholder.
+    # Values are treated as literal strings — no shell evaluation, no sed
+    # metacharacter interpretation. See
+    # docs/decisions/0001-template-processor-hardening.md.
+    local content
+    content=$(<"$template_file")
     while (($# >= 2)); do
         local placeholder="$1"
         local value="$2"
-        sed_cmd+="-e 's|{{${placeholder}}}|${value}|g' "
+        content="${content//\{\{${placeholder}\}\}/$value}"
         shift 2
     done
 
     # Create output directory if needed
     mkdir -p "$(dirname "$output_file")"
 
-    # Process template
-    eval "sed $sed_cmd '$template_file' > '$output_file'"
+    printf '%s' "$content" > "$output_file"
     log_success "Generated $description"
 }
 
