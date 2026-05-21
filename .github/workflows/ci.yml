@@ -36,10 +36,10 @@ jobs:
     - name: Run shellcheck
       run: |
         find . -name "*.sh" -not -path "./.git/*" -print0 | \
-          xargs -0 shellcheck --severity=error || true
+          xargs -0 shellcheck --severity=warning
         for f in bin/*; do
           [ -f "$f" ] && head -1 "$f" | grep -q bash && \
-            shellcheck --severity=error "$f" || true
+            shellcheck --severity=warning "$f"
         done
 
     - name: Test dry-run install

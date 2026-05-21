@@ -287,7 +287,7 @@ get_config_value() {
             if [[ $value == \$HOME* ]]; then
                 log_warn "config.json key '$key' uses \$HOME — prefer '~' (auto-normalized)"
                 value="${value/#\$HOME/$HOME}"
-            elif [[ $value == "~/"* ]]; then
+            elif [[ $value == \~/* ]]; then
                 value="${value/#\~/$HOME}"
             fi
             echo "$value"

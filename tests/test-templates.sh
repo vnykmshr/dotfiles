@@ -107,7 +107,9 @@ JSON
 export SKIP_PACKAGES=true
 # shellcheck source=/dev/null
 source "$PROJECT_ROOT/install/setup.sh"
-DOTFILES_DIR="$TEST_DIR"
+# Exported so the sourced functions (get_config_value, process_*_template) pick
+# up the fixture path. Shellcheck can't see the cross-source usage.
+export DOTFILES_DIR="$TEST_DIR"
 
 # --- get_config_value normalization (commit 2) ---
 v=$(get_config_value '.ssh.keys.github' 'DEFAULT')
