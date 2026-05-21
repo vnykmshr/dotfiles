@@ -6,6 +6,7 @@ Host *
     # Use SSH keys from ssh-agent
     AddKeysToAgent yes
     # Use system keychain on macOS
+    IgnoreUnknown UseKeychain
     UseKeychain yes
     # Keep connections alive
     ServerAliveInterval 60
