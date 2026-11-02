@@ -63,6 +63,7 @@ plan/
 
 # Generated configuration files (user-specific)
 config/git/gitconfig
+config/git/*.local
 config/ssh/config
 config/zsh/exports.local
 config/zsh/personal.local

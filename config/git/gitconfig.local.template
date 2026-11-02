@@ -1,0 +1,8 @@
+# Machine-local git configuration, included by gitconfig
+# Copy this file to 'gitconfig.local' and customize as needed
+# This file will not be tracked by git
+
+# Per-directory identity: point at a *.local file holding a [user] block.
+# Trailing slash required; a repo-local user.email still wins over this.
+# [includeIf "gitdir:~/code/some-org/"]
+# 	path = ~/.dotfiles/config/git/some-org.local
