@@ -421,7 +421,11 @@ install_packages_main() {
         install_gui_apps
     fi
 
-    log_success "Package installation complete!"
+    if ((PACKAGE_FAILURES > 0)); then
+        log_warn "Package installation finished with $PACKAGE_FAILURES failures"
+    else
+        log_success "Package installation complete!"
+    fi
     log_info "You may need to restart your shell or run 'source ~/.zshrc'"
 }
 
@@ -438,4 +442,5 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     fi
 
     install_packages_main
+    exit $((PACKAGE_FAILURES > 0))
 fi

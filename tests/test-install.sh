@@ -296,6 +296,7 @@ else
 fi
 assert_eq "packages, failing install: login-shell step reached" "1" "$(grep -c 'Configuring shell' "$WORK/pkgfail.log" || true)"
 assert_eq "packages, failing install: failures reported" "1" "$(grep -c 'package commands failed' "$WORK/pkgfail.log" || true)"
+assert_eq "packages, failing install: no success line" "0" "$(grep -c 'installation complete' "$WORK/pkgfail.log" || true)"
 
 echo
 echo "Passed: $TESTS_PASSED"
