@@ -35,7 +35,7 @@ After `jq -r` returns a value, the function normalizes a leading `$HOME` or `~` 
 
 ### 3. Use `~/…` in shipped example configs
 
-`config.json.example` and `docs/templates/config.json.template` use `~/…` paths. New users never write `$HOME`; existing users see the warning above until they migrate.
+`config.json.example` uses `~/…` paths. New users never write `$HOME`; existing users see the warning above until they migrate.
 
 ### Regression test
 
