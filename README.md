@@ -136,7 +136,7 @@ shell-bench        # Measure startup time
 Integrated with fallbacks to traditional tools:
 
 | Tool | Replaces | Purpose |
-|--------|-------------|---------|
+| -------- | ------------- | --------- |
 | eza | ls | Better file listing with git integration |
 | bat | cat | Syntax highlighting, line numbers |
 | fd | find | Faster, simpler file search |
