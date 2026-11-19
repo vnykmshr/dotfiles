@@ -15,16 +15,3 @@ run_cmd() {
 }
 
 # OS detection functions available in lib/os-detect.sh
-
-# Backup file with timestamp
-backup_file() {
-    local file="$1"
-    [[ -e $file ]] && cp "$file" "$file.backup.$(date +%Y%m%d_%H%M%S)"
-}
-
-# Confirmation prompt
-confirm() {
-    local prompt="${1:-Continue?}"
-    read -r -p "$prompt (y/N) " response
-    [[ $response =~ ^[Yy]$ ]]
-}
