@@ -695,8 +695,11 @@ link_owned() {
 uninstall_links() {
     log_step "Removing links"
 
-    local entry link src path target failed=0
+    local entry link src path target failed=0 removed="Removed"
     local roots=$'\n'
+    if [[ $DRY_RUN == "true" ]]; then
+        removed="Would remove"
+    fi
     for entry in "${LINKS[@]}" "${LEGACY_LINKS[@]}"; do
         link="${entry%%:*}"
         src="${entry#*:}"
@@ -711,7 +714,7 @@ uninstall_links() {
             roots+="${target%/"$src"}"$'\n'
         fi
         if run_cmd "rm -f \"$path\""; then
-            log_info "Removed ~/$link"
+            log_info "$removed ~/$link"
         else
             log_error "Could not remove ~/$link"
             failed=1
@@ -726,7 +729,7 @@ uninstall_links() {
         if { [[ -d $path ]] && [[ "$(physical_path "$path")" == "$(physical_path "$DOTFILES_DIR")" ]]; } ||
             { [[ ! -e $path ]] && [[ $roots == *$'\n'"$target"$'\n'* || $roots == *$'\n'"$path"$'\n'* ]]; }; then
             if run_cmd "rm -f \"$path\""; then
-                log_info "Removed ~/.dotfiles"
+                log_info "$removed ~/.dotfiles"
             else
                 log_error "Could not remove ~/.dotfiles"
                 failed=1

@@ -120,6 +120,12 @@ ln -s /nonexistent-volume/aliases "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
 touch "$WORK/elsewhere/config.toml"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
+# Dry run reports what it would remove and removes nothing
+links_before=$(links_in "$HOME_DIR")
+in_home "$HOME_DIR" env DRY_RUN=true "$REPO/install/setup.sh" --uninstall >"$WORK/dry-uninstall.log" 2>&1 || true
+assert_eq "uninstall dry run: links intact" "$links_before" "$(links_in "$HOME_DIR")"
+assert_eq "uninstall dry run: says would remove" "0" "$(grep -c 'Removed ~' "$WORK/dry-uninstall.log" || true)"
+
 # Run from another directory through make -f
 if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
     pass "uninstall via make -f elsewhere: exits 0"
