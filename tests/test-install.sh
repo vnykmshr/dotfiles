@@ -174,6 +174,13 @@ assert_eq "old backup: ~/.zshrc back" "old zshrc" "$(cat "$OLD_HOME/.zshrc" 2>/d
 assert_eq "old backup: no ~/nvim created" "no" "$([[ -e $OLD_HOME/nvim ]] && echo yes || echo no)"
 assert_eq "old backup: skipped entry named" "1" "$(grep -c 'nvim' "$WORK/old-restore.log" || true)"
 
+# Restore into a HOME without ~/.ssh creates it 700
+SSH_HOME="$WORK/ssh-home"
+mkdir -p "$SSH_HOME/.dotfiles-backup-20250101-000000/.ssh"
+echo "old ssh" >"$SSH_HOME/.dotfiles-backup-20250101-000000/.ssh/config"
+printf '1\n' | env HOME="$SSH_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1 || true
+assert_eq "restore: new ~/.ssh is 700" "drwx------" "$(mode_of "$SSH_HOME/.ssh")"
+
 # Restore with no backups fails before prompting
 NONE_HOME="$WORK/none-home"
 mkdir -p "$NONE_HOME"

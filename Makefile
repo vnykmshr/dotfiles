@@ -90,7 +90,11 @@ restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
 		if removable_link ~/$$link "$$repo"; then \
 			rm -f ~/$$link; \
 		fi; \
-		mkdir -p "$$(dirname ~/$$link)"; \
+		if [[ $$link == .ssh/* ]]; then \
+			mkdir -p -m 700 "$$(dirname ~/$$link)"; \
+		else \
+			mkdir -p "$$(dirname ~/$$link)"; \
+		fi; \
 		cp -Rp "$$backup_path/$$link" ~/$$link; \
 		echo "Restored ~/$$link"; \
 		restored=$$((restored + 1)); \
