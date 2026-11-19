@@ -234,7 +234,7 @@ install_modern_cli_tools_linux() {
     # fzf (fuzzy finder)
     if ! command_exists fzf; then
         log_info "Installing fzf..."
-        pkg_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
+        [[ -d $HOME/.fzf ]] || pkg_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
         # --bin only: --all appends to ~/.zshrc, which links to the tracked zshrc
         pkg_cmd "$HOME/.fzf/install --bin"
         pkg_cmd "mkdir -p \"$HOME/.local/bin\" && ln -sf \"$HOME/.fzf/bin/fzf\" \"$HOME/.local/bin/fzf\""
