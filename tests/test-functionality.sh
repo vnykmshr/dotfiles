@@ -68,6 +68,16 @@ else
     fail "zshrc loads"
 fi
 
+# A clean start prints nothing to stderr (repo as a real dir, no ~/.dotfiles link)
+clean_home=$(mktemp -d)
+startup_err=$(env -i HOME="$clean_home" TERM=xterm PATH=/usr/bin:/bin zsh -c "DOTFILES=$PROJECT_ROOT; source $PROJECT_ROOT/config/zsh/zshrc" 2>&1 >/dev/null)
+rm -rf "$clean_home"
+if [[ -z $startup_err ]]; then
+    pass "zshrc start: no stderr"
+else
+    fail "zshrc start: no stderr: $startup_err"
+fi
+
 # Key aliases exist after loading
 echo ""
 echo "Alias checks..."

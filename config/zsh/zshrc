@@ -7,9 +7,9 @@
 # Core configuration
 export DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 
-# Verify .dotfiles symlink exists (setup.sh should create it)
-if [[ ! -L "$HOME/.dotfiles" ]]; then
-    echo "⚠️  Warning: ~/.dotfiles symlink not found. Run 'make install' to set up dotfiles properly." >&2
+# ~/.dotfiles is the install symlink or the clone itself
+if [[ ! -d "$DOTFILES" ]]; then
+    echo "dotfiles: $DOTFILES not found. Run 'make install' from the repo." >&2
 fi
 
 export HISTFILE="$HOME/.zsh_history"
