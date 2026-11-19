@@ -186,15 +186,9 @@ create_dotfiles_symlink() {
 
     local target_link="$HOME/.dotfiles"
 
-    # Repo cloned at ~/.dotfiles: nothing to link, and nothing to back up
-    if [[ -d $target_link && ! -L $target_link && "$(cd "$target_link" && pwd -P)" == "$(cd "$DOTFILES_DIR" && pwd -P)" ]]; then
-        log_info "Dotfiles repo is at $target_link"
-        return 0
-    fi
-
-    # Check if symlink already exists and points to correct location
-    if [[ -L $target_link && "$(readlink "$target_link")" == "$DOTFILES_DIR" ]]; then
-        log_info ".dotfiles symlink already exists and is correct"
+    # ~/.dotfiles already resolves to this repo: the clone itself, or a link to it
+    if [[ -d $target_link ]] && [[ "$(cd "$target_link" && pwd -P)" == "$(cd "$DOTFILES_DIR" && pwd -P)" ]]; then
+        log_info ".dotfiles already points at this repo"
         return 0
     fi
 

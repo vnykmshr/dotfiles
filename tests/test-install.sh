@@ -185,6 +185,21 @@ for mode in plain force; do
     assert_eq "clone at ~/.dotfiles, $mode: link set" "$(grep -v '^\.dotfiles$' <<<"$EXPECTED_LINKS")" "$(links_in "$CLONE_HOME")"
 done
 
+# ~/.dotfiles links to the repo; forced reinstall run through that link
+LINKED_REPO="$WORK/linked-repo"
+LINKED_HOME="$WORK/linked-home"
+copy_repo "$LINKED_REPO"
+mkdir -p "$LINKED_HOME"
+ln -s "$LINKED_REPO" "$LINKED_HOME/.dotfiles"
+if in_home "$LINKED_HOME" env FORCE=true "$LINKED_HOME/.dotfiles/install/setup.sh" >"$WORK/linked.log" 2>&1; then
+    pass "linked ~/.dotfiles, forced from inside: exits 0"
+else
+    fail "linked ~/.dotfiles, forced from inside: exits 0" "see output below"
+    cat "$WORK/linked.log"
+fi
+assert_eq "linked ~/.dotfiles: still points at the repo" "$LINKED_REPO" "$(readlink "$LINKED_HOME/.dotfiles")"
+assert_eq "linked ~/.dotfiles: no dangling links" "" "$(dangling_in "$LINKED_HOME")"
+
 # First run without config.json: creates it and stops before linking
 NOCFG_REPO="$WORK/nocfg-repo"
 NOCFG_HOME="$WORK/nocfg-home"
