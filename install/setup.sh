@@ -113,6 +113,10 @@ main() {
         install_dependencies
         install_packages
         configure_shell
+        if ((${PACKAGE_FAILURES:-0} > 0)); then
+            log_error "$PACKAGE_FAILURES package commands failed; see the warnings above"
+            exit 1
+        fi
         log_success "Packages installed"
         return 0
     fi

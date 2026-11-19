@@ -258,6 +258,24 @@ fi
 assert_eq "packages dry run: OS detected" "0" "$(grep -c 'Unknown OS' "$WORK/pkg.log" || true)"
 assert_eq "packages dry run: HOME untouched" "" "$(find "$PKG_HOME" -mindepth 1)"
 
+# Packages, real run with every installer stubbed and a restricted PATH: a
+# failing install warns, the run still reaches the login-shell step, and exits 1
+FAILSTUBS="$WORK/failstubs"
+FAIL_HOME="$WORK/fail-home"
+mkdir -p "$FAILSTUBS" "$FAIL_HOME"
+cp "$STUBS"/* "$FAILSTUBS"/
+printf '#!/bin/sh\necho "git $*" >>"%s"\n' "$CALLS" >"$FAILSTUBS/git"
+printf '#!/bin/sh\necho "brew $*" >>"%s"\ncase "$*" in "install --cask"*) exit 1 ;; esac\n' "$CALLS" >"$FAILSTUBS/brew"
+printf '#!/bin/sh\necho "sudo $*" >>"%s"\ncase "$*" in *" install "*) exit 1 ;; esac\n' "$CALLS" >"$FAILSTUBS/sudo"
+chmod +x "$FAILSTUBS"/*
+if env -u USER HOME="$FAIL_HOME" PATH="$FAILSTUBS:/usr/bin:/bin" "$DRY_REPO/install/setup.sh" --packages </dev/null >"$WORK/pkgfail.log" 2>&1; then
+    fail "packages, failing install: exits non-zero" "exited 0"
+else
+    pass "packages, failing install: exits non-zero"
+fi
+assert_eq "packages, failing install: login-shell step reached" "1" "$(grep -c 'Configuring shell' "$WORK/pkgfail.log" || true)"
+assert_eq "packages, failing install: failures reported" "1" "$(grep -c 'package commands failed' "$WORK/pkgfail.log" || true)"
+
 echo
 echo "Passed: $TESTS_PASSED"
 echo "Failed: $TESTS_FAILED"

@@ -8,6 +8,16 @@ source "$DOTFILES_DIR/lib/utils.sh"
 source "$DOTFILES_DIR/lib/os-detect.sh"
 source "$DOTFILES_DIR/lib/logging.sh"
 
+# A failed install warns and the run continues; setup.sh --packages reports
+# the count and exits non-zero at the end
+PACKAGE_FAILURES=0
+pkg_cmd() {
+    run_cmd "$1" || {
+        log_warn "Failed, continuing: $1"
+        PACKAGE_FAILURES=$((PACKAGE_FAILURES + 1))
+    }
+}
+
 # Core Development Tools
 
 install_core_tools() {
@@ -56,7 +66,7 @@ install_core_tools() {
             log_info "Installing Homebrew packages..."
             for package in "${packages[@]}"; do
                 if ! brew list "$package" >/dev/null 2>&1; then
-                    run_cmd "brew install $package"
+                    pkg_cmd "brew install $package"
                 else
                     log_info "Already installed: $package"
                 fi
@@ -65,7 +75,7 @@ install_core_tools() {
 
         ubuntu | debian)
             # Update package list
-            run_cmd "sudo apt update"
+            pkg_cmd "sudo apt update"
 
             # Essential Ubuntu/Debian packages
             local packages=(
@@ -92,7 +102,7 @@ install_core_tools() {
             )
 
             log_info "Installing apt packages..."
-            run_cmd "sudo apt install -y ${packages[*]}"
+            pkg_cmd "sudo apt install -y ${packages[*]}"
 
             # CLI tools (install manually if not available)
             install_modern_cli_tools_linux
@@ -120,7 +130,7 @@ install_core_tools() {
             )
 
             log_info "Installing dnf/yum packages..."
-            run_cmd "sudo $PACKAGE_MANAGER install -y ${packages[*]}"
+            pkg_cmd "sudo $PACKAGE_MANAGER install -y ${packages[*]}"
 
             install_modern_cli_tools_linux
             ;;
@@ -159,7 +169,7 @@ install_core_tools() {
             )
 
             log_info "Installing pacman packages..."
-            run_cmd "sudo pacman -S --noconfirm --needed ${packages[*]}"
+            pkg_cmd "sudo pacman -S --noconfirm --needed ${packages[*]}"
             ;;
 
         *)
@@ -176,12 +186,12 @@ install_modern_cli_tools_linux() {
     if ! command_exists bat; then
         case "$OS_NAME" in
             ubuntu | debian)
-                run_cmd "sudo apt install -y bat"
+                pkg_cmd "sudo apt install -y bat"
                 # Ubuntu installs as 'batcat' - create portable symlink
                 if command_exists batcat && ! command_exists bat; then
                     local link_dir="$HOME/.local/bin"
                     mkdir -p "$link_dir"
-                    run_cmd "ln -sf /usr/bin/batcat \"$link_dir/bat\""
+                    pkg_cmd "ln -sf /usr/bin/batcat \"$link_dir/bat\""
                 fi
                 ;;
         esac
@@ -191,7 +201,7 @@ install_modern_cli_tools_linux() {
     if ! command_exists eza; then
         log_info "Installing eza via cargo..."
         if command_exists cargo; then
-            run_cmd "cargo install eza"
+            pkg_cmd "cargo install eza"
         else
             log_warn "Cargo not found. Install Rust to get eza."
         fi
@@ -201,12 +211,12 @@ install_modern_cli_tools_linux() {
     if ! command_exists fd; then
         case "$OS_NAME" in
             ubuntu | debian)
-                run_cmd "sudo apt install -y fd-find"
+                pkg_cmd "sudo apt install -y fd-find"
                 # Ubuntu installs as 'fdfind' - create portable symlink
                 if command_exists fdfind && ! command_exists fd; then
                     local link_dir="$HOME/.local/bin"
                     mkdir -p "$link_dir"
-                    run_cmd "ln -sf /usr/bin/fdfind \"$link_dir/fd\""
+                    pkg_cmd "ln -sf /usr/bin/fdfind \"$link_dir/fd\""
                 fi
                 ;;
         esac
@@ -216,7 +226,7 @@ install_modern_cli_tools_linux() {
     if ! command_exists rg; then
         case "$OS_NAME" in
             ubuntu | debian)
-                run_cmd "sudo apt install -y ripgrep"
+                pkg_cmd "sudo apt install -y ripgrep"
                 ;;
         esac
     fi
@@ -224,14 +234,14 @@ install_modern_cli_tools_linux() {
     # fzf (fuzzy finder)
     if ! command_exists fzf; then
         log_info "Installing fzf..."
-        run_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
-        run_cmd "$HOME/.fzf/install --all"
+        pkg_cmd "git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf"
+        pkg_cmd "$HOME/.fzf/install --all"
     fi
 
     # zoxide (frecency cd)
     if ! command_exists zoxide; then
         log_info "Installing zoxide via curl..."
-        run_cmd "curl -fsS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
+        pkg_cmd "curl -fsS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
     fi
 }
 
@@ -247,7 +257,7 @@ install_language_tools() {
             log_warn "mise not found; install it with: brew install mise"
         else
             log_info "Installing mise..."
-            run_cmd "curl -fsS https://mise.run | sh"
+            pkg_cmd "curl -fsS https://mise.run | sh"
 
             # Add to PATH for current session
             export PATH="$HOME/.local/bin:$PATH"
@@ -259,18 +269,18 @@ install_language_tools() {
         log_info "Installing languages via mise..."
 
         # Node.js
-        run_cmd "mise use -g node@lts"
+        pkg_cmd "mise use -g node@lts"
 
         # Python
-        run_cmd "mise use -g python@latest"
+        pkg_cmd "mise use -g python@latest"
 
         # Go
-        run_cmd "mise use -g go@latest"
+        pkg_cmd "mise use -g go@latest"
 
         # Rust (via rustup if not using mise)
         if ! command_exists rustc; then
             log_info "Installing Rust via rustup..."
-            run_cmd "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+            pkg_cmd "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
         fi
     fi
 }
@@ -294,7 +304,6 @@ install_development_tools() {
 
                 # Cloud tools
                 awscli
-                terraform
 
                 # Kubernetes
                 kubectl
@@ -303,7 +312,7 @@ install_development_tools() {
 
             for package in "${packages[@]}"; do
                 if ! brew list "$package" >/dev/null 2>&1; then
-                    run_cmd "brew install $package"
+                    pkg_cmd "brew install $package"
                 else
                     log_info "Already installed: $package"
                 fi
@@ -330,8 +339,6 @@ install_fonts() {
     case "$OS_NAME" in
         macos)
             # Install Nerd Fonts via Homebrew
-            run_cmd "brew tap homebrew/cask-fonts"
-
             local fonts=(
                 font-fira-code-nerd-font
                 font-jetbrains-mono-nerd-font
@@ -339,7 +346,7 @@ install_fonts() {
             )
 
             for font in "${fonts[@]}"; do
-                run_cmd "brew install --cask $font"
+                pkg_cmd "brew install --cask $font"
             done
             ;;
 
@@ -378,7 +385,7 @@ install_gui_apps() {
 
         for app in "${apps[@]}"; do
             if ! brew list --cask "$app" >/dev/null 2>&1; then
-                run_cmd "brew install --cask $app"
+                pkg_cmd "brew install --cask $app"
             else
                 log_info "Already installed: $app"
             fi
