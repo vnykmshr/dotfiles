@@ -174,11 +174,14 @@ install_homebrew() {
     if [[ $DRY_RUN != "true" ]]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-        # Add Homebrew to PATH for Apple Silicon Macs
-        # Initialize brew environment if installed
-        if command -v brew >/dev/null 2>&1; then
-            eval "$(brew shellenv)"
-        fi
+        # A fresh install is not on PATH yet: /opt/homebrew (Apple Silicon), /usr/local (Intel)
+        local brew_bin
+        for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+            if [[ -x $brew_bin ]]; then
+                eval "$("$brew_bin" shellenv)"
+                break
+            fi
+        done
     else
         log_info "Would install Homebrew"
     fi
