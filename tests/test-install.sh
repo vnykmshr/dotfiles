@@ -121,7 +121,8 @@ assert_eq "install: no package, shell or system commands" "" "$(cat "$CALLS")"
 ln -s "$REPO/config/zsh/gone" "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
-if printf 'y\n' | env HOME="$HOME_DIR" make -s -C "$REPO" uninstall >"$WORK/uninstall.log" 2>&1; then
+# Run from another directory: the Makefile must not depend on the cwd
+if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
     pass "uninstall exits 0"
 else
     fail "uninstall exits 0" "$(cat "$WORK/uninstall.log")"

@@ -3,6 +3,9 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
+# Physical repo path, wherever make runs from (make -f, make -C)
+REPO := $(patsubst %/,%,$(dir $(realpath $(lastword $(MAKEFILE_LIST)))))
+
 # Colors for output
 define blue
 	@printf "\033[0;34m$(1)\033[0m\n"
@@ -56,7 +59,7 @@ update: ## Update from git
 sync: update install ## Update and install
 
 restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
-	@set -e; source lib/utils.sh; repo=$$(pwd -P); \
+	@set -e; source "$(REPO)/lib/utils.sh"; repo="$(REPO)"; \
 	backups=$$(ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5); \
 	if [[ -z "$$backups" ]]; then \
 		echo "No backups found in ~/.dotfiles-backup-*" >&2; \
@@ -112,7 +115,7 @@ uninstall: ## Remove the links (keeps backups)
 	@echo "This removes the links install created"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@source lib/utils.sh; repo=$$(pwd -P); \
+	@set -e; source "$(REPO)/lib/utils.sh"; repo="$(REPO)"; \
 	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
 		if owned_link ~/$$link "$$repo"; then \
 			echo "Removing symlink: ~/$$link"; \
