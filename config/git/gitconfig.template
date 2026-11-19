@@ -276,9 +276,6 @@
 [protocol "https"]
 	allow = always
 
-[protocol "git"]
-	allow = always
-
 [protocol "ssh"]
 	allow = always
 

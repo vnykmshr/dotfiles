@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shellcheck runs at `--severity=warning`, Linux only, and fails the build
 - Example config paths use `~/` instead of `$HOME/`
 - CI runs all pre-commit hooks
+- Plaintext `git://` protocol no longer allowed in the gitconfig template
 
 ### Removed
 
