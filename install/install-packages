@@ -8,9 +8,7 @@ source "$DOTFILES_DIR/lib/utils.sh"
 source "$DOTFILES_DIR/lib/os-detect.sh"
 source "$DOTFILES_DIR/lib/logging.sh"
 
-# =============================================================================
 # Core Development Tools
-# =============================================================================
 
 install_core_tools() {
     log_step "Installing core development tools"
@@ -236,9 +234,7 @@ install_modern_cli_tools_linux() {
     fi
 }
 
-# =============================================================================
 # Language Runtimes and Version Managers
-# =============================================================================
 
 install_language_tools() {
     log_step "Installing language tools and runtimes"
@@ -273,9 +269,7 @@ install_language_tools() {
     fi
 }
 
-# =============================================================================
 # Development Tools
-# =============================================================================
 
 install_development_tools() {
     log_step "Installing development tools"
@@ -322,9 +316,7 @@ install_development_tools() {
     esac
 }
 
-# =============================================================================
 # Fonts
-# =============================================================================
 
 install_fonts() {
     log_step "Installing fonts"
@@ -352,9 +344,7 @@ install_fonts() {
     esac
 }
 
-# =============================================================================
 # GUI Applications (macOS)
-# =============================================================================
 
 install_gui_apps() {
     if [[ $OS_NAME == "macos" ]]; then
@@ -390,9 +380,7 @@ install_gui_apps() {
     fi
 }
 
-# =============================================================================
 # Main Installation Function
-# =============================================================================
 
 install_packages_main() {
     log_info "Starting package installation for $OS_NAME"
