@@ -170,7 +170,7 @@ Skip features you don't need in `config/zsh/exports.local` (gitignored):
 
 ```bash
 export DOTFILES_SKIP_WORKFLOW=1        # Disable git workflow helpers
-export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip platform detection
+export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
 export DOTFILES_SKIP_TMPDIR=1          # Disable TMPDIR management
 ```
 
