@@ -70,7 +70,6 @@ load_config "personal-aliases"
 # Load optional modules (can be disabled)
 [[ "$DOTFILES_SKIP_CROSS_PLATFORM" != "1" ]] && load_config "cross-platform"
 [[ "$DOTFILES_SKIP_DIRENV" != "1" ]] && load_config "direnv-integration"
-[[ "$DOTFILES_SKIP_PERFORMANCE" != "1" ]] && load_config "performance"
 load_config "prompt"
 
 # Load CLI tools and workflow automation
