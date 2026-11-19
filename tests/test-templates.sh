@@ -225,6 +225,7 @@ if [[ -f $zsh_out ]]; then
     assert_not_contains "zsh: no leftover {{ in active lines" "{{" "$zsh_active"
     assert_contains "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$zsh_content"
     assert_contains "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$zsh_content"
+    assert_not_contains "zsh: PATH set only via path array" "export PATH=" "$zsh_content"
 else
     fail "zsh exports generated" "$zsh_out missing"
 fi

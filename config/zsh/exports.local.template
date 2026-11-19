@@ -13,8 +13,8 @@ export PROJECTS="{{PROJECTS_DIR}}"
 # Personal tools and scripts
 export PERSONAL_BIN="{{PERSONAL_BIN_DIR}}"
 
-# Add personal bin to PATH if it exists
-[[ -d "$PERSONAL_BIN" ]] && export PATH="$PERSONAL_BIN:$PATH"
+# Append personal bin to PATH; zshrc order (brew first) wins for dirs already listed
+[[ -d "$PERSONAL_BIN" ]] && path+=("$PERSONAL_BIN")
 
 # API Keys and Tokens (example placeholders)
 
