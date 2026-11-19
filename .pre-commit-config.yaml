@@ -35,7 +35,7 @@ repos:
 
   # Shell script formatting and linting
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-4
+    rev: v3.14.1-1
     hooks:
       - id: shfmt
         args: [-w, -s, -i, '4', -ci]
