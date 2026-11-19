@@ -74,9 +74,8 @@ load_config "personal-aliases"
 [[ "$DOTFILES_SKIP_CROSS_PLATFORM" != "1" ]] && load_config "cross-platform"
 load_config "prompt"
 
-# Load CLI tools and workflow automation
+# Load CLI tools
 [[ -r "$DOTFILES/config/cli-tools/init" ]] && source "$DOTFILES/config/cli-tools/init"
-[[ -r "$DOTFILES/config/workflow/init" ]] && source "$DOTFILES/config/workflow/init"
 
 # fzf keybindings and completion
 command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh)"

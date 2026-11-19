@@ -91,9 +91,8 @@ make restore        # Restore from backup
 make uninstall      # Remove dotfiles (preserves backups)
 make test          # Run validation tests
 
-# Git Workflow (optional, set DOTFILES_SKIP_WORKFLOW=1 to disable)
-gw                 # Git workflow helpers
-gws                # Git status with helpers
+# Git workflow helpers (config/workflow/git-helpers)
+mygh               # Repo status; `mygh help` lists pull, new, switch, clean
 
 # Traditional Git Aliases
 g                  # git
@@ -169,7 +168,6 @@ for machine-specific config.
 Skip features you don't need in `config/zsh/exports.local` (gitignored):
 
 ```bash
-export DOTFILES_SKIP_WORKFLOW=1        # Disable git workflow helpers
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
 export DOTFILES_SKIP_TMPDIR=1          # Disable TMPDIR management
 ```

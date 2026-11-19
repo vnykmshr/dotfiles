@@ -57,7 +57,7 @@ time zsh -i -c exit
 
 **Solutions:**
 
-- Disable unused modules: `export DOTFILES_SKIP_WORKFLOW=1`
+- Disable optional modules: `export DOTFILES_SKIP_CROSS_PLATFORM=1`
 - Check for network-dependent operations
 - Review `.zshrc` for heavy operations
 
