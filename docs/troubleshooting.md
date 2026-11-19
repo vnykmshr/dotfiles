@@ -4,17 +4,6 @@ Common issues and solutions.
 
 ## Installation Issues
 
-### Permission denied errors
-
-**Problem:** `permission denied` when running setup
-
-**Solution:**
-
-```bash
-chmod +x install/setup.sh
-./install/setup.sh
-```
-
 ### Files already exist
 
 **Problem:** Install warns `File exists: ~/.zshrc. Use --force to overwrite.`
@@ -65,8 +54,6 @@ DOTFILES_DEBUG=true zsh -i -c exit
 **Solutions:**
 
 - Skip the Linux/WSL shims: `export DOTFILES_SKIP_CROSS_PLATFORM=1` in `~/.exports.local`
-- Check for network-dependent operations
-- Review `.zshrc` for heavy operations
 
 ### Command not found after install
 
@@ -155,20 +142,6 @@ curl -fsS https://mise.run | sh  # Linux
 
 ## Platform-Specific
 
-### macOS: Operation not permitted
-
-**Problem:** Can't write to `/usr/local`
-
-**Solution:** Use Homebrew's recommended directory
-
-```bash
-# Apple Silicon (M1/M2)
-# Homebrew installs to /opt/homebrew
-
-# Intel
-# Homebrew installs to /usr/local
-```
-
 ### Linux: zsh not default shell
 
 **Problem:** bash still loads instead of zsh
@@ -204,6 +177,9 @@ git clone https://github.com/vnykmshr/dotfiles.git .dotfiles
 make uninstall   # remove the links
 make restore     # pick a backup; files go back to their original paths
 ```
+
+If install replaced nothing, there is no backup and `make restore` reports
+"No backups found".
 
 ### Reset to clean state
 
