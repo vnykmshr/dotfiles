@@ -1,5 +1,5 @@
-# Cross-platform shims: macOS-style clipboard and open on Linux and WSL,
-# word-movement keys per platform.
+# Linux/WSL clipboard and open shims, WSL PATH cleanup, and line-editing and
+# word-movement keys.
 
 if [[ "$OSTYPE" == linux* ]]; then
     _dotfiles_wsl=0

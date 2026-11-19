@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install, reinstall, uninstall and dry-run into a temp HOME.
+# Install, reinstall, restore, uninstall, dry runs and edge layouts in a temp HOME.
 # Install writes generated configs into the repo, so it runs on a copy of the
 # tracked files. Commands with system side effects are stubbed on PATH and
 # logged to calls.log.
