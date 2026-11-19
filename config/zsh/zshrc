@@ -60,7 +60,7 @@ load_config() {
 [[ "$DOTFILES_SKIP_TMPDIR" != "1" ]] && load_config "tmpdir-management"
 
 # Load core modules (always needed)
-for module in exports aliases functions go-dev; do
+for module in exports aliases functions; do
     load_config "$module"
 done
 
