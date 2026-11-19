@@ -16,8 +16,8 @@ main() {
 
     if [[ -f $CONFIG_FILE ]]; then
         echo "Personal config already exists: $CONFIG_FILE"
-        read -r -p "Overwrite it? (y/N): " choice
-        case "$choice" in
+        read -r -p "Overwrite it? (y/N): " choice || true
+        case "${choice:-}" in
             [yY] | [yY][eE][sS])
                 local backup_dir
                 backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"

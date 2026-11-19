@@ -143,7 +143,14 @@ if env -u EDITOR DOTFILES="$pc_dir" "$PROJECT_ROOT/bin/setup-personal-config" </
 else
     fail "setup-personal-config: works without EDITOR"
 fi
-# Overwrite backs up outside the repo (make clean deletes *.backup.*; repo is public)
+# With stdin closed, an existing personal.local is kept
+if env -u EDITOR DOTFILES="$pc_dir" "$PROJECT_ROOT/bin/setup-personal-config" </dev/null >/dev/null 2>&1; then
+    pass "setup-personal-config: closed stdin keeps existing"
+else
+    fail "setup-personal-config: closed stdin keeps existing"
+fi
+
+# Overwrite backs up outside the repo, apart from install backups
 pc_home=$(mktemp -d)
 echo "mine" >"$pc_dir/config/zsh/personal.local"
 printf 'y\n' | env -u EDITOR HOME="$pc_home" DOTFILES="$pc_dir" "$PROJECT_ROOT/bin/setup-personal-config" >/dev/null 2>&1 || true
