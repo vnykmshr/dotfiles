@@ -15,7 +15,7 @@ VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 MODE=install
 
-# HOME link -> repo source; install and --uninstall read this
+# HOME link -> repo source; install, --uninstall and --restore read this
 LINKS=(
     ".zshrc:config/zsh/zshrc"
     ".zshenv:config/zsh/zshenv"
@@ -25,7 +25,7 @@ LINKS=(
     ".config/nvim:config/nvim"
     ".tmux.conf:config/tmux/tmux.conf"
 )
-# Linked by earlier versions; --uninstall still recognizes them
+# Linked by earlier versions; --uninstall and --restore still recognize them
 LEGACY_LINKS=(
     ".aliases:config/zsh/aliases"
     ".config/mise/config.toml:config/mise/config.toml"
@@ -61,6 +61,7 @@ OPTIONS:
     -f, --force         Force overwrite existing files
     -p, --packages      Install prerequisites and packages, set zsh as login shell
     -u, --uninstall     Remove the links install created (make uninstall)
+    -r, --restore       Put back files an install replaced (make restore)
     -h, --help          Show this help message
 
 ENVIRONMENT:
@@ -102,6 +103,10 @@ parse_args() {
                 MODE=uninstall
                 shift
                 ;;
+            -r | --restore)
+                MODE=restore
+                shift
+                ;;
             -h | --help)
                 usage
                 exit 0
@@ -132,6 +137,11 @@ main() {
 
     if [[ $MODE == "uninstall" ]]; then
         uninstall_links
+        return
+    fi
+
+    if [[ $MODE == "restore" ]]; then
+        restore_backup
         return
     fi
 
@@ -706,6 +716,75 @@ uninstall_links() {
     fi
 
     return "$failed"
+}
+
+# Copy managed paths back from an install backup, removing install's links first
+restore_backup() {
+    local all=() backups=() backup choice entry link src path i restored=0
+    local managed=" "
+
+    # Names end in YYYYMMDD-HHMMSS: reverse glob order is newest first
+    for backup in "$HOME"/.dotfiles-backup-*; do
+        if [[ -d $backup ]]; then
+            all+=("$backup")
+        fi
+    done
+    for ((i = ${#all[@]} - 1; i >= 0 && ${#backups[@]} < 5; i--)); do
+        backups+=("${all[i]}")
+    done
+    if ((${#backups[@]} == 0)); then
+        log_error "No backups found in ~/.dotfiles-backup-*"
+        return 1
+    fi
+
+    echo "Available backups:"
+    for i in "${!backups[@]}"; do
+        printf '%6d  %s\n' "$((i + 1))" "${backups[i]}"
+    done
+    read -r -p "Enter backup number to restore (or path): " choice || true
+    if [[ $choice =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= ${#backups[@]})); then
+        backup="${backups[choice - 1]}"
+    else
+        backup="$choice"
+    fi
+    if [[ -z $backup || ! -d $backup ]]; then
+        log_error "Backup not found: ${backup:-none given}"
+        return 1
+    fi
+
+    log_info "Restoring from: $backup"
+    for entry in "${LINKS[@]}" "${LEGACY_LINKS[@]}" ".dotfiles:."; do
+        link="${entry%%:*}"
+        src="${entry#*:}"
+        path="$HOME/$link"
+        managed+="${link%%/*} "
+        [[ -e $backup/$link || -L $backup/$link ]] || continue
+        if link_owned "$path" "$src"; then
+            rm -f "$path"
+        elif [[ -e $path || -L $path ]]; then
+            log_warn "Skipping ~/$link: exists and is not a link into this repo"
+            continue
+        fi
+        if [[ $link == .ssh/* && ! -d $HOME/.ssh ]]; then
+            mkdir -m 700 "$HOME/.ssh"
+        fi
+        mkdir -p "$(dirname "$path")"
+        cp -Rp "$backup/$link" "$path"
+        log_info "Restored ~/$link"
+        restored=$((restored + 1))
+    done
+
+    for entry in "$backup"/* "$backup"/.[!.]*; do
+        [[ -e $entry || -L $entry ]] || continue
+        [[ $managed == *" $(basename "$entry") "* ]] ||
+            log_warn "Skipped $entry: not a path install manages; restore it by hand"
+    done
+
+    if ((restored == 0)); then
+        log_error "Nothing restored from $backup"
+        return 1
+    fi
+    log_success "Restore complete"
 }
 
 # Run main only when executed directly (skipped when sourced for testing)

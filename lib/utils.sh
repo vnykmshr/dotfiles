@@ -28,23 +28,3 @@ confirm() {
     read -r -p "$prompt (y/N) " response
     [[ $response =~ ^[Yy]$ ]]
 }
-
-# True when symlink $1 points into repo dir $2 (a physical path). Walks up to
-# an existing parent so a dangling link to a removed repo file still counts.
-owned_link() {
-    local path rest=""
-    [[ -L $1 ]] || return 1
-    path="$(readlink "$1")"
-    [[ $path == /* ]] || path="$(dirname "$1")/$path"
-    while [[ ! -d $path ]]; do
-        rest="/$(basename "$path")$rest"
-        path="$(dirname "$path")"
-    done
-    path="$(cd "$path" && pwd -P)$rest"
-    [[ $path == "$2" || $path == "$2"/* ]]
-}
-
-# True when symlink $1 points into repo $2, or is dangling (removing it loses nothing)
-removable_link() {
-    owned_link "$1" "$2" || { [[ -L $1 ]] && [[ ! -e $1 ]]; }
-}

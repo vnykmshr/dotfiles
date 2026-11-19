@@ -206,8 +206,16 @@ assert_eq "old backup: skipped entry named" "1" "$(grep -c 'nvim' "$WORK/old-res
 SSH_HOME="$WORK/ssh-home"
 mkdir -p "$SSH_HOME/.dotfiles-backup-20250101-000000/.ssh"
 echo "old ssh" >"$SSH_HOME/.dotfiles-backup-20250101-000000/.ssh/config"
-printf '1\n' | env HOME="$SSH_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1 || true
+printf '1\n' | env HOME="$SSH_HOME" make -s -C "$SPACE_REPO" restore >/dev/null 2>&1 || true
 assert_eq "restore: new ~/.ssh is 700" "drwx------" "$(mode_of "$SSH_HOME/.ssh")"
+
+# Restore leaves a dangling foreign link alone (target on an unmounted volume)
+FOREIGN_HOME="$WORK/foreign-home"
+mkdir -p "$FOREIGN_HOME/.dotfiles-backup-20250101-000000/.ssh" "$FOREIGN_HOME/.ssh"
+echo "old ssh" >"$FOREIGN_HOME/.dotfiles-backup-20250101-000000/.ssh/config"
+ln -s /nonexistent-volume/ssh/config "$FOREIGN_HOME/.ssh/config"
+printf '1\n' | env HOME="$FOREIGN_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1 || true
+assert_eq "restore: dangling foreign link kept" "/nonexistent-volume/ssh/config" "$(readlink "$FOREIGN_HOME/.ssh/config")"
 
 # Restore with no backups fails before prompting
 NONE_HOME="$WORK/none-home"
