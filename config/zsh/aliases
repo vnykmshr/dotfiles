@@ -102,7 +102,6 @@ alias gup='git pull && git submodule update'
 
 # Git workflow aliases
 alias mygh='$DOTFILES/config/workflow/git-helpers'
-alias gsave='$DOTFILES/config/workflow/git-helpers save'
 alias gpull='$DOTFILES/config/workflow/git-helpers pull'
 alias gnew='$DOTFILES/config/workflow/git-helpers new'
 alias gswitch='$DOTFILES/config/workflow/git-helpers switch'

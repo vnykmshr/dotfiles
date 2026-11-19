@@ -126,7 +126,7 @@ shell-bench        # Measure startup time
 ### Git Integration
 
 - Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`
-- Workflow helpers: `gsave`, `gpull`, `gclean` (via git-helpers script)
+- Workflow helpers: `gpull`, `gclean` (via git-helpers script)
 - Diffs through delta
 - Global gitignore covering major platforms
 - SSH signing support

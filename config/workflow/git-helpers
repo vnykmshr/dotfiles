@@ -20,114 +20,6 @@ ensure_git_repo() {
     fi
 }
 
-# Suggest commit messages from staged files
-suggest_commit_message() {
-    local staged_files suggestions=()
-
-    # Get staged changes
-    staged_files=$(git diff --cached --name-only)
-    if [[ -z $staged_files ]]; then
-        echo "No staged changes found"
-        return 1
-    fi
-
-    # Common conventional commit types
-    suggestions+=(
-        "feat: add new feature"
-        "fix: resolve bug"
-        "docs: update documentation"
-        "test: add or fix tests"
-        "refactor: improve code structure"
-        "style: format code"
-        "chore: maintenance tasks"
-        "build: update build scripts or dependencies"
-    )
-
-    # Display suggestions
-    echo "Suggested commit messages:"
-    for i in "${!suggestions[@]}"; do
-        printf "%2d. %s\n" $((i + 1)) "${suggestions[$i]}"
-    done
-
-    echo "Or type custom message:"
-}
-
-# Quick add, commit, and push
-quick_save() {
-    local dry_run="${1:-false}"
-    ensure_git_repo
-
-    if [[ $dry_run == "true" ]]; then
-        log_info "[DRY RUN] Would add all changes: git add ."
-        log_info "[DRY RUN] Would show commit message suggestions"
-        log_info "[DRY RUN] Would commit and push to current branch"
-        return 0
-    fi
-
-    # Add all changes
-    git add .
-    log_success "Staged all changes"
-
-    # Show suggestions
-    suggest_commit_message
-
-    # Get commit message
-    echo
-    read -p "Commit message (or number): " -r input
-    if [[ -z $input ]]; then
-        log_error "Commit message required"
-        return 1
-    fi
-
-    # Parse input - number or custom message
-    local message
-    if [[ $input =~ ^[0-9]+$ ]]; then
-        # User selected a number - get fresh suggestions
-        local temp_suggestions
-        # Use Bash 3.2 compatible method instead of mapfile
-        local suggestion_output
-        suggestion_output=$(suggest_commit_message | grep "^[[:space:]]*[0-9]" | sed 's/^[[:space:]]*[0-9]*\. //')
-
-        local IFS=$'\n'
-        local line_count=0
-        while IFS= read -r line; do
-            temp_suggestions[line_count]="$line"
-            ((line_count++))
-        done <<<"$suggestion_output"
-
-        if [[ ${#temp_suggestions[@]} -eq 0 ]]; then
-            log_error "No suggestions available"
-            return 1
-        fi
-
-        local index=$((input - 1))
-        if [[ $index -ge 0 && $index -lt ${#temp_suggestions[@]} ]]; then
-            message="${temp_suggestions[$index]}"
-        else
-            log_error "Invalid selection. Please choose 1-${#temp_suggestions[@]}"
-            return 1
-        fi
-    else
-        message="$input"
-    fi
-
-    # Commit
-    git commit -m "$message"
-    log_success "Created commit: $message"
-
-    # Push (with upstream if needed)
-    local current_branch
-    current_branch=$(git branch --show-current)
-
-    if git push 2>/dev/null; then
-        log_success "Pushed to $current_branch"
-    elif git push -u origin "$current_branch" 2>/dev/null; then
-        log_success "Pushed and set upstream for $current_branch"
-    else
-        log_error "Push failed - check remote configuration"
-    fi
-}
-
 # Quick pull with rebase
 quick_pull() {
     local dry_run="${1:-false}"
@@ -244,7 +136,6 @@ USAGE:
     git-helpers [COMMAND] [OPTIONS]
 
 COMMANDS:
-    save        Quick add, commit, and push workflow with message suggestions
     pull        Pull with rebase and conflict guidance
     status      Show simple repository status
     new         Create and switch to new branch
@@ -256,9 +147,8 @@ OPTIONS:
     -n, --dry-run   Show what would be done without executing
 
 EXAMPLES:
-    git-helpers save         # Add all, commit with a suggested message, push
-    git-helpers save -n      # Show what save would do (dry run)
     git-helpers pull         # Pull with rebase
+    git-helpers pull -n      # Show what pull would do
     git-helpers status       # Show branch and sync status
     git-helpers new feature  # Create and switch to 'feature' branch
     git-helpers switch main  # Switch to main branch
@@ -281,9 +171,6 @@ main() {
     fi
 
     case "$command" in
-        save)
-            quick_save "$dry_run"
-            ;;
         pull)
             quick_pull "$dry_run"
             ;;
