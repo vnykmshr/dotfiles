@@ -514,32 +514,13 @@ process_zsh_exports_template() {
     local template_file="$DOTFILES_DIR/config/zsh/exports.local.template"
     local output_file="$DOTFILES_DIR/config/zsh/exports.local"
 
-    # Load values from JSON config with fallbacks
     local workspace_dir
     local projects_dir
     local personal_bin_dir
-    local browser
-    local terminal
-    local pager
-    local npm_prefix
-    local python_path
-    local go_path
-    local cargo_home
-    local preferred_editor
 
     workspace_dir=$(get_config_value '.environment.workspace_dir' "$HOME/workspace")
     projects_dir=$(get_config_value '.environment.projects_dir' "$HOME/projects")
     personal_bin_dir=$(get_config_value '.environment.personal_bin_dir' "$HOME/.local/bin")
-    browser=$(get_config_value '.user.browser' 'open')
-    terminal=$(get_config_value '.user.terminal' 'Terminal')
-    pager=$(get_config_value '.environment.pager' 'less')
-    npm_prefix=$(get_config_value '.development.node.npm_prefix' "$HOME/.npm-global")
-    python_path=$(get_config_value '.development.python.path' '')
-    go_path=$(get_config_value '.development.go.path' "$HOME/go")
-    cargo_home=$(get_config_value '.development.rust.cargo_home' "$HOME/.cargo")
-    preferred_editor=$(get_config_value '.user.editor' 'nvim')
-    local preferred_lang="en_US.UTF-8"
-    local code_editor="code"
 
     # Show preview in dry run mode
     if [[ $DRY_RUN == "true" ]]; then
@@ -547,21 +528,10 @@ process_zsh_exports_template() {
         return 0
     fi
 
-    # Process template using generic processor
     process_template_generic "$template_file" "$output_file" "local environment exports" \
         "WORKSPACE_DIR" "$workspace_dir" \
         "PROJECTS_DIR" "$projects_dir" \
-        "PERSONAL_BIN_DIR" "$personal_bin_dir" \
-        "BROWSER" "$browser" \
-        "TERMINAL" "$terminal" \
-        "PAGER" "$pager" \
-        "NPM_PREFIX" "$npm_prefix" \
-        "PYTHON_PATH" "$python_path" \
-        "GO_PATH" "$go_path" \
-        "CARGO_HOME" "$cargo_home" \
-        "PREFERRED_EDITOR" "$preferred_editor" \
-        "PREFERRED_LANG" "$preferred_lang" \
-        "CODE_EDITOR" "$code_editor"
+        "PERSONAL_BIN_DIR" "$personal_bin_dir"
 }
 
 # Link a config file/directory

@@ -75,9 +75,7 @@ cat >"$TEST_DIR/config.json" <<JSON
   "user": {
     "name": "Tom & Jerry \$(touch $INJECTION_MARKER)",
     "email": "user'with'quote@example.com",
-    "editor": "nvim",
-    "browser": "open",
-    "terminal": "Terminal"
+    "editor": "nvim"
   },
   "git":  { "signing_key": "\$HOME/.ssh/key.pub", "gpg_sign": false },
   "ssh": {
@@ -97,14 +95,7 @@ cat >"$TEST_DIR/config.json" <<JSON
   "environment": {
     "workspace_dir":    "\$HOME/work",
     "projects_dir":     "~/proj",
-    "personal_bin_dir": "/abs/bin",
-    "pager":            "less"
-  },
-  "development": {
-    "node":   { "npm_prefix": "~/.npm-global" },
-    "python": { "path": "" },
-    "go":     { "path": "~/go" },
-    "rust":   { "cargo_home": "~/.cargo" }
+    "personal_bin_dir": "/abs/bin"
   }
 }
 JSON
@@ -218,14 +209,11 @@ fi
 
 if [[ -f $zsh_out ]]; then
     zsh_content=$(cat "$zsh_out")
-    # Comments in exports.local.template intentionally retain {{KEY}} for keys
-    # callers don't supply (GITHUB_TOKEN, OPENAI_API_KEY, etc.). Only check
-    # uncommented lines for leftover placeholders.
-    zsh_active=$(grep -v '^[[:space:]]*#' "$zsh_out" || true)
-    assert_not_contains "zsh: no leftover {{ in active lines" "{{" "$zsh_active"
+    assert_not_contains "zsh: no leftover {{" "{{" "$zsh_content"
     assert_contains "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$zsh_content"
     assert_contains "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$zsh_content"
     assert_not_contains "zsh: PATH set only via path array" "export PATH=" "$zsh_content"
+    assert_not_contains "zsh: GOPATH left to zshrc" "GOPATH" "$zsh_content"
 else
     fail "zsh exports generated" "$zsh_out missing"
 fi

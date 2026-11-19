@@ -2,9 +2,7 @@
   "user": {
     "name": "Your Name",
     "email": "your.email@example.com",
-    "editor": "nvim",
-    "browser": "open",
-    "terminal": "Terminal"
+    "editor": "nvim"
   },
   "git": {
     "signing_key": "~/.ssh/id_ed25519.pub",
@@ -40,21 +38,6 @@
   "environment": {
     "workspace_dir": "~/workspace",
     "projects_dir": "~/projects",
-    "personal_bin_dir": "~/.local/bin",
-    "pager": "less"
-  },
-  "development": {
-    "node": {
-      "npm_prefix": "~/.npm-global"
-    },
-    "python": {
-      "path": ""
-    },
-    "go": {
-      "path": "~/go"
-    },
-    "rust": {
-      "cargo_home": "~/.cargo"
-    }
+    "personal_bin_dir": "~/.local/bin"
   }
 }
