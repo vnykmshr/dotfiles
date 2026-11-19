@@ -55,42 +55,21 @@ if [[ $TESTS_FAILED -gt 0 ]]; then
 fi
 echo ""
 
-# Run critical path tests
-echo "Running Critical Path Tests..."
-echo "=============================="
-echo ""
-
 SUITE_FAILED=0
 
-if [[ -x "$TEST_DIR/test-critical-path.sh" ]]; then
-    "$TEST_DIR/test-critical-path.sh" || SUITE_FAILED=1
-else
-    echo "Warning: critical path tests not found or not executable"
-fi
-
-# Run functionality tests
-echo ""
-echo "Running Functionality Tests..."
-echo "=============================="
-echo ""
-
-if [[ -x "$TEST_DIR/test-functionality.sh" ]]; then
-    "$TEST_DIR/test-functionality.sh" || SUITE_FAILED=1
-else
-    echo "Warning: functionality tests not found or not executable"
-fi
-
-# Run template processor tests
-echo ""
-echo "Running Template Processor Tests..."
-echo "==================================="
-echo ""
-
-if [[ -x "$TEST_DIR/test-templates.sh" ]]; then
-    "$TEST_DIR/test-templates.sh" || SUITE_FAILED=1
-else
-    echo "Warning: template tests not found or not executable"
-fi
+# A missing suite fails the run.
+suites=(test-install.sh test-functionality.sh test-templates.sh)
+for suite in "${suites[@]}"; do
+    echo ""
+    echo "Running $suite"
+    echo ""
+    if [[ -x "$TEST_DIR/$suite" ]]; then
+        "$TEST_DIR/$suite" || SUITE_FAILED=1
+    else
+        echo "Missing or not executable: $suite"
+        SUITE_FAILED=1
+    fi
+done
 
 if [[ $SUITE_FAILED -eq 0 && $TESTS_FAILED -eq 0 ]]; then
     echo ""
