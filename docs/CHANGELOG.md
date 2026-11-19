@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Homebrew `sbin` dirs on PATH when present
+- Untracked `config/ssh/config.local` include for per-machine ssh hosts (from `config.local.template`)
+- ssh config includes colima's `ssh_config`, so colima no longer edits the generated file
 - Untracked `config/git/gitconfig.local` include for per-machine git settings (from `gitconfig.local.template`)
 - Adversarial and chained-substitution fixtures for the template processor (`tests/test-templates.sh`)
 - ADR 0001: template processor hardening (`docs/decisions/`)

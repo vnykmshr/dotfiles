@@ -510,7 +510,8 @@ process_ssh_template() {
         "WORK_SERVER_USER" "$work_server_user" \
         "WORK_SERVER_PORT" "$work_server_port" \
         "LOCAL_DEV_HOST" "$local_dev_host" \
-        "LOCAL_DEV_USER" "$local_dev_user"
+        "LOCAL_DEV_USER" "$local_dev_user" \
+        "COLIMA_SSH_CONFIG" "${COLIMA_HOME:-$HOME/.config/colima}/ssh_config"
 }
 
 # Process zsh exports template

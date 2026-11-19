@@ -66,6 +66,7 @@ plan/
 config/git/gitconfig
 config/git/*.local
 config/ssh/config
+config/ssh/*.local
 config/zsh/exports.local
 config/zsh/personal.local
 

@@ -1,6 +1,13 @@
 # SSH Client Configuration Template
 # This file is processed during setup to create ~/.ssh/config
 
+# Includes stay above every Host block: an Include inside a Host block only applies to that host.
+# Colima VM hosts. Must match the line colima writes (sshConfig: true), or colima prepends its own copy.
+Include {{COLIMA_SSH_CONFIG}}
+
+# Machine-local hosts, untracked (see config.local.template)
+Include ~/.dotfiles/config/ssh/config.local
+
 # Default settings for all hosts
 Host *
     # Use SSH keys from ssh-agent

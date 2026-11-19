@@ -191,6 +191,8 @@ if [[ -f $ssh_out ]]; then
     ssh_content=$(cat "$ssh_out")
     assert_not_contains 'ssh: no literal $HOME' '$HOME' "$ssh_content"
     assert_not_contains "ssh: no leftover {{" "{{" "$ssh_content"
+    assert_contains "ssh: colima include matches colima's line" "Include $HOME/.config/colima/ssh_config" "$ssh_content"
+    assert_eq "ssh: includes precede the first Host" "Include" "$(grep -E '^(Include|Host) ' "$ssh_out" | head -2 | cut -d' ' -f1 | sort -u)"
     # IdentityFile lines should now be absolute paths starting with /
     if grep -E "^[[:space:]]*IdentityFile[[:space:]]+/" "$ssh_out" >/dev/null; then
         pass "ssh: IdentityFile uses absolute path"
