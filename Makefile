@@ -56,13 +56,18 @@ update: ## Update from git
 sync: update install ## Update and install
 
 restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
-	@echo "Available backups:"
-	@ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5 | nl || echo "No backups found"
-	@echo
-	@set -e; \
+	@set -e; source lib/utils.sh; repo=$$(pwd -P); \
+	backups=$$(ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5); \
+	if [[ -z "$$backups" ]]; then \
+		echo "No backups found in ~/.dotfiles-backup-*" >&2; \
+		exit 1; \
+	fi; \
+	echo "Available backups:"; \
+	echo "$$backups" | nl; \
+	echo; \
 	read -p "Enter backup number to restore (or path): " backup; \
 	if [[ $$backup =~ ^[0-9]+$$ ]]; then \
-		backup_path=$$(ls -1td ~/.dotfiles-backup-* 2>/dev/null | sed -n "$${backup}p"); \
+		backup_path=$$(echo "$$backups" | sed -n "$${backup}p"); \
 	else \
 		backup_path=$$backup; \
 	fi; \
@@ -70,17 +75,32 @@ restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
 		echo "Backup not found: $${backup_path:-$$backup}" >&2; \
 		exit 1; \
 	fi; \
-	if [[ -z "$$(ls -A "$$backup_path")" ]]; then \
-		echo "Backup is empty: $$backup_path" >&2; \
-		exit 1; \
-	fi; \
 	echo "Restoring from: $$backup_path"; \
+	restored=0; managed=" "; \
 	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
-		if [[ -L ~/$$link ]] && [[ -e "$$backup_path/$$link" || -L "$$backup_path/$$link" ]]; then \
+		managed+="$${link%%/*} "; \
+		[[ -e "$$backup_path/$$link" || -L "$$backup_path/$$link" ]] || continue; \
+		if [[ -e ~/$$link || -L ~/$$link ]] && ! owned_link ~/$$link "$$repo"; then \
+			echo "Skipping ~/$$link: exists and is not a link into this repo" >&2; \
+			continue; \
+		fi; \
+		if owned_link ~/$$link "$$repo"; then \
 			rm -f ~/$$link; \
 		fi; \
+		mkdir -p "$$(dirname ~/$$link)"; \
+		cp -Rp "$$backup_path/$$link" ~/$$link; \
+		echo "Restored ~/$$link"; \
+		restored=$$((restored + 1)); \
 	done; \
-	cp -Rp "$$backup_path"/. ~/; \
+	for entry in "$$backup_path"/* "$$backup_path"/.[!.]*; do \
+		[[ -e "$$entry" || -L "$$entry" ]] || continue; \
+		[[ $$managed == *" $$(basename "$$entry") "* ]] || \
+			echo "Skipped $$entry: not a path install manages; restore it by hand" >&2; \
+	done; \
+	if [[ $$restored -eq 0 ]]; then \
+		echo "Nothing restored from $$backup_path" >&2; \
+		exit 1; \
+	fi; \
 	echo "Restore complete"
 
 # Must match setup_symlinks in install/setup.sh

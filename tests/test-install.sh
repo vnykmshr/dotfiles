@@ -75,6 +75,7 @@ in_home() {
 }
 
 links_in() { (cd "$1" && find . -type l | sed 's|^\./||' | sort); }
+mode_of() { stat -c %A "$1" 2>/dev/null || stat -f %Sp "$1"; }
 dangling_in() { find "$1" -type l ! -exec test -e {} \; -print; }
 
 # Install
@@ -134,6 +135,8 @@ mkdir -p "$RESTORE_HOME/.config/nvim" "$RESTORE_HOME/.ssh"
 echo "own zshrc" >"$RESTORE_HOME/.zshrc"
 echo "own ssh" >"$RESTORE_HOME/.ssh/config"
 echo "own nvim" >"$RESTORE_HOME/.config/nvim/init.lua"
+chmod 750 "$RESTORE_HOME"
+chmod 700 "$RESTORE_HOME/.ssh"
 repo_zshrc_before=$(cat "$RESTORE_REPO/config/zsh/zshrc")
 in_home "$RESTORE_HOME" env FORCE=true "$RESTORE_REPO/install/setup.sh" >"$WORK/restore-install.log" 2>&1 || true
 # A second install must not leave a newer, empty backup in front
@@ -149,11 +152,34 @@ assert_eq "restore: ~/.zshrc back" "own zshrc" "$(cat "$RESTORE_HOME/.zshrc" 2>/
 assert_eq "restore: ~/.ssh/config back" "own ssh" "$(cat "$RESTORE_HOME/.ssh/config" 2>/dev/null)"
 assert_eq "restore: ~/.config/nvim back" "own nvim" "$(cat "$RESTORE_HOME/.config/nvim/init.lua" 2>/dev/null)"
 assert_eq "restore: repo files untouched" "$repo_zshrc_before" "$(cat "$RESTORE_REPO/config/zsh/zshrc")"
+assert_eq "restore: ~ mode kept" "drwxr-x---" "$(mode_of "$RESTORE_HOME")"
+assert_eq "restore: ~/.ssh mode kept" "drwx------" "$(mode_of "$RESTORE_HOME/.ssh")"
 if printf '99\n' | env HOME="$RESTORE_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1; then
     fail "restore: unknown backup fails" "exited 0"
 else
     pass "restore: unknown backup fails"
 fi
+
+# Restore from a pre-v5 backup (basename layout): known dotfiles back,
+# other entries skipped rather than copied into HOME
+OLD_HOME="$WORK/old-home"
+mkdir -p "$OLD_HOME/.dotfiles-backup-20250101-000000/nvim"
+echo "old zshrc" >"$OLD_HOME/.dotfiles-backup-20250101-000000/.zshrc"
+echo "old nvim" >"$OLD_HOME/.dotfiles-backup-20250101-000000/nvim/init.lua"
+printf '1\n' | env HOME="$OLD_HOME" make -s -C "$RESTORE_REPO" restore >"$WORK/old-restore.log" 2>&1 || true
+assert_eq "old backup: ~/.zshrc back" "old zshrc" "$(cat "$OLD_HOME/.zshrc" 2>/dev/null)"
+assert_eq "old backup: no ~/nvim created" "no" "$([[ -e $OLD_HOME/nvim ]] && echo yes || echo no)"
+assert_eq "old backup: skipped entry named" "1" "$(grep -c 'nvim' "$WORK/old-restore.log" || true)"
+
+# Restore with no backups fails before prompting
+NONE_HOME="$WORK/none-home"
+mkdir -p "$NONE_HOME"
+if env HOME="$NONE_HOME" make -s -C "$RESTORE_REPO" restore </dev/null >"$WORK/none.log" 2>&1; then
+    fail "restore, no backups: fails" "exited 0"
+else
+    pass "restore, no backups: fails"
+fi
+assert_eq "restore, no backups: says so" "1" "$(grep -c 'No backups found' "$WORK/none.log" || true)"
 
 # Dry run
 DRY_REPO="$WORK/dry-repo"
