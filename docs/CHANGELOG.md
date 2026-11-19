@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `make packages` (`install/setup.sh --packages`): prerequisites, packages, mise runtimes, zsh as login shell
+- `make macos-defaults`
+- `DOTFILES_TMPDIR` turns on the private TMPDIR
+- `tests/test-install.sh`: install, reinstall, restore, uninstall and dry runs in a temp HOME
+- Test fails when an alias or function shadows a `bin/` script
 - Homebrew `sbin` dirs on PATH when present
 - Untracked `config/ssh/config.local` include for per-machine ssh hosts (from `config.local.template`)
 - ssh config includes colima's `ssh_config`, so colima no longer edits the generated file
@@ -18,8 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** `make install` only links configs and generates personal ones; packages, login shell and macOS defaults moved to `make packages` and `make macos-defaults`
+- **Breaking:** the private TMPDIR is opt-in; set `DOTFILES_TMPDIR="$HOME/tmp"` in `config/zsh/personal.local`
+- Install requires jq
+- `exports.local` sets only `WORKSPACE`, `PROJECTS` and `PERSONAL_BIN`; set GOPATH, `NPM_CONFIG_PREFIX` and the like in `personal.local`
+- Backups keep each file's path under HOME and are made only when install replaces a file
+- direnv hook moved into `config/cli-tools/init`
+- `cross-platform` trimmed to clipboard and `open` shims, WSL PATH cleanup and keybindings
+- `make dev` runs `pre-commit install`; `make lint` runs `pre-commit run --all-files`
+- `grep` aliases no longer add `-n -H`
+- `ports` uses lsof on macOS
+- `ws` and `proj` moved to `personal-aliases`
 - `bin/*` exits when a required `lib/*.sh` is missing
-- `bin/dotfiles` and `bin/workflow-helper` trimmed
 - Secret scan runs via the shared `1mb-dev/.github` workflow (SHA-pinned)
 - Example config paths use `~/` instead of `$HOME/`
 - CI runs all pre-commit hooks; shellcheck runs there, pinned and at default severity, in place of the separate step
@@ -28,10 +43,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- zsh modules: `history` (`HIST_*` options stay in zshrc), `security-automation`, `performance`, `dev-automation`, `go-dev`, `config/workflow/init` and `aliases` (`gw`, `gws`, `workcheck`), unloaded `completions`
+- `DOTFILES_SKIP_HISTORY`, `_SECURITY`, `_PERFORMANCE`, `_DIRENV`, `_WORKFLOW` and `_TMPDIR`; `DOTFILES_SKIP_CROSS_PLATFORM` remains, set in `~/.exports.local`
+- `bin/dotfiles`, `bin/workflow-helper` and `bin/check-alias-conflicts`; use the make targets
+- `make tools`, `make status`, `make validate` and `make reset` (use `make install-force`)
+- `gsave` and `git-helpers save`
+- Functions `killp`, `git-cleanup`, `backup`, `gitlog` (use `git lg`), `status`, `sysinfo`, `myip`, `localip`, `json`, `genpass`, `calc`, `dsh`, `kctx`, `kns`, `tm`, `lower`, `upper`, `dotfiles-edit`
+- Aliases `dotfiles`, `tools`, `npx --yes`, `gcl`, `lock`, `emptytrash`, `mkdir -pv` and the Linux `install`
+- `config.json` keys `user.browser`, `user.terminal`, `environment.pager` and `development.*`
+- `~/.aliases` link
+- `install/setup-pre-commit.sh`, `tests/lint.sh`, `tests/test-critical-path.sh`, `docs/COMMAND_EXAMPLES.md`, `docs/templates/config.json.template`
+- `lib/os-detect.sh` helpers other than `detect_os`
 - `-i` safety aliases for `rm`, `cp`, `mv`
 
 ### Fixed
 
+- Install from a clone at `~/.dotfiles` works, and `--force` no longer moves the repo into the backup
+- First install links `~/.ssh/config`
+- Install no longer links a missing mise config
+- Uninstall removes every link install makes, plus the `~/.aliases` and mise links earlier versions left
+- `make restore` puts files back at their original paths without writing into the repo, and fails on an unknown or empty backup
+- Dry run leaves HOME untouched
+- `make packages` detects the OS and installs packages
+- Piped installers fail on download errors
+- A shell started in a Go project no longer puts `./bin` first on PATH
+- Word-movement keys survive `EDITOR=nvim`
+- README and troubleshooting match the install flow; `gl` is `git log`
 - Template processor no longer uses `eval` or `sed`; `&`, `|` and `\1` in values are preserved, including on bash < 5.2
 - `$HOME` and `~/` prefixes normalized in `config.json` values
 - ssh `UseKeychain` no longer fatal on Linux
