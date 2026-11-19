@@ -27,10 +27,10 @@ files=(
 echo "Testing file structure..."
 for file in "${files[@]}"; do
     if [[ -f "$PROJECT_ROOT/$file" ]]; then
-        echo "✓ Required file exists: $file"
+        echo "ok Required file exists: $file"
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
-        echo "✗ Required file missing: $file"
+        echo "FAIL Required file missing: $file"
         TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 done
@@ -38,10 +38,10 @@ done
 echo "Testing syntax..."
 # Test setup script
 if bash -n "$PROJECT_ROOT/install/setup.sh" 2>/dev/null; then
-    echo "✓ Shell syntax valid: setup.sh"
+    echo "ok Shell syntax valid: setup.sh"
     TESTS_PASSED=$((TESTS_PASSED + 1))
 else
-    echo "✗ Shell syntax invalid: setup.sh"
+    echo "FAIL Shell syntax invalid: setup.sh"
     TESTS_FAILED=$((TESTS_FAILED + 1))
 fi
 

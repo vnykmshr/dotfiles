@@ -252,7 +252,7 @@ init_config() {
                 cp "$example_file" "$config_file"
                 log_success "Created config.json from example template"
                 echo
-                log_info "📝 Next steps:"
+                log_info "Next steps:"
                 log_info "   1. Edit config.json with your personal settings (name, email, SSH keys, etc.)"
                 if command -v code >/dev/null 2>&1; then
                     log_info "      Example: code config.json"
@@ -265,7 +265,7 @@ init_config() {
                 fi
                 log_info "   2. Run the setup script again: ./install/setup.sh"
                 echo
-                log_info "💡 Key settings to update in config.json:"
+                log_info "Key settings to update in config.json:"
                 log_info "   • user.name and user.email (for Git commits)"
                 log_info "   • ssh.keys.* paths (if different from defaults)"
                 log_info "   • environment.workspace_dir (your preferred workspace location)"

@@ -38,7 +38,7 @@ quality: lint test ## Run all quality checks
 clean: ## Clean temporary files
 	@find . -name "*.backup.*" -delete 2>/dev/null || true
 	@find . -name ".DS_Store" -delete 2>/dev/null || true
-	@echo "🧹 Cleaned temporary files"
+	@echo "Cleaned temporary files"
 
 dev: ## Install pre-commit hooks
 	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
@@ -109,7 +109,7 @@ INSTALL_LINKS := .zshrc .zshenv .gitconfig .gitignore_global .ssh/config .config
 LEGACY_LINKS := .aliases .config/mise/config.toml
 
 uninstall: ## Uninstall dotfiles
-	@echo "⚠️  This will remove installed dotfiles"
+	@echo "This removes the links install created"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
 	@source lib/utils.sh; repo=$$(pwd -P); \
@@ -121,4 +121,4 @@ uninstall: ## Uninstall dotfiles
 			echo "Skipping ~/$$link: points outside this repo"; \
 		fi; \
 	done
-	@echo "✅ Uninstall complete. Run 'make restore' to restore from backup"
+	@echo "Uninstall complete. Run 'make restore' to put back files install replaced"
