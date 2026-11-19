@@ -133,6 +133,18 @@ else
     fail "keybinding: word left"
 fi
 
+# setup-personal-config creates personal.local with EDITOR unset
+pc_dir=$(mktemp -d)
+mkdir -p "$pc_dir/config/zsh"
+cp "$PROJECT_ROOT/config/zsh/personal.local.template" "$pc_dir/config/zsh/"
+if env -u EDITOR DOTFILES="$pc_dir" "$PROJECT_ROOT/bin/setup-personal-config" </dev/null >/dev/null 2>&1 &&
+    [[ -f $pc_dir/config/zsh/personal.local ]]; then
+    pass "setup-personal-config: works without EDITOR"
+else
+    fail "setup-personal-config: works without EDITOR"
+fi
+rm -rf "$pc_dir"
+
 # No hardcoded user home paths in tracked files
 echo ""
 echo "Portability checks..."

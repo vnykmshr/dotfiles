@@ -49,7 +49,7 @@ main() {
     echo "💡 This file is git-ignored, so your personal settings stay private!"
 
     # Offer to open in editor
-    if command -v "$EDITOR" >/dev/null 2>&1; then
+    if [[ -n ${EDITOR:-} ]] && command -v "$EDITOR" >/dev/null 2>&1; then
         read -r -p "Do you want to edit it now? (y/N): " edit_choice
         case "$edit_choice" in
             [yY] | [yY][eE][sS])
