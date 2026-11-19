@@ -257,9 +257,15 @@ create_dotfiles_symlink() {
 setup_symlinks() {
     log_step "Setting up configuration symlinks"
 
-    local entry
+    local entry src
     for entry in "${LINKS[@]}"; do
-        link_config "${entry#*:}" "${entry%%:*}"
+        src="${entry#*:}"
+        # Dry run has not generated the template outputs yet
+        if [[ ! -e $DOTFILES_DIR/$src && $DRY_RUN != "true" ]]; then
+            log_warn "Not linking ~/${entry%%:*}: $src is missing"
+            continue
+        fi
+        link_config "$src" "${entry%%:*}"
     done
 }
 

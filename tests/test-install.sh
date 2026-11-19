@@ -156,6 +156,17 @@ ln -s /nonexistent/old-clone "$DOT_HOME/.dotfiles"
 printf '1\n' | env HOME="$DOT_HOME" make -s -C "$REPO" restore >/dev/null 2>&1 || true
 assert_eq "restore: dangling ~/.dotfiles replaced" "old clone" "$(cat "$DOT_HOME/.dotfiles/marker" 2>/dev/null)"
 
+# Without the ssh template, a forced install keeps the real ~/.ssh/config
+NOSSH_REPO="$WORK/nossh-repo"
+NOSSH_HOME="$WORK/nossh-home"
+copy_repo "$NOSSH_REPO"
+mv "$NOSSH_REPO/config/ssh/config.template" "$WORK/ssh-template-aside"
+mkdir -p "$NOSSH_HOME/.ssh"
+echo "own ssh" >"$NOSSH_HOME/.ssh/config"
+in_home "$NOSSH_HOME" env FORCE=true "$NOSSH_REPO/install/setup.sh" >/dev/null 2>&1 || true
+assert_eq "no ssh template: real ~/.ssh/config kept" "own ssh" "$(cat "$NOSSH_HOME/.ssh/config" 2>/dev/null)"
+assert_eq "no ssh template: ~/.ssh/config not a link" "no" "$([[ -L $NOSSH_HOME/.ssh/config ]] && echo yes || echo no)"
+
 # Clone path with a space
 SPACE_REPO="$WORK/space repo"
 SPACE_HOME="$WORK/space-home"
