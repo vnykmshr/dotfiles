@@ -484,19 +484,19 @@ process_ssh_template() {
 
     personal_server_alias=$(get_config_value '.ssh.servers.personal.alias' 'my-server')
     personal_server_host=$(get_config_value '.ssh.servers.personal.host' 'example.com')
-    personal_server_user=$(get_config_value '.ssh.servers.personal.user' "$USER")
+    personal_server_user=$(get_config_value '.ssh.servers.personal.user' "${USER:-$(id -un)}")
     personal_server_port=$(get_config_value '.ssh.servers.personal.port' '22')
 
     work_server_alias=$(get_config_value '.ssh.servers.work.alias' 'work-server')
     work_server_host=$(get_config_value '.ssh.servers.work.host' 'work.example.com')
-    work_server_user=$(get_config_value '.ssh.servers.work.user' "$USER")
+    work_server_user=$(get_config_value '.ssh.servers.work.user' "${USER:-$(id -un)}")
     work_server_port=$(get_config_value '.ssh.servers.work.port' '22')
 
     local local_dev_host
     local local_dev_user
 
     local_dev_host=$(get_config_value '.ssh.servers.local_dev.host' 'localhost')
-    local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "$USER")
+    local_dev_user=$(get_config_value '.ssh.servers.local_dev.user' "${USER:-$(id -un)}")
 
     # Show preview in dry run mode
     if [[ $DRY_RUN == "true" ]]; then

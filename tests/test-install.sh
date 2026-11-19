@@ -66,11 +66,12 @@ for cmd in brew apt apt-get dnf pacman sudo chsh defaults killall curl tmutil; d
     chmod +x "$STUBS/$cmd"
 done
 
-# Run a command with the test HOME and the stubs first on PATH.
+# Run a command with the test HOME and the stubs first on PATH. USER is unset:
+# minimal containers and cron run without it.
 in_home() {
     local home="$1"
     shift
-    env HOME="$home" PATH="$STUBS:$PATH" "$@" </dev/null
+    env -u USER HOME="$home" PATH="$STUBS:$PATH" "$@" </dev/null
 }
 
 links_in() { (cd "$1" && find . -type l | sed 's|^\./||' | sort); }
