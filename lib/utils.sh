@@ -10,7 +10,7 @@ run_cmd() {
     if [[ $DRY_RUN == "true" ]]; then
         echo "[DRY RUN] $1"
     else
-        bash -c "$1"
+        bash -o pipefail -c "$1"
     fi
 }
 

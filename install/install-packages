@@ -231,7 +231,7 @@ install_modern_cli_tools_linux() {
     # zoxide (frecency cd)
     if ! command_exists zoxide; then
         log_info "Installing zoxide via curl..."
-        run_cmd "curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
+        run_cmd "curl -fsS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
     fi
 }
 
@@ -247,7 +247,7 @@ install_language_tools() {
             log_warn "mise not found; install it with: brew install mise"
         else
             log_info "Installing mise..."
-            run_cmd "curl https://mise.run | sh"
+            run_cmd "curl -fsS https://mise.run | sh"
 
             # Add to PATH for current session
             export PATH="$HOME/.local/bin:$PATH"
