@@ -67,8 +67,7 @@ for cmd in brew apt apt-get dnf pacman sudo chsh defaults killall curl tmutil ba
     chmod +x "$STUBS/$cmd"
 done
 
-# Run a command with the test HOME and the stubs first on PATH. USER is unset:
-# minimal containers and cron run without it.
+# Run a command with the test HOME and the stubs first on PATH. USER is unset.
 in_home() {
     local home="$1"
     shift
