@@ -1,10 +1,5 @@
 # Go Development Tools
 
-# Environment setup
-setup_go_env() {
-    [[ -d "bin" && ":$PATH:" != *":$(pwd)/bin:"* ]] && export PATH="$(pwd)/bin:$PATH"
-}
-
 # Module management
 goinit() { go mod init "${1:-$(basename $(pwd))}"; }
 gotidy() { go mod tidy; }
@@ -51,6 +46,3 @@ goinfo() {
     echo "GOPATH: ${GOPATH:-not set}"
     [[ -f "go.mod" ]] && echo "Module: $(grep '^module ' go.mod | awk '{print $2}')"
 }
-
-# Auto-setup in Go projects
-[[ -f "go.mod" ]] && setup_go_env
