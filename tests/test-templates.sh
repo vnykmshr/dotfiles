@@ -5,6 +5,9 @@
 #   - sed metacharacter mishandling (& \1 |)
 #   - shell injection via eval over jq output
 
+# Fixtures and labels are literal $HOME / $() strings by design.
+# shellcheck disable=SC2016
+
 set -eo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -18,8 +21,14 @@ TESTS_FAILED=0
 cleanup() { rm -rf "$TEST_DIR"; }
 trap cleanup EXIT
 
-pass() { echo "ok $1"; TESTS_PASSED=$((TESTS_PASSED + 1)); }
-fail() { echo "FAIL $1: $2"; TESTS_FAILED=$((TESTS_FAILED + 1)); }
+pass() {
+    echo "ok $1"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+}
+fail() {
+    echo "FAIL $1: $2"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+}
 
 assert_eq() {
     local label="$1" expected="$2" actual="$3"
@@ -50,8 +59,8 @@ assert_not_contains() {
 
 # Build fixture DOTFILES_DIR mirroring the real layout
 mkdir -p "$TEST_DIR/config/ssh" "$TEST_DIR/config/git" "$TEST_DIR/config/zsh"
-cp "$PROJECT_ROOT/config/ssh/config.template"        "$TEST_DIR/config/ssh/"
-cp "$PROJECT_ROOT/config/git/gitconfig.template"     "$TEST_DIR/config/git/"
+cp "$PROJECT_ROOT/config/ssh/config.template" "$TEST_DIR/config/ssh/"
+cp "$PROJECT_ROOT/config/git/gitconfig.template" "$TEST_DIR/config/git/"
 cp "$PROJECT_ROOT/config/zsh/exports.local.template" "$TEST_DIR/config/zsh/"
 
 # Adversarial config.json:
@@ -61,7 +70,7 @@ cp "$PROJECT_ROOT/config/zsh/exports.local.template" "$TEST_DIR/config/zsh/"
 # - | in path to detect sed delimiter conflict
 # - \1 to detect sed backref interpretation
 # - ' to detect quote breakage
-cat > "$TEST_DIR/config.json" <<JSON
+cat >"$TEST_DIR/config.json" <<JSON
 {
   "user": {
     "name": "Tom & Jerry \$(touch $INJECTION_MARKER)",
@@ -116,7 +125,7 @@ v=$(get_config_value '.ssh.keys.github' 'DEFAULT')
 assert_eq "get_config_value: ~/ normalized to abs" "$HOME/.ssh/id_ed25519" "$v"
 
 v=$(get_config_value '.ssh.keys.gitlab' 'DEFAULT' 2>/dev/null)
-assert_eq "get_config_value: \$HOME normalized to abs" "$HOME/.ssh/id_ed25519" "$v"
+assert_eq 'get_config_value: $HOME normalized to abs' "$HOME/.ssh/id_ed25519" "$v"
 
 v=$(get_config_value '.ssh.keys.personal' 'DEFAULT')
 assert_eq "get_config_value: absolute path untouched" "/abs/with|pipe/key" "$v"
@@ -126,16 +135,16 @@ assert_eq "get_config_value: fallback for missing key" "FALLBACK" "$v"
 
 # Warning fires on $HOME (route stderr to a temp file to inspect)
 warn_capture=$(get_config_value '.git.signing_key' 'DEFAULT' 2>&1 >/dev/null)
-assert_contains "log_warn fires on \$HOME" "uses \$HOME" "$warn_capture"
+assert_contains 'log_warn fires on $HOME' 'uses $HOME' "$warn_capture"
 
 # Warning does NOT fire on ~/
 warn_capture=$(get_config_value '.ssh.keys.github' 'DEFAULT' 2>&1 >/dev/null)
-assert_not_contains "no warn on ~/" "uses \$HOME" "$warn_capture"
+assert_not_contains "no warn on ~/" 'uses $HOME' "$warn_capture"
 
 # --- process_template_generic literal-string semantics (commit 1) ---
 adv_template="$TEST_DIR/adv.tpl"
 adv_output="$TEST_DIR/adv.out"
-cat > "$adv_template" <<'TPL'
+cat >"$adv_template" <<'TPL'
 name = {{NAME}}
 path = {{PATH}}
 ref  = {{REF}}
@@ -147,9 +156,9 @@ process_template_generic "$adv_template" "$adv_output" "adversarial fixture" \
     "REF" '\1backref' >/dev/null
 
 out=$(cat "$adv_output")
-assert_contains "& preserved verbatim"      "Tom & Jerry"      "$out"
-assert_contains "| preserved verbatim"      "/with|pipe/key"   "$out"
-assert_contains "\\1 preserved verbatim"    "\\1backref"       "$out"
+assert_contains "& preserved verbatim" "Tom & Jerry" "$out"
+assert_contains "| preserved verbatim" "/with|pipe/key" "$out"
+assert_contains '\1 preserved verbatim' '\1backref' "$out"
 assert_not_contains "no leftover placeholder" "{{" "$out"
 
 # Chained substitution: a value containing {{OTHER_KEY}} gets re-substituted on
@@ -157,7 +166,7 @@ assert_not_contains "no leftover placeholder" "{{" "$out"
 # substitution single-pass is a deliberate, test-detected choice.
 chain_template="$TEST_DIR/chain.tpl"
 chain_output="$TEST_DIR/chain.out"
-cat > "$chain_template" <<'TPL'
+cat >"$chain_template" <<'TPL'
 first  = {{FIRST}}
 second = {{SECOND}}
 TPL
@@ -180,7 +189,7 @@ zsh_out="$TEST_DIR/config/zsh/exports.local"
 
 if [[ -f $ssh_out ]]; then
     ssh_content=$(cat "$ssh_out")
-    assert_not_contains "ssh: no literal \$HOME" '$HOME' "$ssh_content"
+    assert_not_contains 'ssh: no literal $HOME' '$HOME' "$ssh_content"
     assert_not_contains "ssh: no leftover {{" "{{" "$ssh_content"
     # IdentityFile lines should now be absolute paths starting with /
     if grep -E "^[[:space:]]*IdentityFile[[:space:]]+/" "$ssh_out" >/dev/null; then
@@ -194,9 +203,9 @@ fi
 
 if [[ -f $git_out ]]; then
     git_content=$(cat "$git_out")
-    assert_not_contains "git: no literal \$HOME" '$HOME' "$git_content"
+    assert_not_contains 'git: no literal $HOME' '$HOME' "$git_content"
     assert_not_contains "git: no leftover {{" "{{" "$git_content"
-    assert_contains    "git: name with & preserved" "Tom & Jerry" "$git_content"
+    assert_contains "git: name with & preserved" "Tom & Jerry" "$git_content"
 else
     fail "git config generated" "$git_out missing"
 fi
@@ -208,8 +217,8 @@ if [[ -f $zsh_out ]]; then
     # uncommented lines for leftover placeholders.
     zsh_active=$(grep -v '^[[:space:]]*#' "$zsh_out" || true)
     assert_not_contains "zsh: no leftover {{ in active lines" "{{" "$zsh_active"
-    assert_contains    "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$zsh_content"
-    assert_contains    "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$zsh_content"
+    assert_contains "zsh: WORKSPACE is absolute" "export WORKSPACE=\"$HOME/work\"" "$zsh_content"
+    assert_contains "zsh: PROJECTS is absolute" "export PROJECTS=\"$HOME/proj\"" "$zsh_content"
 else
     fail "zsh exports generated" "$zsh_out missing"
 fi
@@ -218,11 +227,11 @@ fi
 if [[ -e $INJECTION_MARKER ]]; then
     fail "command injection prevented" "marker file $INJECTION_MARKER was created — shell eval still happening"
 else
-    pass "command injection prevented (no \$() execution)"
+    pass 'command injection prevented (no $() execution)'
 fi
 
 echo
 echo "Template tests: $TESTS_PASSED passed, $TESTS_FAILED failed"
-if (( TESTS_FAILED > 0 )); then
+if ((TESTS_FAILED > 0)); then
     exit 1
 fi
