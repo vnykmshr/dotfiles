@@ -190,7 +190,7 @@ install_modern_cli_tools_linux() {
                 # Ubuntu installs as 'batcat' - create portable symlink
                 if command_exists batcat && ! command_exists bat; then
                     local link_dir="$HOME/.local/bin"
-                    mkdir -p "$link_dir"
+                    pkg_cmd "mkdir -p \"$link_dir\""
                     pkg_cmd "ln -sf /usr/bin/batcat \"$link_dir/bat\""
                 fi
                 ;;
@@ -215,7 +215,7 @@ install_modern_cli_tools_linux() {
                 # Ubuntu installs as 'fdfind' - create portable symlink
                 if command_exists fdfind && ! command_exists fd; then
                     local link_dir="$HOME/.local/bin"
-                    mkdir -p "$link_dir"
+                    pkg_cmd "mkdir -p \"$link_dir\""
                     pkg_cmd "ln -sf /usr/bin/fdfind \"$link_dir/fd\""
                 fi
                 ;;

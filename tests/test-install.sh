@@ -61,7 +61,8 @@ copy_repo() {
 STUBS="$WORK/stubs"
 CALLS="$WORK/calls.log"
 mkdir -p "$STUBS"
-for cmd in brew apt apt-get dnf pacman sudo chsh defaults killall curl tmutil; do
+# batcat/fdfind: Debian names that make the Linux packages path link bat/fd
+for cmd in brew apt apt-get dnf pacman sudo chsh defaults killall curl tmutil batcat fdfind; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$CALLS" >"$STUBS/$cmd"
     chmod +x "$STUBS/$cmd"
 done
