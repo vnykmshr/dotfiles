@@ -142,7 +142,8 @@ nvim --headless "+Lazy! sync" +qa
 **Solution:**
 
 ```bash
-curl https://mise.run | sh
+brew install mise              # macOS
+curl https://mise.run | sh     # Linux
 ```
 
 ## Platform-Specific

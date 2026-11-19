@@ -37,6 +37,7 @@ install_core_tools() {
                 neovim # Editor
                 gh     # GitHub CLI
                 jq     # JSON processor
+                mise   # Runtime version manager
 
                 # System monitoring
                 htop
@@ -239,13 +240,18 @@ install_modern_cli_tools_linux() {
 install_language_tools() {
     log_step "Installing language tools and runtimes"
 
-    # Install mise (version manager)
+    # mise: Homebrew on macOS (install_core_tools); the curl installer would land
+    # a second copy in ~/.local/bin that never updates with brew
     if ! command_exists mise; then
-        log_info "Installing mise..."
-        run_cmd "curl https://mise.run | sh"
+        if [[ $OS_NAME == "macos" ]]; then
+            log_warn "mise not found; install it with: brew install mise"
+        else
+            log_info "Installing mise..."
+            run_cmd "curl https://mise.run | sh"
 
-        # Add to PATH for current session
-        export PATH="$HOME/.local/bin:$PATH"
+            # Add to PATH for current session
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
     fi
 
     # Install languages via mise

@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local-path clones no longer blocked by the protocol allowlist
 - Generated configs end with a newline again, so tools that append to them start a new line
 - Personal bin dir no longer jumps ahead of Homebrew in PATH
+- macOS installs mise with Homebrew instead of the curl installer
 
 ## [4.0.0] - 2026-04-04
 
