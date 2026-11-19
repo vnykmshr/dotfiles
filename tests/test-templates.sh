@@ -207,6 +207,7 @@ if [[ -f $git_out ]]; then
     assert_not_contains "git: no leftover {{" "{{" "$git_content"
     assert_contains "git: name with & preserved" "Tom & Jerry" "$git_content"
     assert_not_contains "git: no git:// URLs" "git://" "$git_content"
+    assert_eq "git: gitconfig.local include is last" "[include]" "$(grep '^\[' "$git_out" | tail -1)"
 else
     fail "git config generated" "$git_out missing"
 fi
