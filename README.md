@@ -35,7 +35,7 @@ make install                         # link configs and generate personal ones
 ```
 
 `make install` only links configs and generates personal ones; it needs `jq`
-(shipped with macOS 15+). Without `config.json`, it creates one from the
+(ships with macOS 15+). Without `config.json`, it creates one from the
 example and stops so you can edit it. Everything that touches the system is
 a separate, opt-in step:
 
@@ -88,7 +88,7 @@ skipped (`DOTFILES_SKIP_CROSS_PLATFORM`).
 - Works out-of-the-box with sensible defaults
 - Graceful fallbacks when tools aren't available
 - Optional features can be disabled without breaking the system
-- Performance-conscious: startup is measured (`shell-bench`)
+- `shell-bench` measures startup time
 
 ## Key Commands
 
@@ -170,14 +170,14 @@ auto-normalized with a warning.
 **Personal Aliases**: Add shortcuts to `config/zsh/personal-aliases`.
 
 **Personal Functions and Overrides**: Use `config/zsh/personal.local`
-(gitignored, loaded after the other modules). Start from `config/zsh/personal.local.template`.
+(gitignored, loaded near the end of zshrc). Start from `config/zsh/personal.local.template`.
 Don't edit `config/zsh/exports.local`: install regenerates it.
 
 ### Optional Features
 
 ```bash
 # In config/zsh/personal.local
-export DOTFILES_TMPDIR="$HOME/tmp"     # Private TMPDIR, created 700 and excluded from Time Machine
+export DOTFILES_TMPDIR="$HOME/tmp"     # Private TMPDIR, created 700 and excluded from Time Machine on macOS
 
 # In ~/.exports.local (read before modules load)
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
