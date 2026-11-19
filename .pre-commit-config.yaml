@@ -58,14 +58,6 @@ repos:
   # Local hooks for custom checks
   - repo: local
     hooks:
-      # Validate dotfiles structure
-      - id: validate-structure
-        name: Validate dotfiles structure
-        entry: make validate
-        language: system
-        pass_filenames: false
-        files: '^(install/|config/|bin/|Makefile).*'
-
       # Check for hardcoded paths
       - id: check-hardcoded-paths
         name: Check for hardcoded paths

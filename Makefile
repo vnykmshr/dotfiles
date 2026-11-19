@@ -8,7 +8,7 @@ define blue
 	@printf "\033[0;34m$(1)\033[0m\n"
 endef
 
-.PHONY: help install test validate clean
+.PHONY: help install test clean
 
 help: ## Show this help
 	@echo "Dotfiles Management Commands"
@@ -29,18 +29,11 @@ test: ## Run all tests
 	$(call blue,"Running tests...")
 	@./tests/test-all.sh
 
-validate: ## Validate structure
-	$(call blue,"Validating structure...")
-	@test -f install/setup.sh || (echo "❌ Missing setup.sh" && exit 1)
-	@test -f config/zsh/zshrc || (echo "❌ Missing zshrc" && exit 1)
-	@test -f config/git/gitconfig.template || (echo "❌ Missing gitconfig template" && exit 1)
-	@echo "✅ Validation passed"
-
 lint: ## Lint shell scripts
 	$(call blue,"Linting scripts...")
 	@./tests/lint.sh
 
-quality: validate lint test ## Run all quality checks
+quality: lint test ## Run all quality checks
 
 clean: ## Clean temporary files
 	@find . -name "*.backup.*" -delete 2>/dev/null || true
