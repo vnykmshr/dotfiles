@@ -458,6 +458,13 @@ process_gitconfig_template() {
         delta_command="$(command -v delta)"
     fi
 
+    # Without a terminal the prompts below cannot be answered
+    if [[ $DRY_RUN != "true" && ! -t 0 ]] &&
+        [[ $git_user_name == "Your Name" || $git_user_email == "your.email@example.com" ]]; then
+        log_error "config.json still has the example name or email; set user.name and user.email, then rerun"
+        return 1
+    fi
+
     # Prompt for user details if using defaults and not in dry run
     if [[ $git_user_name == "Your Name" ]] && [[ $DRY_RUN != "true" ]]; then
         read -rp "Enter your name for Git commits: " git_user_name

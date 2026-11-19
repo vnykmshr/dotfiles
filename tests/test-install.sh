@@ -383,6 +383,19 @@ assert_eq "no config.json: config.json created" "yes" "$([[ -f $NOCFG_REPO/confi
 assert_eq "no config.json: only ~/.dotfiles linked" ".dotfiles" "$(links_in "$NOCFG_HOME")"
 assert_eq "no config.json: no dangling links" "" "$(dangling_in "$NOCFG_HOME")"
 
+# Unedited example config without a terminal: fails and says why
+EX_REPO="$WORK/example-repo"
+EX_HOME="$WORK/example-home"
+copy_repo "$EX_REPO" no-config
+cp "$EX_REPO/config.json.example" "$EX_REPO/config.json"
+mkdir -p "$EX_HOME"
+if in_home "$EX_HOME" "$EX_REPO/install/setup.sh" >"$WORK/example.log" 2>&1; then
+    fail "example config, no tty: fails" "exited 0"
+else
+    pass "example config, no tty: fails"
+fi
+assert_eq "example config, no tty: says why" "1" "$(grep -c 'still has the example' "$WORK/example.log" || true)"
+
 # Packages dry run: OS detected, nothing written
 PKG_HOME="$WORK/pkg-home"
 mkdir -p "$PKG_HOME"
