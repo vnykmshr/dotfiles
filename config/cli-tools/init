@@ -1,5 +1,5 @@
 # CLI Tools - merged configuration
-# Initializes CLI replacements: eza, bat, rg, fd, delta, zoxide
+# Initializes CLI replacements: eza, bat, rg, fd, delta, zoxide; hooks direnv
 
 # --- eza ---
 if command -v eza >/dev/null 2>&1; then
@@ -58,6 +58,12 @@ if command -v zoxide >/dev/null 2>&1; then
     export _ZO_RESOLVE_SYMLINKS=1
     eval "$(zoxide init zsh)"
     alias zb='z -'
+fi
+
+# --- direnv ---
+if command -v direnv >/dev/null 2>&1; then
+    export DIRENV_LOG_FORMAT=""
+    eval "$(direnv hook zsh)"
 fi
 
 # --- diagnostics ---
