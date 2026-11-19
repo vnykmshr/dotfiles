@@ -15,6 +15,17 @@ VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
 PACKAGES=false
 
+# HOME link -> repo source
+LINKS=(
+    ".zshrc:config/zsh/zshrc"
+    ".zshenv:config/zsh/zshenv"
+    ".gitconfig:config/git/gitconfig"
+    ".gitignore_global:config/git/gitignore_global"
+    ".ssh/config:config/ssh/config"
+    ".config/nvim:config/nvim"
+    ".tmux.conf:config/tmux/tmux.conf"
+)
+
 # Bash 5.2+ with patsub_replacement on (default) treats `&` in the replacement
 # of ${var//pat/repl} as the matched text. Older bash (macOS 3.2, Ubuntu 22.04
 # 5.1) has no such handling — `&` is literal. The template substitution below
@@ -221,24 +232,10 @@ create_dotfiles_symlink() {
 setup_symlinks() {
     log_step "Setting up configuration symlinks"
 
-    # Zsh configuration
-    link_config "config/zsh/zshrc" ".zshrc"
-    link_config "config/zsh/zshenv" ".zshenv"
-
-    # Git configuration
-    link_config "config/git/gitconfig" ".gitconfig"
-    link_config "config/git/gitignore_global" ".gitignore_global"
-
-    # SSH configuration (if generated)
-    if [[ -f "$DOTFILES_DIR/config/ssh/config" ]]; then
-        link_config "config/ssh/config" ".ssh/config"
-    fi
-
-    # Neovim configuration
-    link_config "config/nvim" ".config/nvim"
-
-    # Tmux configuration
-    link_config "config/tmux/tmux.conf" ".tmux.conf"
+    local entry
+    for entry in "${LINKS[@]}"; do
+        link_config "${entry#*:}" "${entry%%:*}"
+    done
 }
 
 # Create initial config.json from example if it doesn't exist
