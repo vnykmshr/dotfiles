@@ -19,23 +19,13 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update -q
-        sudo apt-get install -y shellcheck zsh jq
+        sudo apt-get install -y zsh jq
 
     - name: Run tests
       run: ./tests/test-all.sh
 
     - name: Run linting
       run: ./tests/lint.sh
-
-    - name: Run shellcheck
-      if: runner.os == 'Linux'
-      run: |
-        find . -name "*.sh" -not -path "./.git/*" -print0 | \
-          xargs -0 shellcheck --severity=warning
-        for f in bin/*; do
-          [ -f "$f" ] && head -1 "$f" | grep -q bash && \
-            shellcheck --severity=warning "$f"
-        done
 
     - name: Test dry-run install
       run: DRY_RUN=true ./install/setup.sh

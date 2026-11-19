@@ -19,9 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `bin/*` exits when a required `lib/*.sh` is missing
 - `bin/dotfiles` and `bin/workflow-helper` trimmed
 - Secret scan runs via the shared `1mb-dev/.github` workflow (SHA-pinned)
-- Shellcheck runs at `--severity=warning`, Linux only, and fails the build
 - Example config paths use `~/` instead of `$HOME/`
-- CI runs all pre-commit hooks
+- CI runs all pre-commit hooks; shellcheck runs there, pinned and at default severity, in place of the separate step
 - `ls` is no longer eza; it gets the platform `ls -hF` alias on every machine, and `ll`, `la`, `lt` use eza when installed
 - Plaintext `git://` protocol no longer allowed in the gitconfig template
 
