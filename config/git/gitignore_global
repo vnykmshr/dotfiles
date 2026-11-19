@@ -182,3 +182,5 @@ id_ed25519
 # .dart_tool/
 # build/
 # flutter_export_environment.sh
+
+**/.claude/settings.local.json
