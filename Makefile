@@ -42,12 +42,6 @@ lint: ## Lint shell scripts
 
 quality: validate lint test ## Run all quality checks
 
-status: ## Show status
-	@echo "📁 $(shell pwd)"
-	@echo "🔀 $(shell git branch --show-current 2>/dev/null || echo 'not a git repo')"
-	@echo "📊 $(shell find . -name '*.sh' | wc -l | tr -d ' ') shell scripts"
-	@echo "⚙️  $(shell find config -type f | wc -l | tr -d ' ') config files"
-
 clean: ## Clean temporary files
 	@find . -name "*.backup.*" -delete 2>/dev/null || true
 	@find . -name ".DS_Store" -delete 2>/dev/null || true
