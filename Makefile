@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-# Repo dir for make -C or make -f; an absolute -f path with a space is not supported
+# Repo dir for make -C or make -f; a -f path with a space is not supported
 REPO := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 # Colors for output
