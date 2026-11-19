@@ -595,8 +595,8 @@ link_config() {
     target_dir="$(dirname "$target_path")"
     run_cmd "mkdir -p \"$target_dir\""
 
-    # Backup existing file if it exists and is not a symlink
-    if [[ -e $target_path && ! -L $target_path ]]; then
+    # Back up anything there that is not install's own link, foreign links included
+    if [[ -e $target_path || -L $target_path ]] && ! link_owned "$target_path" "$source"; then
         if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
             # Same relative path as in HOME, so make restore can copy it back
             run_cmd "mkdir -p \"$(dirname "$BACKUP_DIR/$target")\""
@@ -607,8 +607,8 @@ link_config() {
         fi
     fi
 
-    # Remove existing symlink
-    if [[ -L $target_path ]]; then
+    # Replace install's own link
+    if link_owned "$target_path" "$source"; then
         run_cmd "rm \"$target_path\""
     fi
 

@@ -188,6 +188,19 @@ assert_eq "no ssh template: ~/.ssh/config not a link" "no" "$([[ -L $NOSSH_HOME/
 in_home "$NOSSH_HOME" env DRY_RUN=true FORCE=true "$NOSSH_REPO/install/setup.sh" >"$WORK/nossh-dry.log" 2>&1 || true
 assert_eq "no ssh template: dry run does not preview the link" "0" "$(grep -c 'ln -sf.*\.ssh/config' "$WORK/nossh-dry.log" || true)"
 
+# A foreign symlink at a managed path: kept without --force; with --force
+# moved into the backup, and restore puts it back
+FL_HOME="$WORK/foreign-link-home"
+mkdir -p "$FL_HOME"
+echo "mine" >"$WORK/my-zshrc"
+ln -s "$WORK/my-zshrc" "$FL_HOME/.zshrc"
+in_home "$FL_HOME" "$REPO/install/setup.sh" >/dev/null 2>&1 || true
+assert_eq "foreign link: plain install keeps it" "$WORK/my-zshrc" "$(readlink "$FL_HOME/.zshrc")"
+in_home "$FL_HOME" env FORCE=true "$REPO/install/setup.sh" >/dev/null 2>&1 || true
+assert_eq "foreign link: forced install backs it up" "$WORK/my-zshrc" "$(readlink "$FL_HOME"/.dotfiles-backup-*/.zshrc 2>/dev/null)"
+printf '1\n' | env HOME="$FL_HOME" make -s -C "$REPO" restore >/dev/null 2>&1 || true
+assert_eq "foreign link: restore puts it back" "$WORK/my-zshrc" "$(readlink "$FL_HOME/.zshrc")"
+
 # Clone path with a space
 SPACE_REPO="$WORK/space repo"
 SPACE_HOME="$WORK/space-home"
