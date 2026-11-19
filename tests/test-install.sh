@@ -136,6 +136,8 @@ if grep -q 'Would remove ~' "$WORK/dry-uninstall.log"; then
 else
     fail "uninstall dry run: says would remove" "no 'Would remove' line"
 fi
+printf 'y\n' | env HOME="$HOME_DIR" DRY_RUN=true make -s -C "$REPO" uninstall >"$WORK/dry-make-uninstall.log" 2>&1 || true
+assert_eq "make uninstall dry run: no completion line" "0" "$(grep -c 'Uninstall complete' "$WORK/dry-make-uninstall.log" || true)"
 
 # Run from another directory through make -f
 if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then

@@ -66,4 +66,4 @@ uninstall: ## Remove the links (keeps backups)
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
 	@"$(REPO)/install/setup.sh" --uninstall
-	@echo "Uninstall complete. Run 'make restore' to put back files install replaced"
+	@[[ "$$DRY_RUN" == true ]] || echo "Uninstall complete. Run 'make restore' to put back files install replaced"
