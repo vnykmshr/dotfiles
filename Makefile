@@ -68,8 +68,9 @@ clean: ## Clean temporary files
 	@find . -name ".DS_Store" -delete 2>/dev/null || true
 	@echo "🧹 Cleaned temporary files"
 
-dev: ## Setup development environment (pre-commit, hooks, linting)
-	@./install/setup-pre-commit.sh
+dev: ## Install pre-commit hooks
+	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
+	@pre-commit install
 
 packages: ## Install system packages
 	@DOTFILES_DIR=$(PWD) source install/install-packages && install_packages_main
