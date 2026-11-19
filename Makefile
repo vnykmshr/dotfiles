@@ -44,8 +44,8 @@ dev: ## Install pre-commit hooks
 	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
 	@pre-commit install
 
-packages: ## Install system packages
-	@DOTFILES_DIR=$(PWD) source install/install-packages && install_packages_main
+packages: ## Install prerequisites and packages, set zsh as login shell
+	@./install/setup.sh --packages
 
 macos-defaults: ## Apply macOS system defaults (install/defaults/macos)
 	@./install/defaults/macos

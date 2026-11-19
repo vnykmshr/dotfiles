@@ -104,7 +104,6 @@ JSON
 # resolves to the real repo at source time (so lib/* are loaded correctly), then
 # we point it at the fixture for the function calls that read config.json and
 # write generated files.
-export SKIP_PACKAGES=true
 # shellcheck source=/dev/null
 source "$PROJECT_ROOT/install/setup.sh"
 # Exported so the sourced functions (get_config_value, process_*_template) pick

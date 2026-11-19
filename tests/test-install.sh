@@ -68,7 +68,7 @@ done
 in_home() {
     local home="$1"
     shift
-    env HOME="$home" PATH="$STUBS:$PATH" CI=1 SKIP_PACKAGES=true "$@" </dev/null
+    env HOME="$home" PATH="$STUBS:$PATH" "$@" </dev/null
 }
 
 links_in() { (cd "$1" && find . -type l | sed 's|^\./||' | sort); }
@@ -79,6 +79,7 @@ REPO="$WORK/repo"
 HOME_DIR="$WORK/home"
 copy_repo "$REPO"
 mkdir -p "$HOME_DIR"
+: >"$CALLS"
 
 if in_home "$HOME_DIR" "$REPO/install/setup.sh" >"$WORK/install1.log" 2>&1; then
     pass "install exits 0"
@@ -108,6 +109,7 @@ else
     cat "$WORK/install2.log"
 fi
 assert_eq "reinstall: link set unchanged" "$EXPECTED_LINKS" "$(links_in "$HOME_DIR")"
+assert_eq "install: no package, shell or system commands" "" "$(cat "$CALLS")"
 
 # Uninstall
 if printf 'y\n' | env HOME="$HOME_DIR" make -s -C "$REPO" uninstall >"$WORK/uninstall.log" 2>&1; then
@@ -133,6 +135,18 @@ assert_eq "dry run: HOME untouched" "" "$(find "$DRY_HOME" -mindepth 1)"
 assert_eq "dry run: no generated files" "" \
     "$(cd "$DRY_REPO" && ls config/git/gitconfig config/ssh/config config/zsh/exports.local 2>/dev/null)"
 assert_eq "dry run: no stubbed commands called" "" "$(cat "$CALLS")"
+
+# Packages dry run: OS detected, nothing written
+PKG_HOME="$WORK/pkg-home"
+mkdir -p "$PKG_HOME"
+if in_home "$PKG_HOME" env DRY_RUN=true "$DRY_REPO/install/setup.sh" --packages >"$WORK/pkg.log" 2>&1; then
+    pass "packages dry run exits 0"
+else
+    fail "packages dry run exits 0" "see output below"
+    cat "$WORK/pkg.log"
+fi
+assert_eq "packages dry run: OS detected" "0" "$(grep -c 'Unknown OS' "$WORK/pkg.log" || true)"
+assert_eq "packages dry run: HOME untouched" "" "$(find "$PKG_HOME" -mindepth 1)"
 
 echo
 echo "Passed: $TESTS_PASSED"

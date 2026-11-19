@@ -13,6 +13,7 @@ BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
+PACKAGES=false
 
 # Bash 5.2+ with patsub_replacement on (default) treats `&` in the replacement
 # of ${var//pat/repl} as the matched text. Older bash (macOS 3.2, Ubuntu 22.04
@@ -42,6 +43,7 @@ OPTIONS:
     -d, --dry-run       Show what would be done without making changes
     -v, --verbose       Enable verbose output
     -f, --force         Force overwrite existing files
+    -p, --packages      Install prerequisites and packages, set zsh as login shell
     -h, --help          Show this help message
 
 ENVIRONMENT:
@@ -53,6 +55,7 @@ EXAMPLES:
     $0                  # Normal installation
     $0 --dry-run        # Preview changes
     $0 --force          # Overwrite existing files
+    $0 --packages       # Install packages only (make packages)
     DRY_RUN=true $0     # Environment variable dry-run
 
 EOF
@@ -72,6 +75,10 @@ parse_args() {
                 ;;
             -f | --force)
                 FORCE=true
+                shift
+                ;;
+            -p | --packages)
+                PACKAGES=true
                 shift
                 ;;
             -h | --help)
@@ -102,19 +109,28 @@ main() {
     detect_os
     log_info "Detected OS: $OS_NAME ($OS_ARCH)"
 
+    if [[ $PACKAGES == "true" ]]; then
+        install_dependencies
+        install_packages
+        configure_shell
+        log_success "Packages installed"
+        return 0
+    fi
+
+    if ! command_exists jq; then
+        log_error "jq is required to read config.json. Run 'make packages' or install jq, then retry."
+        exit 1
+    fi
+
     # Create backup directory if needed
     if [[ $DRY_RUN != "true" ]]; then
         mkdir -p "$BACKUP_DIR"
         log_info "Backup directory: $BACKUP_DIR"
     fi
 
-    # Installation steps
-    install_dependencies
     create_dotfiles_symlink
     process_templates
     setup_symlinks
-    install_packages
-    configure_shell
 
     log_success "Dotfiles setup complete!"
 
@@ -570,16 +586,11 @@ link_config() {
 install_packages() {
     log_step "Installing packages"
 
-    # Skip packages if SKIP_PACKAGES is set (useful for CI/testing)
-    if [[ ${SKIP_PACKAGES:-} == "true" ]]; then
-        log_info "Skipping package installation (SKIP_PACKAGES=true)"
-        return 0
-    fi
-
     local package_file="$DOTFILES_DIR/install/install-packages"
     if [[ -f $package_file ]]; then
         # shellcheck disable=SC1090
         source "$package_file"
+        install_packages_main
     else
         log_warn "Package installation file not found: $package_file"
     fi
