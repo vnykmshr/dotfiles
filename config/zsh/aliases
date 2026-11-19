@@ -48,7 +48,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
     alias ps='ps auxf'
 fi
-alias psg='ps aux | grep'
+alias psg='command ps aux | grep'
 alias cpu='htop --sort-key PERCENT_CPU'
 
 # Cross-platform memory and process aliases

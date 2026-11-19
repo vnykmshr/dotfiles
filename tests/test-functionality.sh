@@ -91,6 +91,13 @@ for alias_check in "gs:git status" "..:"; do
     fi
 done
 
+# psg runs (the ps alias must not expand inside it)
+if zsh -c "$ZSH_SOURCE 2>/dev/null; eval 'psg zsh'" >/dev/null 2>&1; then
+    pass "alias: psg runs"
+else
+    fail "alias: psg runs"
+fi
+
 # Key functions exist
 echo ""
 echo "Function checks..."
