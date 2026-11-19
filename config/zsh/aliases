@@ -12,7 +12,7 @@ alias -- -='cd -'
 alias ws='cd ~/workspace'
 alias proj='cd ~/workspace/projects'
 
-# List files — eza aliases defined in cli-tools/aliases when eza is available
+# List files — ll/la/lt come from cli-tools/init when eza is available
 if ! command -v eza >/dev/null 2>&1; then
     if [[ "$OSTYPE" == darwin* ]]; then
         alias ls='ls -hFG'

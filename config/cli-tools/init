@@ -62,7 +62,7 @@ fi
 
 # --- diagnostics ---
 check_modern_tools() {
-    local tools=("eza:ls" "bat:cat" "rg:grep" "fd:find" "delta:diff" "zoxide:cd")
+    local tools=("eza:ll/la/lt" "bat:cat" "rg:grep" "fd:find" "delta:diff" "zoxide:cd")
     for entry in "${tools[@]}"; do
         local cmd="${entry%%:*}" desc="${entry##*:}"
         if command -v "$cmd" >/dev/null 2>&1; then
