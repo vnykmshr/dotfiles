@@ -62,7 +62,7 @@
 	diffFilter = {{DELTA_COMMAND}} --color-only --features=interactive
 
 [delta]
-	# Delta configuration for enhanced git diffs
+	# Delta configuration for git diffs
 	navigate = true
 	light = false
 	side-by-side = true
@@ -139,7 +139,7 @@
 	r = rebase
 	s = status
 
-	# Enhanced commands
+	# Command shortcuts
 	aa = add --all
 	ap = add --patch
 	ca = commit --amend
@@ -247,7 +247,7 @@
 [includeIf "gitdir:~/personal/"]
 	path = ~/.gitconfig-personal
 
-# Modern Git Features
+# Git Features
 
 [feature]
 	# Enable experimental features

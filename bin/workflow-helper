@@ -23,7 +23,7 @@ USAGE:
 COMMANDS:
     commit [message]     # Quick commit workflow (your gst + git add -u + git commit pattern)
     deploy              # Build and deploy workflow (make build + environment setup)
-    status              # Enhanced status (git + project info)
+    status              # Status (git + project info)
     setup               # Project setup (npm install, go mod tidy, etc.)
     clean               # Clean workspace (git clean, make clean, etc.)
     sync                # Sync workflow (git pull + setup + build)

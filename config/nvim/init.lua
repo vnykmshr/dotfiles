@@ -1,5 +1,5 @@
--- Modern Neovim Configuration
--- Professional setup with LSP, Treesitter, and modern plugins
+-- Neovim Configuration
+-- LSP, Treesitter, and plugins
 
 -- =============================================================================
 -- Core Settings
@@ -32,7 +32,7 @@ opt.swapfile = false          -- No swap files
 opt.tabstop = 4               -- Tab width
 opt.shiftwidth = 4            -- Indent width
 opt.expandtab = true          -- Use spaces instead of tabs
-opt.smartindent = true        -- Smart auto-indenting
+opt.smartindent = true        -- Syntax-aware auto-indent
 opt.autoindent = true         -- Copy indent from current line
 
 -- Search

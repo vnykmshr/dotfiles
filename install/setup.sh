@@ -651,7 +651,7 @@ configure_shell() {
 setup_development_tools() {
     log_step "Setting up development tools"
 
-    # Modern CLI tools installed via main package manager (brew/apt/etc)
+    # CLI tools installed via main package manager (brew/apt/etc)
     # See install/install-packages for implementation
 
     local bin_dir="$DOTFILES_DIR/bin"

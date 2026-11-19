@@ -3,7 +3,7 @@
 # Initialize direnv if available
 command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)" && export DIRENV_LOG_FORMAT=""
 
-# Smart .envrc creation
+# .envrc creation
 create_envrc() {
     local type="${1:-generic}"
     [[ -f ".envrc" ]] && { read -p ".envrc exists. Overwrite? [y/N]: " -r; [[ ! $REPLY =~ ^[Yy]$ ]] && return 1; }

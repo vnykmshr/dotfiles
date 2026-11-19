@@ -28,7 +28,7 @@
 if [[ ! -f "$HOME/.config/dotfiles/prompt-choice" ]]; then
     if [[ -t 0 && -t 1 ]]; then
         echo ""
-        echo "Dotfiles can set up a clean, modern prompt."
+        echo "Dotfiles can set up a clean prompt."
         echo "Skip if you use oh-my-zsh, starship, or have your own prompt."
         echo ""
         read -q "REPLY?Set up dotfiles prompt? (y/n): "
@@ -108,7 +108,7 @@ git_prompt() {
     echo " ${branch_color}$branch%f%F{cyan}$status_symbols%f"
 }
 
-# Directory path with smart truncation
+# Directory path, truncated
 dir_prompt() {
     local current_dir="${PWD/#$HOME/~}"
     local dir_parts=("${(@s:/:)current_dir}")

@@ -1,5 +1,5 @@
 # CLI Tools - merged configuration
-# Initializes modern CLI replacements: eza, bat, rg, fd, delta, zoxide
+# Initializes CLI replacements: eza, bat, rg, fd, delta, zoxide
 
 # --- eza ---
 if command -v eza >/dev/null 2>&1; then

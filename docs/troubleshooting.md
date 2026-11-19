@@ -65,7 +65,7 @@ time zsh -i -c exit
 
 **Problem:** Commands like `eza`, `bat` not found
 
-**Solution:** Install modern CLI tools
+**Solution:** Install the CLI tools
 
 ```bash
 make packages

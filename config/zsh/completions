@@ -119,7 +119,7 @@ _smart_project_completion() {
     fi
 }
 
-# Apply smart completion to the dev function
+# Completion for the dev function
 compdef _smart_project_completion dev
 
 # Load Additional Completions

@@ -55,7 +55,7 @@ tools: ## Show development tools status
 	@printf "  %-12s %s\n" "mise:" "$$(command -v mise >/dev/null && echo '✅ installed' || echo '❌ not found')"
 	@printf "  %-12s %s\n" "shellcheck:" "$$(command -v shellcheck >/dev/null && echo '✅ installed' || echo '❌ not found')"
 	@printf "  %-12s %s\n" "shfmt:" "$$(command -v shfmt >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@echo "Modern CLI tools:"
+	@echo "CLI tools:"
 	@printf "  %-12s %s\n" "ripgrep:" "$$(command -v rg >/dev/null && echo '✅ installed' || echo '❌ not found')"
 	@printf "  %-12s %s\n" "fd:" "$$(command -v fd >/dev/null && echo '✅ installed' || echo '❌ not found')"
 	@printf "  %-12s %s\n" "bat:" "$$(command -v bat >/dev/null && echo '✅ installed' || echo '❌ not found')"

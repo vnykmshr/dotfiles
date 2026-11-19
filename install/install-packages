@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Package Installation Script
-# Cross-platform package installation with modern tools
+# Cross-platform package installation
 
 # Source utilities
 source "$DOTFILES_DIR/lib/utils.sh"
@@ -24,17 +24,17 @@ install_core_tools() {
                 zsh
                 tmux
 
-                # Modern CLI tools
+                # CLI tools
                 bat       # Better cat
                 eza       # Better ls
                 fd        # Better find
                 ripgrep   # Better grep
                 fzf       # Fuzzy finder
-                zoxide    # Smart cd
+                zoxide    # Frecency cd
                 git-delta # Better git diff
 
                 # Development tools
-                neovim # Modern vim
+                neovim # Editor
                 gh     # GitHub CLI
                 jq     # JSON processor
 
@@ -93,7 +93,7 @@ install_core_tools() {
             log_info "Installing apt packages..."
             run_cmd "sudo apt install -y ${packages[*]}"
 
-            # Modern CLI tools (install manually if not available)
+            # CLI tools (install manually if not available)
             install_modern_cli_tools_linux
             ;;
 
@@ -135,7 +135,7 @@ install_core_tools() {
                 tmux
                 base-devel
 
-                # Modern CLI tools
+                # CLI tools
                 bat
                 eza
                 fd
@@ -167,9 +167,9 @@ install_core_tools() {
     esac
 }
 
-# Install modern CLI tools on Linux
+# Install CLI tools on Linux
 install_modern_cli_tools_linux() {
-    log_info "Installing modern CLI tools..."
+    log_info "Installing CLI tools..."
 
     # bat (better cat)
     if ! command_exists bat; then
@@ -227,7 +227,7 @@ install_modern_cli_tools_linux() {
         run_cmd "$HOME/.fzf/install --all"
     fi
 
-    # zoxide (smart cd)
+    # zoxide (frecency cd)
     if ! command_exists zoxide; then
         log_info "Installing zoxide via curl..."
         run_cmd "curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"
@@ -239,7 +239,7 @@ install_modern_cli_tools_linux() {
 install_language_tools() {
     log_step "Installing language tools and runtimes"
 
-    # Install mise (modern version manager)
+    # Install mise (version manager)
     if ! command_exists mise; then
         log_info "Installing mise..."
         run_cmd "curl https://mise.run | sh"

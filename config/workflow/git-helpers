@@ -16,7 +16,7 @@ ensure_git_repo() {
     fi
 }
 
-# Generate smart commit message suggestions
+# Suggest commit messages from staged files
 suggest_commit_message() {
     local staged_files suggestions=()
 
@@ -240,7 +240,7 @@ USAGE:
     git-helpers [COMMAND] [OPTIONS]
 
 COMMANDS:
-    save        Quick add, commit, and push workflow with smart suggestions
+    save        Quick add, commit, and push workflow with message suggestions
     pull        Pull with rebase and conflict guidance
     status      Show simple repository status
     new         Create and switch to new branch
@@ -252,7 +252,7 @@ OPTIONS:
     -n, --dry-run   Show what would be done without executing
 
 EXAMPLES:
-    git-helpers save         # Add all, commit with smart suggestions, push
+    git-helpers save         # Add all, commit with a suggested message, push
     git-helpers save -n      # Show what save would do (dry run)
     git-helpers pull         # Pull with rebase
     git-helpers status       # Show branch and sync status

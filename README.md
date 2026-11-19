@@ -18,7 +18,7 @@ configurations.
 ## Features
 
 - **Fast Shell**: Sub-200ms startup with lazy loading
-- **Modern CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
+- **CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
 - **Git Helpers**: Extensive git aliases and workflow scripts
 - **Organized Functions**: Shell functions in logical categories
 - **Cross-Platform**: macOS, Linux, WSL
@@ -67,7 +67,7 @@ config/
 ├── nvim/         # Editor configuration
 ├── tmux/         # Terminal multiplexer
 ├── ssh/          # SSH client templates
-├── cli-tools/    # Modern tool init and fallbacks
+├── cli-tools/    # CLI tool init and fallbacks
 └── workflow/     # Git helpers (optional)
 ```
 
@@ -113,7 +113,7 @@ shell-bench        # Measure startup time
 
 - Sub-200ms startup with lazy loading and completion caching
 - History with search and deduplication
-- Modern CLI tools (bat, eza, fd, ripgrep) with fallbacks
+- CLI tools (bat, eza, fd, ripgrep) with fallbacks
 - Organized functions in logical categories
 - Cross-platform support (macOS, Linux, WSL)
 - Security automation and TMPDIR management
@@ -127,26 +127,26 @@ shell-bench        # Measure startup time
 
 - Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`
 - Workflow helpers: `gsave`, `gpull`, `gclean` (via git-helpers script)
-- Enhanced diffs with delta integration
+- Diffs through delta
 - Global gitignore covering major platforms
 - SSH signing support
 
-### Modern CLI Tools
+### CLI Tools
 
 Integrated with fallbacks to traditional tools:
 
-| Modern | Traditional | Purpose |
+| Tool | Replaces | Purpose |
 |--------|-------------|---------|
 | eza | ls | Better file listing with git integration |
 | bat | cat | Syntax highlighting, line numbers |
 | fd | find | Faster, simpler file search |
 | ripgrep | grep | Faster code search |
 | delta | diff | Better git diffs with syntax highlighting |
-| zoxide | cd | Smart directory jumping with frecency |
+| zoxide | cd | Directory jumping by frecency |
 
 ### Other Configurations
 
-- **Neovim**: Modern editor setup with LSP support
+- **Neovim**: Editor setup with LSP support
 - **tmux**: Sensible defaults, vim-style navigation
 - **SSH**: Template-based config for multiple keys/servers
 
