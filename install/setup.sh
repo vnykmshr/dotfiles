@@ -116,7 +116,6 @@ main() {
     install_packages
     configure_shell
     setup_development_tools
-    apply_os_defaults
 
     log_success "Dotfiles setup complete!"
 
@@ -660,19 +659,6 @@ setup_tmpdir() {
         else
             log_info "[DRY RUN] Would exclude $tmpdir from Time Machine"
         fi
-    fi
-}
-
-# Apply OS-specific defaults
-apply_os_defaults() {
-    log_step "Applying OS defaults"
-
-    local defaults_script="$DOTFILES_DIR/install/defaults/$OS_NAME"
-    if [[ -f $defaults_script && -x $defaults_script ]]; then
-        log_info "Applying $OS_NAME defaults..."
-        run_cmd "\"$defaults_script\""
-    else
-        log_info "No OS defaults found for: $OS_NAME"
     fi
 }
 

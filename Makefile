@@ -47,6 +47,9 @@ dev: ## Install pre-commit hooks
 packages: ## Install system packages
 	@DOTFILES_DIR=$(PWD) source install/install-packages && install_packages_main
 
+macos-defaults: ## Apply macOS system defaults (install/defaults/macos)
+	@./install/defaults/macos
+
 update: ## Update from git
 	@git pull origin main
 

@@ -16,13 +16,13 @@ Configures essential macOS settings that improve development workflow:
 
 ## Usage
 
-Automatically runs during setup:
+Opt-in; `make install` does not apply them:
 
 ```bash
-./install/setup.sh
+make macos-defaults
 ```
 
-Run separately with dry-run:
+Preview with dry-run:
 
 ```bash
 DRY_RUN=true ./install/defaults/macos
