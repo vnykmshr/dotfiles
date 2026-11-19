@@ -44,14 +44,16 @@ EXPECTED_LINKS=".config/nvim
 .zshrc"
 
 # Copy tracked and untracked-unignored files that exist on disk.
+# A second argument "no-config" skips writing config.json.
 copy_repo() {
-    local dest="$1" f
+    local dest="$1" config="${2:-}" f
     local files=()
     mkdir -p "$dest"
     while IFS= read -r -d '' f; do
         [[ -e "$PROJECT_ROOT/$f" || -L "$PROJECT_ROOT/$f" ]] && files+=("$f")
     done < <(git -C "$PROJECT_ROOT" ls-files -z --cached --others --exclude-standard)
     (cd "$PROJECT_ROOT" && tar cf - "${files[@]}") | (cd "$dest" && tar xf -)
+    [[ $config == "no-config" ]] && return 0
     jq '.user.name = "Test User" | .user.email = "test@example.com"' \
         "$dest/config.json.example" >"$dest/config.json"
 }
@@ -135,6 +137,20 @@ assert_eq "dry run: HOME untouched" "" "$(find "$DRY_HOME" -mindepth 1)"
 assert_eq "dry run: no generated files" "" \
     "$(cd "$DRY_REPO" && ls config/git/gitconfig config/ssh/config config/zsh/exports.local 2>/dev/null)"
 assert_eq "dry run: no stubbed commands called" "" "$(cat "$CALLS")"
+
+# First run without config.json: creates it and stops before linking
+NOCFG_REPO="$WORK/nocfg-repo"
+NOCFG_HOME="$WORK/nocfg-home"
+copy_repo "$NOCFG_REPO" no-config
+mkdir -p "$NOCFG_HOME"
+if in_home "$NOCFG_HOME" "$NOCFG_REPO/install/setup.sh" >"$WORK/nocfg.log" 2>&1; then
+    fail "no config.json: exits non-zero" "exited 0"
+else
+    pass "no config.json: exits non-zero"
+fi
+assert_eq "no config.json: config.json created" "yes" "$([[ -f $NOCFG_REPO/config.json ]] && echo yes)"
+assert_eq "no config.json: only ~/.dotfiles linked" ".dotfiles" "$(links_in "$NOCFG_HOME")"
+assert_eq "no config.json: no dangling links" "" "$(dangling_in "$NOCFG_HOME")"
 
 # Packages dry run: OS detected, nothing written
 PKG_HOME="$WORK/pkg-home"
