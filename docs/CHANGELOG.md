@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- `terraform` and the retired `homebrew/cask-fonts` tap from the macOS package lists
+- `terraform` and the `homebrew/cask-fonts` tap from the macOS package lists
 - zsh modules: `history` (`HIST_*` options stay in zshrc), `security-automation`, `performance`, `dev-automation`, `go-dev`, `config/workflow/init` and `aliases` (`gw`, `gws`, `workcheck`), unloaded `completions`
 - `DOTFILES_SKIP_HISTORY`, `_SECURITY`, `_PERFORMANCE`, `_DIRENV`, `_WORKFLOW` and `_TMPDIR`; `DOTFILES_SKIP_CROSS_PLATFORM` remains, set in `~/.exports.local`
 - `bin/dotfiles`, `bin/workflow-helper` and `bin/check-alias-conflicts`; use the make targets
@@ -61,11 +61,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `make packages` on a fresh Mac finds Homebrew right after installing it
+- `make uninstall` and `make restore` work from any directory and remove links left dangling by a moved clone
+- `make restore` creates a missing `~/.ssh` with mode 700
+- `make packages` reuses an existing `~/.fzf` checkout
+- `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-backup-*`
 - `make restore` keeps the modes of `~` and `~/.ssh`, and skips entries of pre-v5 backups it does not manage
 - No startup warning when the repo is cloned at `~/.dotfiles`
 - Forced install through a symlinked `~/.dotfiles` no longer points the link at itself
 - Install works with `USER` unset
-- Linux fzf install no longer appends to `~/.zshrc` (the tracked zshrc)
+- Linux fzf install no longer appends to `~/.zshrc`
 - `psg` no longer expands the `ps` alias
 - Install from a clone at `~/.dotfiles` works, and `--force` no longer moves the repo into the backup
 - First install links `~/.ssh/config`
