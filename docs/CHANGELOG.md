@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `make packages` continues past a failed install and exits non-zero with the count at the end
-- Uninstall and restore leave links that point outside the repo alone
+- Uninstall and restore run from `install/setup.sh` (`--uninstall`, `--restore`) and leave links that point outside the repo alone
 - **Breaking:** `make install` only links configs and generates personal ones; packages, login shell and macOS defaults moved to `make packages` and `make macos-defaults`
 - **Breaking:** the private TMPDIR is opt-in; set `DOTFILES_TMPDIR="$HOME/tmp"` in `config/zsh/personal.local`
 - Install requires jq
@@ -62,10 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `make packages` on a fresh Mac finds Homebrew right after installing it
-- `make uninstall` and `make restore` work from any directory and remove links left dangling by a moved clone
+- `make uninstall` and `make restore` remove links left dangling by a moved clone
 - `make restore` creates a missing `~/.ssh` with mode 700
 - `make packages` reuses an existing `~/.fzf` checkout
-- `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-backup-*`
+- `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-personal-backup-*`
 - `make restore` keeps the modes of `~` and `~/.ssh`, and skips entries of pre-v5 backups it does not manage
 - No startup warning when the repo is cloned at `~/.dotfiles`
 - Forced install through a symlinked `~/.dotfiles` no longer points the link at itself
