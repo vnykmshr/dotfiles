@@ -9,6 +9,8 @@ alias mc='make check'
 alias mt='make test'
 
 # Navigation
+alias ws='cd ~/workspace'
+alias proj='cd ~/workspace/projects'
 alias workspace='cd ~/workspace'
 alias github='cd ~/workspace/github'
 alias projects='cd ~/workspace/projects'

@@ -9,8 +9,6 @@ alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ~='cd ~'
 alias -- -='cd -'
-alias ws='cd ~/workspace'
-alias proj='cd ~/workspace/projects'
 
 # List files; cli-tools/init replaces ll/la/lt with eza when installed
 if [[ "$OSTYPE" == darwin* ]]; then
@@ -69,7 +67,11 @@ else
 fi
 
 # Network
-alias ports='netstat -tulanp'
+if [[ "$OSTYPE" == darwin* ]]; then
+    alias ports='lsof -iTCP -sTCP:LISTEN -nP'
+else
+    alias ports='netstat -tulanp'
+fi
 alias ping='ping -c 5'
 alias fastping='ping -c 100 -s 2'
 alias conncount="netstat -tan | awk '{print \$6}' | sort | uniq -c"
@@ -97,7 +99,6 @@ alias gp='git push'
 alias gs='git status'
 alias gst='git status'
 alias gup='git pull && git submodule update'
-alias gcl='git clean -fd && git reset --hard'
 
 # Git workflow aliases
 alias mygh='$DOTFILES/config/workflow/git-helpers'
@@ -150,9 +151,6 @@ alias kgd='kubectl get deployments'
 
 # File Operations & Archives
 
-# Create directories with parents
-alias mkdir='mkdir -pv'
-
 # Archive operations
 alias tar-create='tar -czf'
 alias tar-extract='tar -xzf'
@@ -172,9 +170,9 @@ alias header='curl --location --head'
 alias serve='python3 -m http.server'
 
 # grep with useful defaults
-alias grep='grep --color=auto -n -H'
-alias egrep='egrep --color=auto -n -H'
-alias fgrep='fgrep --color=auto -n -H'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
 
 # grep using fd and ripgrep
 if command -v fd >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
@@ -195,27 +193,18 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     alias showfiles='defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder'
     alias hidefiles='defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder'
 
-    # Empty trash
-    alias emptytrash='rm -rf ~/.Trash/*'
-
-    # Lock screen
-    alias lock='/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend'
-
 # Linux specific
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Package managers
     if command -v apt >/dev/null 2>&1; then
         alias update='sudo apt update && sudo apt upgrade'
         alias upgrade='sudo apt-get update && sudo apt-get upgrade && sudo apt-get clean'
-        alias install='sudo apt install'
         alias search='apt search'
     elif command -v yum >/dev/null 2>&1; then
         alias update='sudo yum update'
-        alias install='sudo yum install'
         alias search='yum search'
     elif command -v pacman >/dev/null 2>&1; then
         alias update='sudo pacman -Syu'
-        alias install='sudo pacman -S'
         alias search='pacman -Ss'
     fi
 fi
