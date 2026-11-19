@@ -106,7 +106,7 @@ repos:
 
       - id: no-separator-lines
         name: Forbid ===== separator comments
-        entry: '^#\s*={10,}\s*$'
+        entry: '^\s*(#|--)\s*={10,}\s*$'
         language: pygrep
         types: [text]
 
