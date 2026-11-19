@@ -7,29 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-11-19
+
 ### Added
 
-- `make packages` (`install/setup.sh --packages`): prerequisites, packages, mise runtimes, zsh as login shell
 - `make macos-defaults`
 - `DOTFILES_TMPDIR` turns on the private TMPDIR
 - `tests/test-install.sh`: install, reinstall, restore, uninstall and dry runs in a temp HOME
 - Test fails when an alias or function shadows a `bin/` script
 - Homebrew `sbin` dirs on PATH when present
 - Untracked `config/ssh/config.local` include for per-machine ssh hosts (from `config.local.template`)
-- ssh config includes colima's `ssh_config`, so colima no longer edits the generated file
+- ssh config includes colima's `ssh_config`
 - Untracked `config/git/gitconfig.local` include for per-machine git settings (from `gitconfig.local.template`)
 - Adversarial and chained-substitution fixtures for the template processor (`tests/test-templates.sh`)
 - ADR 0001: template processor hardening (`docs/decisions/`)
 
 ### Changed
 
-- `make packages` continues past a failed install and exits non-zero with the count at the end
-- Uninstall and restore run from `install/setup.sh` (`--uninstall`, `--restore`) and leave links that point outside the repo alone
 - **Breaking:** `make install` only links configs and generates personal ones; packages, login shell and macOS defaults moved to `make packages` and `make macos-defaults`
 - **Breaking:** the private TMPDIR is opt-in; set `DOTFILES_TMPDIR="$HOME/tmp"` in `config/zsh/personal.local`
+- `make packages` runs `install/setup.sh --packages` (prerequisites, packages, mise runtimes, zsh as login shell), continues past a failed install and exits non-zero with the count at the end
+- Uninstall and restore run from `install/setup.sh` (`--uninstall`, `--restore`) and leave in place, with a warning, any link they cannot trace to this repo
+- Install treats a symlink it did not make like a file: skipped without `--force`, backed up with it
 - Install requires jq
 - `exports.local` sets only `WORKSPACE`, `PROJECTS` and `PERSONAL_BIN`; set GOPATH, `NPM_CONFIG_PREFIX` and the like in `personal.local`
 - Backups keep each file's path under HOME and are made only when install replaces a file
+- macOS installs mise with Homebrew instead of the curl installer
 - direnv hook moved into `config/cli-tools/init`
 - `cross-platform` trimmed to clipboard and `open` shims, WSL PATH cleanup and keybindings
 - `make dev` runs `pre-commit install`; `make lint` runs `pre-commit run --all-files`
@@ -46,55 +49,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `terraform` and the `homebrew/cask-fonts` tap from the macOS package lists
-- zsh modules: `history` (`HIST_*` options stay in zshrc), `security-automation`, `performance`, `dev-automation`, `go-dev`, `config/workflow/init` and `aliases` (`gw`, `gws`, `workcheck`), unloaded `completions`
-- `DOTFILES_SKIP_HISTORY`, `_SECURITY`, `_PERFORMANCE`, `_DIRENV`, `_WORKFLOW` and `_TMPDIR`; `DOTFILES_SKIP_CROSS_PLATFORM` remains, set in `~/.exports.local`
+- zsh modules `history`, `security-automation`, `performance`, `dev-automation`, `go-dev`, `config/workflow/init` and `aliases`, and the unloaded `completions`; the `HIST_*` options stay in zshrc
+- Commands from those modules: `seccheck`, `envcheck`, `gitsec`, `sprof`, `sanalyze`, `rt`, `testwatch`, `project_setup`, `goinit`, `gotidy`, `goget`, `gowatch`, `gobuild-all`, `gonew`, `cdgo`, `goinfo`, `hg`, `h10`, `h50`, `hstats`, `hsuggest`, `htime`, `hfind`, `hclean`, `hpriv`, `gw`, `gws`, `workcheck`
+- `DOTFILES_SKIP_HISTORY`, `_SECURITY`, `_PERFORMANCE`, `_DIRENV`, `_WORKFLOW` and `_TMPDIR`; `DOTFILES_SKIP_CROSS_PLATFORM` (set in `~/.exports.local`) and `DOTFILES_SKIP_PROMPT` remain
 - `bin/dotfiles`, `bin/workflow-helper` and `bin/check-alias-conflicts`; use the make targets
-- `make tools`, `make status`, `make validate` and `make reset` (use `make install-force`)
+- `make tools`, `make status`, `make validate`, `make reset` (use `make install-force`) and `make clean`
 - `gsave` and `git-helpers save`
 - Functions `killp`, `git-cleanup`, `backup`, `gitlog` (use `git lg`), `status`, `sysinfo`, `myip`, `localip`, `json`, `genpass`, `calc`, `dsh`, `kctx`, `kns`, `tm`, `lower`, `upper`, `dotfiles-edit`
 - Aliases `dotfiles`, `tools`, `npx --yes`, `gcl`, `lock`, `emptytrash`, `mkdir -pv` and the Linux `install`
 - `config.json` keys `user.browser`, `user.terminal`, `environment.pager` and `development.*`
 - `~/.aliases` link
 - `install/setup-pre-commit.sh`, `tests/lint.sh`, `tests/test-critical-path.sh`, `docs/COMMAND_EXAMPLES.md`, `docs/templates/config.json.template`
-- `lib/os-detect.sh` helpers other than `detect_os`
+- `check-hardcoded-paths` pre-commit hook
+- `lib/os-detect.sh` helpers other than `detect_os`; `lib/utils.sh` helpers other than `command_exists` and `run_cmd`
 - `-i` safety aliases for `rm`, `cp`, `mv`
 
 ### Fixed
 
-- Install skips a link whose source is missing
-- `--restore` refuses dry run; dry-run uninstall reports what it would remove
-- `make packages` on a fresh Mac finds Homebrew right after installing it
-- Every make target works through `make -f` from another directory; `make uninstall` and `make restore` also remove links left dangling by a moved clone while `~/.dotfiles` still points at the old clone
-- `make restore` creates a missing `~/.ssh` with mode 700
-- `make packages` reuses an existing `~/.fzf` checkout
-- `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-personal-backup-*`
-- `make restore` keeps the modes of `~` and `~/.ssh`, and skips entries of pre-v5 backups it does not manage
-- No startup warning when the repo is cloned at `~/.dotfiles`
-- Forced install through a symlinked `~/.dotfiles` no longer points the link at itself
-- Install works with `USER` unset
-- Linux fzf install no longer appends to `~/.zshrc`
-- `psg` no longer expands the `ps` alias
-- Install from a clone at `~/.dotfiles` works, and `--force` no longer moves the repo into the backup
+- Install and `--force` work from a clone at `~/.dotfiles` or behind a symlinked `~/.dotfiles`, with no startup warning
+- Install skips a link whose source is missing, such as an absent mise config
 - First install links `~/.ssh/config`
-- Install no longer links a missing mise config
+- Install works with `USER` unset
+- Install without a terminal says why it stops when `config.json` still has the example name or email
+- Dry run leaves HOME untouched; dry-run uninstall reports what it would remove; `--restore` refuses dry run
+- Every make target works through `make -f` from another directory
 - Uninstall removes every link install makes, plus the `~/.aliases` and mise links earlier versions left
-- `make restore` puts files back at their original paths without writing into the repo, and fails on an unknown or empty backup
-- Dry run leaves HOME untouched
+- `make restore` puts files back at their original paths without writing into the repo, keeps the modes of `~` and `~/.ssh`, creates a missing `~/.ssh` with mode 700, skips entries of pre-v5 backups it does not manage, and fails on an unknown or empty backup
 - `make packages` detects the OS and installs packages
+- `make packages` on a fresh Mac finds Homebrew right after installing it
+- fzf install reuses an existing `~/.fzf` checkout and no longer appends to `~/.zshrc` on Linux
 - Piped installers fail on download errors
+- `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-personal-backup-*`
+- `psg` no longer expands the `ps` alias
 - A shell started in a Go project no longer puts `./bin` first on PATH
 - Word-movement keys survive `EDITOR=nvim`
-- README Quick Start includes the config.json step; `gl` documented as `git log`; platform claims match CI
 - Template processor no longer uses `eval` or `sed`; `&`, `|` and `\1` in values are preserved, including on bash < 5.2
 - `$HOME` and `~/` prefixes normalized in `config.json` values
 - ssh `UseKeychain` no longer fatal on Linux
-- `gitconfig.local` loads last, so its values override the template's
+- `gitconfig.local` values override the template's
 - `github:` and `gist:` URL shortcuts fetch over https instead of the retired `git://`
 - `/opt/homebrew` takes PATH precedence over `/usr/local` when both exist
 - Local-path clones no longer blocked by the protocol allowlist
-- Generated configs end with a newline again, so tools that append to them start a new line
+- Generated configs end with a newline again
 - Personal bin dir no longer jumps ahead of Homebrew in PATH
-- macOS installs mise with Homebrew instead of the curl installer
+
+### Security
+
+- Prompt escapes `%` in git branch, directory and virtualenv names (CVE-2021-45444 on zsh < 5.8.1)
 
 ## [4.0.0] - 2026-04-04
 
@@ -335,5 +336,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[Unreleased]: https://github.com/vnykmshr/dotfiles/compare/v5.0.0...HEAD
+[5.0.0]: https://github.com/vnykmshr/dotfiles/compare/v4.0.0...v5.0.0
+[4.0.0]: https://github.com/vnykmshr/dotfiles/compare/v3.7.0...v4.0.0
 [1.0.0]: https://github.com/vnykmshr/dotfiles/releases/tag/v1.0.0
 [0.1.0]: https://github.com/vnykmshr/dotfiles/releases/tag/v0.1.0
