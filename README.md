@@ -169,7 +169,6 @@ Skip features you don't need in `config/zsh/exports.local` (gitignored):
 
 ```bash
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
-export DOTFILES_SKIP_TMPDIR=1          # Disable TMPDIR management
 ```
 
 ### Environment-Specific Setup

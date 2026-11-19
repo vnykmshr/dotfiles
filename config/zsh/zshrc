@@ -59,9 +59,6 @@ load_config() {
     [[ -r "$config_path" ]] && source "$config_path"
 }
 
-# TMPDIR Management (early initialization for all commands)
-[[ "$DOTFILES_SKIP_TMPDIR" != "1" ]] && load_config "tmpdir-management"
-
 # Load core modules (always needed)
 for module in exports aliases functions; do
     load_config "$module"
@@ -109,3 +106,6 @@ load_config "personal.local"
 
 # Local overrides
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# Private TMPDIR, opt-in: set DOTFILES_TMPDIR in personal.local
+[[ -n "$DOTFILES_TMPDIR" ]] && load_config "tmpdir-management"

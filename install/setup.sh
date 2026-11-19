@@ -115,7 +115,6 @@ main() {
     setup_symlinks
     install_packages
     configure_shell
-    setup_development_tools
 
     log_success "Dotfiles setup complete!"
 
@@ -610,55 +609,6 @@ configure_shell() {
         fi
     else
         log_info "Shell is already zsh"
-    fi
-}
-
-# Setup development tools
-setup_development_tools() {
-    log_step "Setting up development tools"
-
-    # CLI tools installed via main package manager (brew/apt/etc)
-    # See install/install-packages for implementation
-
-    local bin_dir="$DOTFILES_DIR/bin"
-    if [[ -d $bin_dir ]]; then
-        log_info "Custom scripts available in: $bin_dir"
-    fi
-
-    # Setup user TMPDIR and exclude from Time Machine (macOS only)
-    if [[ $OS_NAME == "macos" ]]; then
-        setup_tmpdir
-    fi
-}
-
-# Setup user-owned TMPDIR
-setup_tmpdir() {
-    local tmpdir="$HOME/tmp"
-
-    # Create directory if it doesn't exist
-    if [[ ! -d $tmpdir ]]; then
-        run_cmd "mkdir -p \"$tmpdir\""
-        run_cmd "chmod 700 \"$tmpdir\""
-        log_success "Created user TMPDIR: $tmpdir"
-    else
-        log_info "User TMPDIR already exists: $tmpdir"
-    fi
-
-    # Exclude from Time Machine backups (macOS)
-    if command_exists tmutil; then
-        if [[ $DRY_RUN != "true" ]]; then
-            if tmutil isexcluded "$tmpdir" 2>/dev/null | grep -q "\[Excluded\]"; then
-                log_info "TMPDIR already excluded from Time Machine"
-            else
-                if tmutil addexclusion "$tmpdir" 2>/dev/null; then
-                    log_success "Excluded $tmpdir from Time Machine backups"
-                else
-                    log_warn "Could not exclude TMPDIR from Time Machine (requires sudo)"
-                fi
-            fi
-        else
-            log_info "[DRY RUN] Would exclude $tmpdir from Time Machine"
-        fi
     fi
 }
 

@@ -11,6 +11,9 @@
 
 # Personal exports
 
+# Private TMPDIR, created 700 and excluded from Time Machine
+# export DOTFILES_TMPDIR="$HOME/tmp"
+
 # Personal aliases
 
 # Tool-specific configurations

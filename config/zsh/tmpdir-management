@@ -1,10 +1,9 @@
-# Temp directory management
-
-DOTFILES_TMPDIR="${DOTFILES_TMPDIR:-$HOME/tmp}"
+# Private temp directory at $DOTFILES_TMPDIR; zshrc loads this only when it is set
 
 if [[ ! -d "$DOTFILES_TMPDIR" ]]; then
     mkdir -p "$DOTFILES_TMPDIR"
     chmod 700 "$DOTFILES_TMPDIR"
+    command -v tmutil >/dev/null 2>&1 && tmutil addexclusion "$DOTFILES_TMPDIR" 2>/dev/null
 fi
 
 export TMPDIR="$DOTFILES_TMPDIR"
