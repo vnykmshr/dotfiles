@@ -65,11 +65,6 @@ update: ## Update from git
 
 sync: update install ## Update and install
 
-reset: ## Reset to clean state
-	@echo "⚠️  This will backup and reinstall everything"
-	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@FORCE=true $(MAKE) install
-
 restore: ## Restore from backup
 	@echo "Available backups:"
 	@ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5 | nl || echo "No backups found"

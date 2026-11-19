@@ -209,13 +209,12 @@ cp -r ~/.dotfiles-backup-{timestamp}/.zshrc ~/.zshrc
 **Solution:**
 
 ```bash
-# Backup and reinstall everything
-make reset
+# Back up existing files and reinstall
+make install-force
 
-# Or manual cleanup
-rm -rf ~/.dotfiles
-rm ~/.zshrc ~/.gitconfig ~/.tmux.conf
-# Then reinstall
+# Or remove the links and start over
+make uninstall
+make install
 ```
 
 ## Getting Help
