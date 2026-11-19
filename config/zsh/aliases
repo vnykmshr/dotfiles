@@ -126,7 +126,6 @@ alias e='$EDITOR'
 # Node.js
 alias npm-update='npm update -g'
 alias npm-list='npm list -g --depth=0'
-alias npx='npx --yes'
 
 # Python
 alias py='python3'
