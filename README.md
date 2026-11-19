@@ -31,10 +31,10 @@ git clone https://github.com/vnykmshr/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 cp config.json.example config.json   # set your name, email and key paths
 make install-dry-run                 # preview
-make install                         # link configs, generate gitconfig and ssh config
+make install                         # link configs and generate personal ones
 ```
 
-`make install` only links files and generates configs; it needs `jq`
+`make install` only links configs and generates personal ones; it needs `jq`
 (shipped with macOS 15+). Without `config.json`, it creates one from the
 example and stops so you can edit it. Everything that touches the system is
 a separate, opt-in step:

@@ -16,7 +16,7 @@ help: ## Show this help
 	@echo
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[0;34m%-20s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install dotfiles
+install: ## Link configs and generate personal ones
 	@./install/setup.sh
 
 install-dry-run: ## Preview installation
@@ -108,7 +108,7 @@ INSTALL_LINKS := .zshrc .zshenv .gitconfig .gitignore_global .ssh/config .config
 # Created by earlier versions
 LEGACY_LINKS := .aliases .config/mise/config.toml
 
-uninstall: ## Uninstall dotfiles
+uninstall: ## Remove the links (keeps backups)
 	@echo "This removes the links install created"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
