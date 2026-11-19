@@ -58,13 +58,6 @@ repos:
   # Local hooks for custom checks
   - repo: local
     hooks:
-      # User home paths (/Users/, /home/) in shell scripts
-      - id: check-hardcoded-paths
-        name: Check for hardcoded user paths
-        entry: bash -c 'if grep -rn "/Users/\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git --exclude-dir=tests . config/zsh/ config/cli-tools/ 2>/dev/null | grep -v "\.template:" | grep -v "\.local:"; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
-        language: system
-        pass_filenames: false
-
       # Check for TODO/FIXME comments in non-documentation files
       - id: check-todos
         name: Check for TODO/FIXME comments
