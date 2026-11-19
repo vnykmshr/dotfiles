@@ -116,13 +116,14 @@ else
     fail "keybinding: word left"
 fi
 
-# No hardcoded user paths in tracked config
+# No hardcoded user home paths in tracked files
 echo ""
 echo "Portability checks..."
-if grep -r '/Users/vmx\|/home/vmx' "$PROJECT_ROOT/config/zsh/" --include="*" -l 2>/dev/null | grep -v '.local$' | grep -v '.local.template$'; then
-    fail "hardcoded user paths in tracked files"
-else
+user_paths=$(git -C "$PROJECT_ROOT" grep -nE '/(Users|home)/[A-Za-z0-9._-]+' || true)
+if [[ -z $user_paths ]]; then
     pass "no hardcoded user paths"
+else
+    fail "hardcoded user paths: $user_paths"
 fi
 
 # Summary
