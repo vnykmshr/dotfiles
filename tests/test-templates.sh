@@ -209,6 +209,7 @@ if [[ -f $git_out ]]; then
     assert_not_contains "git: no git:// fetch target" '[url "git://' "$git_content"
     assert_not_contains "git: git:// transport not allowed" '[protocol "git"]' "$git_content"
     assert_eq "git: gitconfig.local include is last" "[include]" "$(grep '^\[' "$git_out" | tail -1)"
+    assert_eq "git: ends with a newline" "" "$(tail -c1 "$git_out")"
 else
     fail "git config generated" "$git_out missing"
 fi

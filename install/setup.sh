@@ -385,7 +385,8 @@ process_template_generic() {
     # Create output directory if needed
     mkdir -p "$(dirname "$output_file")"
 
-    printf '%s' "$content" >"$output_file"
+    # $(<file) strips the trailing newline; restore it so appending tools start a new line.
+    printf '%s\n' "$content" >"$output_file"
     log_success "Generated $description"
 }
 

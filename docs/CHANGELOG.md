@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `github:` and `gist:` URL shortcuts fetch over https instead of the retired `git://`
 - `/opt/homebrew` takes PATH precedence over `/usr/local` when both exist
 - Local-path clones no longer blocked by the protocol allowlist
+- Generated configs end with a newline again, so tools that append to them start a new line
 
 ## [4.0.0] - 2026-04-04
 
