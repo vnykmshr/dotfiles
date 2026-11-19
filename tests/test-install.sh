@@ -138,6 +138,23 @@ assert_eq "dry run: no generated files" "" \
     "$(cd "$DRY_REPO" && ls config/git/gitconfig config/ssh/config config/zsh/exports.local 2>/dev/null)"
 assert_eq "dry run: no stubbed commands called" "" "$(cat "$CALLS")"
 
+# Repo cloned at ~/.dotfiles (the README layout), plain and forced
+CLONE_HOME="$WORK/clone-home"
+copy_repo "$CLONE_HOME/.dotfiles"
+for mode in plain force; do
+    force=false
+    [[ $mode == force ]] && force=true
+    if in_home "$CLONE_HOME" env FORCE="$force" "$CLONE_HOME/.dotfiles/install/setup.sh" >"$WORK/clone-$mode.log" 2>&1; then
+        pass "clone at ~/.dotfiles, $mode: exits 0"
+    else
+        fail "clone at ~/.dotfiles, $mode: exits 0" "see output below"
+        cat "$WORK/clone-$mode.log"
+    fi
+    assert_eq "clone at ~/.dotfiles, $mode: repo in place" "yes" \
+        "$([[ -d $CLONE_HOME/.dotfiles && ! -L $CLONE_HOME/.dotfiles ]] && echo yes)"
+    assert_eq "clone at ~/.dotfiles, $mode: link set" "$(grep -v '^\.dotfiles$' <<<"$EXPECTED_LINKS")" "$(links_in "$CLONE_HOME")"
+done
+
 # First run without config.json: creates it and stops before linking
 NOCFG_REPO="$WORK/nocfg-repo"
 NOCFG_HOME="$WORK/nocfg-home"
