@@ -17,27 +17,34 @@ chmod +x install/setup.sh
 
 ### Files already exist
 
-**Problem:** Installation fails because config files exist
+**Problem:** Install warns `File exists: ~/.zshrc. Use --force to overwrite.`
+and skips that file
 
-**Solution:** Use force mode (creates backup first)
+**Solution:** Use force mode (moves the existing file to a backup first)
 
 ```bash
 make install-force
 ```
 
-Backups are saved to `~/.dotfiles-backup-{timestamp}/`
+Backups are saved to `~/.dotfiles-backup-{timestamp}/`; `make restore` puts
+them back.
 
-### Template placeholders remain
+### Install stops after creating config.json
 
-**Problem:** Configs contain `{{ user.name }}` after installation
+**Problem:** First `make install` prints `Created config.json from example
+template` and exits
 
-**Solution:** Create `config.json` from template
+**Solution:** Edit `config.json` with your details, then run it again
 
 ```bash
-cp config.json.example config.json
-# Edit config.json with your details
 make install
 ```
+
+### jq is required
+
+**Problem:** Install exits with `jq is required to read config.json`
+
+**Solution:** `make packages`, or install jq with your package manager
 
 ## Shell Issues
 
@@ -51,13 +58,13 @@ make install
 # Benchmark startup time
 ./bin/shell-bench
 
-# Profile zsh startup (shows what's slow)
-time zsh -i -c exit
+# Profile zsh startup (zprof report)
+DOTFILES_DEBUG=true zsh -i -c exit
 ```
 
 **Solutions:**
 
-- Disable optional modules: `export DOTFILES_SKIP_CROSS_PLATFORM=1`
+- Skip the Linux/WSL shims: `export DOTFILES_SKIP_CROSS_PLATFORM=1` in `~/.exports.local`
 - Check for network-dependent operations
 - Review `.zshrc` for heavy operations
 
@@ -106,7 +113,7 @@ make install
 
 ```bash
 which delta
-git config --get core.pager  # Should show 'delta'
+git config --get pager.diff  # Should show the delta path
 ```
 
 ## Tool-Specific Issues
@@ -143,7 +150,7 @@ nvim --headless "+Lazy! sync" +qa
 
 ```bash
 brew install mise              # macOS
-curl https://mise.run | sh     # Linux
+curl -fsS https://mise.run | sh  # Linux
 ```
 
 ## Platform-Specific
@@ -166,7 +173,7 @@ curl https://mise.run | sh     # Linux
 
 **Problem:** bash still loads instead of zsh
 
-**Solution:**
+**Solution:** `make packages` sets it, or by hand:
 
 ```bash
 chsh -s $(which zsh)
@@ -194,12 +201,8 @@ git clone https://github.com/vnykmshr/dotfiles.git .dotfiles
 **Solution:**
 
 ```bash
-# List backups
-ls -la ~ | grep dotfiles-backup
-
-# Manually restore (replace {timestamp})
-cp -r ~/.dotfiles-backup-{timestamp}/.zshrc ~/.zshrc
-# Repeat for other files
+make uninstall   # remove the links
+make restore     # pick a backup; files go back to their original paths
 ```
 
 ### Reset to clean state
@@ -221,7 +224,6 @@ make install
 
 If issues persist:
 
-1. **Check logs:** Installation creates logs in `/tmp/`
-2. **Run tests:** `make test` to verify setup
-3. **Dry run:** `make install-dry-run` to see what would change
-4. **Open an issue:** Include OS, shell version, error messages
+1. **Run tests:** `make test` to verify setup
+2. **Dry run:** `make install-dry-run` to see what would change
+3. **Open an issue:** Include OS, shell version, error messages

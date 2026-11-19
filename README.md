@@ -17,23 +17,31 @@ configurations.
 
 ## Features
 
-- **Fast Shell**: Sub-200ms startup with lazy loading
+- **Fast Shell**: Sub-200ms startup with completion caching
 - **CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
 - **Git Helpers**: Extensive git aliases and workflow scripts
 - **Organized Functions**: Shell functions in logical categories
-- **Cross-Platform**: macOS, Linux, WSL
+- **Cross-Platform**: macOS and Linux, with WSL shims
 - **Quality**: Pre-commit hooks and automated tests
 
 ## Quick Start
 
 ```bash
-# Clone and preview
 git clone https://github.com/vnykmshr/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
-make install-dry-run
+cp config.json.example config.json   # set your name, email and key paths
+make install-dry-run                 # preview
+make install                         # link configs, generate gitconfig and ssh config
+```
 
-# Install
-make install
+`make install` only links files and generates configs; it needs `jq`
+(shipped with macOS 15+). Without `config.json`, it creates one from the
+example and stops so you can edit it. Everything that touches the system is
+a separate, opt-in step:
+
+```bash
+make packages        # prerequisites, Homebrew/apt packages, mise runtimes; zsh as login shell
+make macos-defaults  # macOS system preferences (see install/defaults/README.md)
 ```
 
 ## Design Principles
@@ -68,28 +76,31 @@ config/
 ├── tmux/         # Terminal multiplexer
 ├── ssh/          # SSH client templates
 ├── cli-tools/    # CLI tool init and fallbacks
-└── workflow/     # Git helpers (optional)
+└── workflow/     # Git helper script
 ```
 
-Each component is optional and independently configurable with
-`DOTFILES_SKIP_*` variables.
+CLI tool integrations load only when the tool is installed. The private
+TMPDIR is opt-in (`DOTFILES_TMPDIR`), and the Linux/WSL shims can be
+skipped (`DOTFILES_SKIP_CROSS_PLATFORM`).
 
 ### Progressive Enhancement
 
 - Works out-of-the-box with sensible defaults
 - Graceful fallbacks when tools aren't available
 - Optional features can be disabled without breaking the system
-- Performance-conscious with lazy loading
+- Performance-conscious: startup is measured (`shell-bench`)
 
 ## Key Commands
 
 ```bash
 # Installation & Management
-make install        # Install dotfiles
+make install          # Link configs and generate personal ones
 make install-dry-run  # Preview changes
-make restore        # Restore from backup
-make uninstall      # Remove dotfiles (preserves backups)
-make test          # Run validation tests
+make packages         # Install packages, set zsh as login shell
+make macos-defaults   # Apply macOS system preferences
+make restore          # Put back files an install replaced
+make uninstall        # Remove the links (keeps backups)
+make test             # Run the test suites
 
 # Git workflow helpers (config/workflow/git-helpers)
 mygh               # Repo status; `mygh help` lists pull, new, switch, clean
@@ -100,7 +111,7 @@ ga                 # git add
 gc                 # git commit
 gd                 # git diff
 gp                 # git push
-gl                 # git pull
+gl                 # git log --oneline
 
 # Performance
 shell-bench        # Measure startup time
@@ -110,12 +121,12 @@ shell-bench        # Measure startup time
 
 ### Shell Environment (Zsh)
 
-- Sub-200ms startup with lazy loading and completion caching
-- History with search and deduplication
+- Sub-200ms startup with completion caching
+- Shared, deduplicated history; a leading space keeps a command out of it
 - CLI tools (bat, eza, fd, ripgrep) with fallbacks
 - Organized functions in logical categories
-- Cross-platform support (macOS, Linux, WSL)
-- Security automation and TMPDIR management
+- Linux and WSL shims for `pbcopy`, `pbpaste` and `open`
+- Optional private TMPDIR (`DOTFILES_TMPDIR`)
 
 **Customize in**:
 
@@ -125,7 +136,7 @@ shell-bench        # Measure startup time
 ### Git Integration
 
 - Extensive aliases: `g`, `ga`, `gc`, `gd`, `gp`, `gl`, `gnew`, `gswitch`
-- Workflow helpers: `gpull`, `gclean` (via git-helpers script)
+- Workflow helpers: `mygh`, `gpull`, `gclean` (via git-helpers script)
 - Diffs through delta
 - Global gitignore covering major platforms
 - SSH signing support
@@ -158,23 +169,24 @@ auto-normalized with a warning.
 
 **Personal Aliases**: Add shortcuts to `config/zsh/personal-aliases`.
 
-**Personal Functions**: Add utilities to `config/zsh/personal.local`.
+**Personal Functions and Overrides**: Use `config/zsh/personal.local`
+(gitignored, loaded after the other modules). Start from `config/zsh/personal.local.template`.
+Don't edit `config/zsh/exports.local`: install regenerates it.
 
-**Local Overrides**: Use `config/zsh/personal.local` (gitignored)
-for machine-specific config.
-
-### Performance Tuning
-
-Skip features you don't need in `config/zsh/exports.local` (gitignored):
+### Optional Features
 
 ```bash
+# In config/zsh/personal.local
+export DOTFILES_TMPDIR="$HOME/tmp"     # Private TMPDIR, created 700 and excluded from Time Machine
+
+# In ~/.exports.local (read before modules load)
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
 ```
 
 ### Environment-Specific Setup
 
 ```bash
-# Add to config/zsh/exports.local
+# Add to config/zsh/personal.local
 if [[ "$HOST" == "work-laptop" ]]; then
     alias k="kubectl --context=work"
 fi
@@ -183,7 +195,7 @@ fi
 ## Testing Your Changes
 
 ```bash
-make test           # Run validation tests
+make test          # Run the test suites
 make lint          # Run pre-commit hooks
 shell-bench        # Performance impact
 ```
@@ -195,19 +207,15 @@ shell-bench        # Performance impact
 
 ## Requirements
 
-- **macOS**: Xcode Command Line Tools
-- **Linux**: git, curl, zsh
-- **Optional**: homebrew (macOS), mise (language runtime manager)
+- **macOS**: Xcode Command Line Tools; jq (ships with macOS 15+)
+- **Linux**: git, curl, zsh, jq
+- **Optional**: Homebrew and mise, installed by `make packages`
 
 ## Platform Support
 
-Tested and supported on:
-
-- macOS (Intel and Apple Silicon)
-- Ubuntu / Debian
-- Fedora / RHEL / CentOS
-- Arch Linux
-- WSL (Windows Subsystem for Linux)
+CI runs the tests on macOS (Apple Silicon) and Ubuntu.
+`make packages` also has package lists for Debian, Fedora/RHEL and Arch,
+and the shell has WSL shims; those paths are not covered by CI.
 
 ## License
 
