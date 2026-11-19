@@ -46,7 +46,7 @@ path=(
 )
 
 # Add brew paths if they exist
-for brew_path in "/opt/homebrew/bin" "/usr/local/bin"; do
+for brew_path in "/opt/homebrew/sbin" "/opt/homebrew/bin" "/usr/local/sbin" "/usr/local/bin"; do
     [[ -d "$brew_path" ]] && path=("$brew_path" $path)
 done
 
