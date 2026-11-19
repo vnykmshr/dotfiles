@@ -206,6 +206,7 @@ if [[ -f $git_out ]]; then
     assert_not_contains 'git: no literal $HOME' '$HOME' "$git_content"
     assert_not_contains "git: no leftover {{" "{{" "$git_content"
     assert_contains "git: name with & preserved" "Tom & Jerry" "$git_content"
+    assert_not_contains "git: no git:// URLs" "git://" "$git_content"
 else
     fail "git config generated" "$git_out missing"
 fi
