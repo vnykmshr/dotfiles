@@ -17,7 +17,7 @@ INJECTION_MARKER="$TEST_DIR/PWNED"
 TESTS_PASSED=0
 TESTS_FAILED=0
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 cleanup() { rm -rf "$TEST_DIR"; }
 trap cleanup EXIT
 

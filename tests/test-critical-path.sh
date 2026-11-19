@@ -11,7 +11,7 @@ TESTS_PASSED=0
 TESTS_FAILED=0
 
 # Cleanup on exit
-# shellcheck disable=SC2317
+# shellcheck disable=SC2329
 cleanup() {
     rm -rf "$TEST_DIR"
 }
