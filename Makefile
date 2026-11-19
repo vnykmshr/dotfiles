@@ -29,9 +29,9 @@ test: ## Run all tests
 	$(call blue,"Running tests...")
 	@./tests/test-all.sh
 
-lint: ## Lint shell scripts
-	$(call blue,"Linting scripts...")
-	@./tests/lint.sh
+lint: ## Run pre-commit hooks on all files
+	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
+	@pre-commit run --all-files
 
 quality: lint test ## Run all quality checks
 

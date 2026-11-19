@@ -41,25 +41,19 @@ else
     fail "syntax: cli-tools/init"
 fi
 
-# Shell script syntax
+# Bash syntax for every tracked bash script
 echo ""
 echo "Shell script syntax..."
-for f in "$PROJECT_ROOT"/bin/*; do
-    [ -f "$f" ] || continue
-    name=$(basename "$f")
+while IFS= read -r -d '' rel; do
+    f="$PROJECT_ROOT/$rel"
+    [[ -f $f ]] || continue
+    [[ $rel == *.sh ]] || head -1 "$f" | grep -qE '^#!.*[/ ]bash$' || continue
     if bash -n "$f" 2>/dev/null; then
-        pass "syntax: bin/$name"
+        pass "syntax: $rel"
     else
-        fail "syntax: bin/$name"
+        fail "syntax: $rel"
     fi
-done
-
-# Workflow scripts
-if bash -n "$PROJECT_ROOT/config/workflow/git-helpers" 2>/dev/null; then
-    pass "syntax: workflow/git-helpers"
-else
-    fail "syntax: workflow/git-helpers"
-fi
+done < <(git -C "$PROJECT_ROOT" ls-files -z)
 
 # Zsh config loads without error
 # Set DOTFILES so zshrc can find modules (no ~/.dotfiles symlink in CI)

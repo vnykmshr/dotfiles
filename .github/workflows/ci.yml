@@ -24,9 +24,6 @@ jobs:
     - name: Run tests
       run: ./tests/test-all.sh
 
-    - name: Run linting
-      run: ./tests/lint.sh
-
     - name: Test dry-run install
       run: DRY_RUN=true ./install/setup.sh
 

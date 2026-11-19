@@ -187,7 +187,7 @@ fi
 
 ```bash
 make test           # Run validation tests
-make lint          # Shell script linting
+make lint          # Run pre-commit hooks
 shell-bench        # Performance impact
 ```
 
