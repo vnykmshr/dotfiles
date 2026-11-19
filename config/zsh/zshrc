@@ -26,6 +26,9 @@ setopt EXTENDED_GLOB GLOB_DOTS
 # Other essentials
 setopt INTERACTIVE_COMMENTS PROMPT_SUBST
 
+# Emacs keymap before any module binds keys: EDITOR=*vi* selects viins otherwise
+bindkey -e
+
 # Environment
 export EDITOR="${EDITOR:-nvim}" VISUAL="$EDITOR" PAGER="${PAGER:-less}"
 export LESS='-R -i -w -M -z-4' LESSHISTFILE=/dev/null
@@ -95,7 +98,6 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' use-cache yes cache-path ~/.zsh/cache
 
 # Key bindings
-bindkey -e
 bindkey '^R' history-incremental-search-backward
 bindkey '^P' history-search-backward
 bindkey '^N' history-search-forward

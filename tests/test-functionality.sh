@@ -98,6 +98,16 @@ for func in mkcd backup extract gitlog gsl reload status; do
     fi
 done
 
+# Module keybindings survive into the final keymap
+echo ""
+echo "Keybinding checks..."
+if [[ $OSTYPE == darwin* ]]; then word_left='^[[1;3D'; else word_left='^[[1;5D'; fi
+if EDITOR=nvim zsh -c "$ZSH_SOURCE 2>/dev/null; bindkey '$word_left'" 2>/dev/null | grep -q backward-word; then
+    pass "keybinding: word left"
+else
+    fail "keybinding: word left"
+fi
+
 # No hardcoded user paths in tracked config
 echo ""
 echo "Portability checks..."
