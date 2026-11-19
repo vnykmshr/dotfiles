@@ -19,7 +19,11 @@ main() {
         read -r -p "Overwrite it? (y/N): " choice
         case "$choice" in
             [yY] | [yY][eE][sS])
-                cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+                local backup_dir
+                backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+                mkdir -p "$backup_dir"
+                cp "$CONFIG_FILE" "$backup_dir/personal.local"
+                echo "Backed up to $backup_dir/personal.local"
                 ;;
             *)
                 echo "Kept $CONFIG_FILE. Template: $TEMPLATE_FILE"
