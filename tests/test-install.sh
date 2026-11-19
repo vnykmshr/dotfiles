@@ -249,6 +249,17 @@ ln -s /nonexistent-volume/ssh/config "$FOREIGN_HOME/.ssh/config"
 printf '1\n' | env HOME="$FOREIGN_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1 || true
 assert_eq "restore: dangling foreign link kept" "/nonexistent-volume/ssh/config" "$(readlink "$FOREIGN_HOME/.ssh/config")"
 
+# Restore refuses dry run rather than changing HOME
+DRYR_HOME="$WORK/dryr-home"
+mkdir -p "$DRYR_HOME/.dotfiles-backup-20250101-000000"
+echo "old zshrc" >"$DRYR_HOME/.dotfiles-backup-20250101-000000/.zshrc"
+if printf '1\n' | env HOME="$DRYR_HOME" DRY_RUN=true make -s -C "$REPO" restore >/dev/null 2>&1; then
+    fail "restore, dry run: refused" "exited 0"
+else
+    pass "restore, dry run: refused"
+fi
+assert_eq "restore, dry run: HOME untouched" "no" "$([[ -e $DRYR_HOME/.zshrc ]] && echo yes || echo no)"
+
 # Restore with no backups fails before prompting
 NONE_HOME="$WORK/none-home"
 mkdir -p "$NONE_HOME"

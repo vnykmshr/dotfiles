@@ -141,6 +141,10 @@ main() {
     fi
 
     if [[ $MODE == "restore" ]]; then
+        if [[ $DRY_RUN == "true" ]]; then
+            log_error "--restore has no dry run"
+            exit 1
+        fi
         restore_backup
         return
     fi
