@@ -225,9 +225,6 @@ setup_symlinks() {
 
     # Tmux configuration
     link_config "config/tmux/tmux.conf" ".tmux.conf"
-
-    # mise configuration
-    link_config "config/mise/config.toml" ".config/mise/config.toml"
 }
 
 # Create initial config.json from example if it doesn't exist
