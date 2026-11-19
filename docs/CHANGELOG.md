@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `make packages` continues past a failed install and exits non-zero with the count at the end
+- Uninstall and restore leave links that point outside the repo alone
 - **Breaking:** `make install` only links configs and generates personal ones; packages, login shell and macOS defaults moved to `make packages` and `make macos-defaults`
 - **Breaking:** the private TMPDIR is opt-in; set `DOTFILES_TMPDIR="$HOME/tmp"` in `config/zsh/personal.local`
 - Install requires jq
@@ -43,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- `terraform` and the retired `homebrew/cask-fonts` tap from the macOS package lists
 - zsh modules: `history` (`HIST_*` options stay in zshrc), `security-automation`, `performance`, `dev-automation`, `go-dev`, `config/workflow/init` and `aliases` (`gw`, `gws`, `workcheck`), unloaded `completions`
 - `DOTFILES_SKIP_HISTORY`, `_SECURITY`, `_PERFORMANCE`, `_DIRENV`, `_WORKFLOW` and `_TMPDIR`; `DOTFILES_SKIP_CROSS_PLATFORM` remains, set in `~/.exports.local`
 - `bin/dotfiles`, `bin/workflow-helper` and `bin/check-alias-conflicts`; use the make targets
@@ -58,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `make restore` keeps the modes of `~` and `~/.ssh`, and skips entries of pre-v5 backups it does not manage
+- No startup warning when the repo is cloned at `~/.dotfiles`
+- Forced install through a symlinked `~/.dotfiles` no longer points the link at itself
+- Install works with `USER` unset
+- Linux fzf install no longer appends to `~/.zshrc` (the tracked zshrc)
+- `psg` no longer expands the `ps` alias
 - Install from a clone at `~/.dotfiles` works, and `--force` no longer moves the repo into the backup
 - First install links `~/.ssh/config`
 - Install no longer links a missing mise config
@@ -68,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Piped installers fail on download errors
 - A shell started in a Go project no longer puts `./bin` first on PATH
 - Word-movement keys survive `EDITOR=nvim`
-- README and troubleshooting match the install flow; `gl` is `git log`
+- README Quick Start includes the config.json step; `gl` documented as `git log`; platform claims match CI
 - Template processor no longer uses `eval` or `sed`; `&`, `|` and `\1` in values are preserved, including on bash < 5.2
 - `$HOME` and `~/` prefixes normalized in `config.json` values
 - ssh `UseKeychain` no longer fatal on Linux
