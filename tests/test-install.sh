@@ -121,6 +121,35 @@ else
 fi
 assert_eq "uninstall: no links left" "" "$(links_in "$HOME_DIR")"
 
+# Forced install over real files, then restore them
+RESTORE_REPO="$WORK/restore-repo"
+RESTORE_HOME="$WORK/restore-home"
+copy_repo "$RESTORE_REPO"
+mkdir -p "$RESTORE_HOME/.config/nvim" "$RESTORE_HOME/.ssh"
+echo "own zshrc" >"$RESTORE_HOME/.zshrc"
+echo "own ssh" >"$RESTORE_HOME/.ssh/config"
+echo "own nvim" >"$RESTORE_HOME/.config/nvim/init.lua"
+repo_zshrc_before=$(cat "$RESTORE_REPO/config/zsh/zshrc")
+in_home "$RESTORE_HOME" env FORCE=true "$RESTORE_REPO/install/setup.sh" >"$WORK/restore-install.log" 2>&1 || true
+# A second install must not leave a newer, empty backup in front
+in_home "$RESTORE_HOME" "$RESTORE_REPO/install/setup.sh" >/dev/null 2>&1 || true
+assert_eq "backup: one per install that replaced files" "1" \
+    "$(find "$RESTORE_HOME" -maxdepth 1 -name '.dotfiles-backup-*' | wc -l | tr -d ' ')"
+if printf '1\n' | env HOME="$RESTORE_HOME" make -s -C "$RESTORE_REPO" restore >"$WORK/restore.log" 2>&1; then
+    pass "restore exits 0"
+else
+    fail "restore exits 0" "$(cat "$WORK/restore.log")"
+fi
+assert_eq "restore: ~/.zshrc back" "own zshrc" "$(cat "$RESTORE_HOME/.zshrc" 2>/dev/null)"
+assert_eq "restore: ~/.ssh/config back" "own ssh" "$(cat "$RESTORE_HOME/.ssh/config" 2>/dev/null)"
+assert_eq "restore: ~/.config/nvim back" "own nvim" "$(cat "$RESTORE_HOME/.config/nvim/init.lua" 2>/dev/null)"
+assert_eq "restore: repo files untouched" "$repo_zshrc_before" "$(cat "$RESTORE_REPO/config/zsh/zshrc")"
+if printf '99\n' | env HOME="$RESTORE_HOME" make -s -C "$RESTORE_REPO" restore >/dev/null 2>&1; then
+    fail "restore: unknown backup fails" "exited 0"
+else
+    pass "restore: unknown backup fails"
+fi
+
 # Dry run
 DRY_REPO="$WORK/dry-repo"
 DRY_HOME="$WORK/dry-home"

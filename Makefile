@@ -55,23 +55,33 @@ update: ## Update from git
 
 sync: update install ## Update and install
 
-restore: ## Restore from backup
+restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
 	@echo "Available backups:"
 	@ls -1td ~/.dotfiles-backup-* 2>/dev/null | head -5 | nl || echo "No backups found"
 	@echo
-	@read -p "Enter backup number to restore (or path): " backup; \
+	@set -e; \
+	read -p "Enter backup number to restore (or path): " backup; \
 	if [[ $$backup =~ ^[0-9]+$$ ]]; then \
 		backup_path=$$(ls -1td ~/.dotfiles-backup-* 2>/dev/null | sed -n "$${backup}p"); \
 	else \
 		backup_path=$$backup; \
 	fi; \
-	if [[ ! -d "$$backup_path" ]]; then \
-		echo "❌ Backup not found: $$backup_path"; \
+	if [[ -z "$$backup_path" || ! -d "$$backup_path" ]]; then \
+		echo "Backup not found: $${backup_path:-$$backup}" >&2; \
+		exit 1; \
+	fi; \
+	if [[ -z "$$(ls -A "$$backup_path")" ]]; then \
+		echo "Backup is empty: $$backup_path" >&2; \
 		exit 1; \
 	fi; \
 	echo "Restoring from: $$backup_path"; \
-	cp -rv "$$backup_path"/.??* ~/ 2>/dev/null || true; \
-	echo "✅ Restore complete"
+	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
+		if [[ -L ~/$$link ]] && [[ -e "$$backup_path/$$link" || -L "$$backup_path/$$link" ]]; then \
+			rm -f ~/$$link; \
+		fi; \
+	done; \
+	cp -Rp "$$backup_path"/. ~/; \
+	echo "Restore complete"
 
 # Must match setup_symlinks in install/setup.sh
 INSTALL_LINKS := .zshrc .zshenv .gitconfig .gitignore_global .ssh/config .config/nvim .tmux.conf

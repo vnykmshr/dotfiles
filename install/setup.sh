@@ -122,20 +122,16 @@ main() {
         exit 1
     fi
 
-    # Create backup directory if needed
-    if [[ $DRY_RUN != "true" ]]; then
-        mkdir -p "$BACKUP_DIR"
-        log_info "Backup directory: $BACKUP_DIR"
-    fi
-
     create_dotfiles_symlink
     process_templates
     setup_symlinks
 
     log_success "Dotfiles setup complete!"
 
+    if [[ -d $BACKUP_DIR ]]; then
+        log_info "Replaced files backed up to: $BACKUP_DIR (make restore)"
+    fi
     if [[ $DRY_RUN != "true" ]]; then
-        log_info "Backup created at: $BACKUP_DIR"
         log_info "Run 'source ~/.zshrc' or restart your shell to apply changes"
     fi
 }
@@ -205,10 +201,9 @@ create_dotfiles_symlink() {
     # Handle existing file/directory/symlink
     if [[ -e $target_link ]]; then
         if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
-            local backup_name
-            backup_name="dotfiles-$(date +%Y%m%d-%H%M%S)"
-            run_cmd "mv \"$target_link\" \"$BACKUP_DIR/$backup_name\""
-            log_info "Backed up existing .dotfiles to $BACKUP_DIR/$backup_name"
+            run_cmd "mkdir -p \"$BACKUP_DIR\""
+            run_cmd "mv \"$target_link\" \"$BACKUP_DIR/.dotfiles\""
+            log_info "Backed up existing .dotfiles to $BACKUP_DIR/.dotfiles"
         else
             log_warn ".dotfiles already exists at $target_link"
             log_warn "Use --force to overwrite or remove it manually"
@@ -569,9 +564,9 @@ link_config() {
     # Backup existing file if it exists and is not a symlink
     if [[ -e $target_path && ! -L $target_path ]]; then
         if [[ $FORCE == "true" || $DRY_RUN == "true" ]]; then
-            local backup_file
-            backup_file="$(basename "$target_path")"
-            run_cmd "mv \"$target_path\" \"$BACKUP_DIR/$backup_file\""
+            # Same relative path as in HOME, so make restore can copy it back
+            run_cmd "mkdir -p \"$(dirname "$BACKUP_DIR/$target")\""
+            run_cmd "mv \"$target_path\" \"$BACKUP_DIR/$target\""
         else
             log_warn "File exists: $target_path. Use --force to overwrite."
             return
