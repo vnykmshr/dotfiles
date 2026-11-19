@@ -64,7 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Install skips a link whose source is missing
 - `--restore` refuses dry run; dry-run uninstall reports what it would remove
 - `make packages` on a fresh Mac finds Homebrew right after installing it
-- `make uninstall` and `make restore` work through `make -f` from another directory, and remove links left dangling by a moved clone
+- Every make target works through `make -f` from another directory; `make uninstall` and `make restore` also remove links left dangling by a moved clone while `~/.dotfiles` still points at the old clone
 - `make restore` creates a missing `~/.ssh` with mode 700
 - `make packages` reuses an existing `~/.fzf` checkout
 - `bin/setup-personal-config` works with `EDITOR` unset and backs up to `~/.dotfiles-personal-backup-*`
