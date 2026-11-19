@@ -65,17 +65,3 @@ if command -v direnv >/dev/null 2>&1; then
     export DIRENV_LOG_FORMAT=""
     eval "$(direnv hook zsh)"
 fi
-
-# --- diagnostics ---
-check_modern_tools() {
-    local tools=("eza:ll/la/lt" "bat:cat" "rg:grep" "fd:find" "delta:diff" "zoxide:cd")
-    for entry in "${tools[@]}"; do
-        local cmd="${entry%%:*}" desc="${entry##*:}"
-        if command -v "$cmd" >/dev/null 2>&1; then
-            printf '  installed  %s (%s replacement)\n' "$cmd" "$desc"
-        else
-            printf '  MISSING    %s (%s replacement)\n' "$cmd" "$desc"
-        fi
-    done
-}
-alias tools='check_modern_tools'

@@ -8,7 +8,7 @@ define blue
 	@printf "\033[0;34m$(1)\033[0m\n"
 endef
 
-.PHONY: help install test validate clean tools
+.PHONY: help install test validate clean
 
 help: ## Show this help
 	@echo "Dotfiles Management Commands"
@@ -47,21 +47,6 @@ status: ## Show status
 	@echo "🔀 $(shell git branch --show-current 2>/dev/null || echo 'not a git repo')"
 	@echo "📊 $(shell find . -name '*.sh' | wc -l | tr -d ' ') shell scripts"
 	@echo "⚙️  $(shell find config -type f | wc -l | tr -d ' ') config files"
-
-tools: ## Show development tools status
-	$(call blue,"Development Tools Status")
-	@echo "Core tools:"
-	@printf "  %-12s %s\n" "pre-commit:" "$$(command -v pre-commit >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "mise:" "$$(command -v mise >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "shellcheck:" "$$(command -v shellcheck >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "shfmt:" "$$(command -v shfmt >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@echo "CLI tools:"
-	@printf "  %-12s %s\n" "ripgrep:" "$$(command -v rg >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "fd:" "$$(command -v fd >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "bat:" "$$(command -v bat >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "eza:" "$$(command -v eza >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "delta:" "$$(command -v delta >/dev/null && echo '✅ installed' || echo '❌ not found')"
-	@printf "  %-12s %s\n" "zoxide:" "$$(command -v zoxide >/dev/null && echo '✅ installed' || echo '❌ not found')"
 
 clean: ## Clean temporary files
 	@find . -name "*.backup.*" -delete 2>/dev/null || true
