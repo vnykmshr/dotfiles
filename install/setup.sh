@@ -264,8 +264,9 @@ setup_symlinks() {
     local entry src
     for entry in "${LINKS[@]}"; do
         src="${entry#*:}"
-        # Dry run has not generated the template outputs yet
-        if [[ ! -e $DOTFILES_DIR/$src && $DRY_RUN != "true" ]]; then
+        # Dry run has not generated template outputs yet: a template stands in
+        if [[ ! -e $DOTFILES_DIR/$src ]] &&
+            [[ $DRY_RUN != "true" || ! -e $DOTFILES_DIR/$src.template ]]; then
             log_warn "Not linking ~/${entry%%:*}: $src is missing"
             continue
         fi

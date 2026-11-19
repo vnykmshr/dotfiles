@@ -185,6 +185,8 @@ echo "own ssh" >"$NOSSH_HOME/.ssh/config"
 in_home "$NOSSH_HOME" env FORCE=true "$NOSSH_REPO/install/setup.sh" >/dev/null 2>&1 || true
 assert_eq "no ssh template: real ~/.ssh/config kept" "own ssh" "$(cat "$NOSSH_HOME/.ssh/config" 2>/dev/null)"
 assert_eq "no ssh template: ~/.ssh/config not a link" "no" "$([[ -L $NOSSH_HOME/.ssh/config ]] && echo yes || echo no)"
+in_home "$NOSSH_HOME" env DRY_RUN=true FORCE=true "$NOSSH_REPO/install/setup.sh" >"$WORK/nossh-dry.log" 2>&1 || true
+assert_eq "no ssh template: dry run does not preview the link" "0" "$(grep -c 'ln -sf.*\.ssh/config' "$WORK/nossh-dry.log" || true)"
 
 # Clone path with a space
 SPACE_REPO="$WORK/space repo"
