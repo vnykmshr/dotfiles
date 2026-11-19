@@ -3,6 +3,9 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
+# Repo dir for make -C or make -f; an absolute -f path with a space is not supported
+REPO := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
 # Colors for output
 define blue
 	@printf "\033[0;34m$(1)\033[0m\n"
@@ -56,11 +59,11 @@ update: ## Update from git
 sync: update install ## Update and install
 
 restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
-	@./install/setup.sh --restore
+	@"$(REPO)/install/setup.sh" --restore
 
 uninstall: ## Remove the links (keeps backups)
 	@echo "This removes the links install created"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@./install/setup.sh --uninstall
+	@"$(REPO)/install/setup.sh" --uninstall
 	@echo "Uninstall complete. Run 'make restore' to put back files install replaced"

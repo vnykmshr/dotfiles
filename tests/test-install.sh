@@ -120,17 +120,11 @@ ln -s /nonexistent-volume/aliases "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
 touch "$WORK/elsewhere/config.toml"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
-links_before=$(links_in "$HOME_DIR")
-if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >/dev/null 2>&1; then
-    fail "uninstall via make -f elsewhere: fails" "exited 0"
+# Run from another directory through make -f
+if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
+    pass "uninstall via make -f elsewhere: exits 0"
 else
-    pass "uninstall via make -f elsewhere: fails"
-fi
-assert_eq "uninstall via make -f elsewhere: links intact" "$links_before" "$(links_in "$HOME_DIR")"
-if printf 'y\n' | env HOME="$HOME_DIR" make -s -C "$REPO" uninstall >"$WORK/uninstall.log" 2>&1; then
-    pass "uninstall exits 0"
-else
-    fail "uninstall exits 0" "$(cat "$WORK/uninstall.log")"
+    fail "uninstall via make -f elsewhere: exits 0" "$(cat "$WORK/uninstall.log")"
 fi
 assert_eq "uninstall: only the foreign links left" ".aliases
 .config/mise/config.toml" "$(links_in "$HOME_DIR")"
