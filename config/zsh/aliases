@@ -12,17 +12,15 @@ alias -- -='cd -'
 alias ws='cd ~/workspace'
 alias proj='cd ~/workspace/projects'
 
-# List files — ll/la/lt come from cli-tools/init when eza is available
-if ! command -v eza >/dev/null 2>&1; then
-    if [[ "$OSTYPE" == darwin* ]]; then
-        alias ls='ls -hFG'
-    else
-        alias ls='ls -hF --color=auto'
-    fi
-    alias ll='ls -la'
-    alias la='ls -A'
-    alias lt='tree -L 2'
+# List files; cli-tools/init replaces ll/la/lt with eza when installed
+if [[ "$OSTYPE" == darwin* ]]; then
+    alias ls='ls -hFG'
+else
+    alias ls='ls -hF --color=auto'
 fi
+alias ll='ls -la'
+alias la='ls -A'
+alias lt='tree -L 2'
 
 # Directory listing shortcuts
 alias lr='ls -R'
