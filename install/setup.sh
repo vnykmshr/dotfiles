@@ -111,8 +111,8 @@ main() {
     # Installation steps
     install_dependencies
     create_dotfiles_symlink
-    setup_symlinks
     process_templates
+    setup_symlinks
     install_packages
     configure_shell
     setup_development_tools
