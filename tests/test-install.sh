@@ -267,7 +267,8 @@ mkdir -p "$FAILSTUBS" "$FAIL_HOME"
 cp "$STUBS"/* "$FAILSTUBS"/
 printf '#!/bin/sh\necho "git $*" >>"%s"\n' "$CALLS" >"$FAILSTUBS/git"
 printf '#!/bin/sh\necho "brew $*" >>"%s"\ncase "$*" in "install --cask"*) exit 1 ;; esac\n' "$CALLS" >"$FAILSTUBS/brew"
-printf '#!/bin/sh\necho "sudo $*" >>"%s"\ncase "$*" in *" install "*) exit 1 ;; esac\n' "$CALLS" >"$FAILSTUBS/sudo"
+# Fail a core package (tmux), not the prerequisites: those abort by design
+printf '#!/bin/sh\necho "sudo $*" >>"%s"\ncase "$*" in *" tmux"*) exit 1 ;; esac\n' "$CALLS" >"$FAILSTUBS/sudo"
 chmod +x "$FAILSTUBS"/*
 if env -u USER HOME="$FAIL_HOME" PATH="$FAILSTUBS:/usr/bin:/bin" "$DRY_REPO/install/setup.sh" --packages </dev/null >"$WORK/pkgfail.log" 2>&1; then
     fail "packages, failing install: exits non-zero" "exited 0"
