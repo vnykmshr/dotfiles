@@ -120,12 +120,6 @@ ln -s /nonexistent-volume/aliases "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
 touch "$WORK/elsewhere/config.toml"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
-# make -f from another project: clean touches only the repo
-mkdir -p "$WORK/other-project"
-touch "$WORK/other-project/notes.backup.1"
-(cd "$WORK/other-project" && make -s -f "$REPO/Makefile" clean) >/dev/null 2>&1 || true
-assert_eq "make -f clean: caller's files kept" "yes" "$([[ -f $WORK/other-project/notes.backup.1 ]] && echo yes)"
-
 # Dry run reports what it would remove and removes nothing
 links_before=$(links_in "$HOME_DIR")
 in_home "$HOME_DIR" env DRY_RUN=true "$REPO/install/setup.sh" --uninstall >"$WORK/dry-uninstall.log" 2>&1 || true

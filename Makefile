@@ -11,7 +11,7 @@ define blue
 	@printf "\033[0;34m$(1)\033[0m\n"
 endef
 
-.PHONY: help install test clean
+.PHONY: help install test
 
 help: ## Show this help
 	@echo "Dotfiles Management Commands"
@@ -37,11 +37,6 @@ lint: ## Run pre-commit hooks on all files
 	@cd "$(REPO)" && pre-commit run --all-files
 
 quality: lint test ## Run all quality checks
-
-clean: ## Clean temporary files
-	@find "$(REPO)" -name "*.backup.*" -delete 2>/dev/null || true
-	@find "$(REPO)" -name ".DS_Store" -delete 2>/dev/null || true
-	@echo "Cleaned temporary files"
 
 dev: ## Install pre-commit hooks
 	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
