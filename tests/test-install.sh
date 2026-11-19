@@ -120,6 +120,7 @@ assert_eq "install: no package, shell or system commands" "" "$(cat "$CALLS")"
 # leaves a link that points elsewhere
 ln -s "$REPO/config/zsh/gone" "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
+touch "$WORK/elsewhere/config.toml"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
 # Run from another directory: the Makefile must not depend on the cwd
 if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
@@ -233,6 +234,16 @@ assert_eq "linked ~/.dotfiles: still points at the repo" "$LINKED_REPO" "$(readl
 assert_eq "linked ~/.dotfiles: no dangling links" "" "$(dangling_in "$LINKED_HOME")"
 printf 'y\n' | env HOME="$LINKED_HOME" make -s -C "$LINKED_HOME/.dotfiles" uninstall >/dev/null 2>&1 || true
 assert_eq "linked ~/.dotfiles: uninstall removes every link" "" "$(links_in "$LINKED_HOME")"
+
+# Clone moved after install: uninstall from the new place removes the now
+# dangling links
+MOVED_HOME="$WORK/moved-home"
+copy_repo "$WORK/moved-a"
+mkdir -p "$MOVED_HOME"
+in_home "$MOVED_HOME" "$WORK/moved-a/install/setup.sh" >/dev/null 2>&1 || true
+mv "$WORK/moved-a" "$WORK/moved-b"
+printf 'y\n' | env HOME="$MOVED_HOME" make -s -f "$WORK/moved-b/Makefile" uninstall >/dev/null 2>&1 || true
+assert_eq "moved clone: uninstall removes dangling links" "" "$(links_in "$MOVED_HOME")"
 
 # First run without config.json: creates it and stops before linking
 NOCFG_REPO="$WORK/nocfg-repo"

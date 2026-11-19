@@ -83,11 +83,11 @@ restore: ## Restore files an install replaced, from ~/.dotfiles-backup-*
 	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
 		managed+="$${link%%/*} "; \
 		[[ -e "$$backup_path/$$link" || -L "$$backup_path/$$link" ]] || continue; \
-		if [[ -e ~/$$link || -L ~/$$link ]] && ! owned_link ~/$$link "$$repo"; then \
+		if [[ -e ~/$$link || -L ~/$$link ]] && ! removable_link ~/$$link "$$repo"; then \
 			echo "Skipping ~/$$link: exists and is not a link into this repo" >&2; \
 			continue; \
 		fi; \
-		if owned_link ~/$$link "$$repo"; then \
+		if removable_link ~/$$link "$$repo"; then \
 			rm -f ~/$$link; \
 		fi; \
 		mkdir -p "$$(dirname ~/$$link)"; \
@@ -117,7 +117,7 @@ uninstall: ## Remove the links (keeps backups)
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
 	@set -e; source "$(REPO)/lib/utils.sh"; repo="$(REPO)"; \
 	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
-		if owned_link ~/$$link "$$repo"; then \
+		if removable_link ~/$$link "$$repo"; then \
 			echo "Removing symlink: ~/$$link"; \
 			rm -f ~/$$link; \
 		elif [[ -L ~/$$link ]]; then \

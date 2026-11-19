@@ -43,3 +43,8 @@ owned_link() {
     path="$(cd "$path" && pwd -P)$rest"
     [[ $path == "$2" || $path == "$2"/* ]]
 }
+
+# True when symlink $1 points into repo $2, or is dangling (removing it loses nothing)
+removable_link() {
+    owned_link "$1" "$2" || { [[ -L $1 ]] && [[ ! -e $1 ]]; }
+}
