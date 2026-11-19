@@ -102,18 +102,19 @@ restore: ## Restore from backup
 	cp -rv "$$backup_path"/.??* ~/ 2>/dev/null || true; \
 	echo "✅ Restore complete"
 
+# Must match setup_symlinks in install/setup.sh
+INSTALL_LINKS := .zshrc .zshenv .gitconfig .gitignore_global .ssh/config .config/nvim .tmux.conf
+# Created by earlier versions
+LEGACY_LINKS := .aliases .config/mise/config.toml
+
 uninstall: ## Uninstall dotfiles
 	@echo "⚠️  This will remove installed dotfiles"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@for file in zshrc gitconfig tmux.conf; do \
-		if [[ -L ~/.$$file ]]; then \
-			echo "Removing symlink: ~/.$$file"; \
-			rm -f ~/.$$file; \
+	@for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
+		if [[ -L ~/$$link ]]; then \
+			echo "Removing symlink: ~/$$link"; \
+			rm -f ~/$$link; \
 		fi; \
 	done
-	@if [[ -L ~/.dotfiles ]]; then \
-		echo "Removing symlink: ~/.dotfiles"; \
-		rm -f ~/.dotfiles; \
-	fi
 	@echo "✅ Uninstall complete. Run 'make restore' to restore from backup"
