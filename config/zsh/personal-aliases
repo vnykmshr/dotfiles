@@ -1,4 +1,5 @@
 # Personal Aliases
+# Example: the owner's shortcuts. Replace with yours.
 
 alias lg='git log --oneline --graph --decorate'
 
