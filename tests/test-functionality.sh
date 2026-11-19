@@ -123,6 +123,22 @@ else
     fail "bin/ names shadowed: $shadowed"
 fi
 
+# Prompt segments escape % from branch and directory names
+prompt_home=$(mktemp -d)
+mkdir -p "$prompt_home/.config/dotfiles" "$prompt_home/a%Bb"
+echo yes >"$prompt_home/.config/dotfiles/prompt-choice"
+git -C "$prompt_home/a%Bb" init -q
+git -C "$prompt_home/a%Bb" -c user.name=t -c user.email=t@t commit -q --allow-empty -m x
+git -C "$prompt_home/a%Bb" checkout -q -b 'x%F{red}y'
+prompt_out=$(cd "$prompt_home/a%Bb" && env -i HOME="$prompt_home" TERM=xterm PATH=/usr/bin:/bin \
+    zsh -c "DOTFILES=$PROJECT_ROOT; source $PROJECT_ROOT/config/zsh/zshrc >/dev/null 2>&1; git_prompt; dir_prompt" 2>/dev/null) || true
+rm -rf "$prompt_home"
+if [[ $prompt_out == *'x%%F{red}y'* && $prompt_out == *'a%%Bb'* ]]; then
+    pass "prompt: % escaped in branch and dir"
+else
+    fail "prompt: % escaped in branch and dir: $prompt_out"
+fi
+
 # Module keybindings survive into the final keymap
 echo ""
 echo "Keybinding checks..."

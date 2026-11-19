@@ -68,6 +68,8 @@ git_prompt() {
         branch=$(git rev-parse --short HEAD 2>/dev/null) || return
         branch="($branch)"
     }
+    # PROMPT_SUBST reads % in the output as prompt escapes
+    branch=${branch//\%/%%}
 
     status_symbols=""
 
@@ -110,7 +112,8 @@ git_prompt() {
 
 # Directory path, truncated
 dir_prompt() {
-    local current_dir="${PWD/#$HOME/~}"
+    # PROMPT_SUBST reads % in the output as prompt escapes
+    local current_dir="${${PWD/#$HOME/~}//\%/%%}"
     local dir_parts=("${(@s:/:)current_dir}")
     local result=""
 
@@ -143,7 +146,7 @@ exit_status() {
 
 # Virtual environment indicator
 venv_prompt() {
-    [[ -n "$VIRTUAL_ENV" ]] && echo "%F{cyan}($(basename $VIRTUAL_ENV))%f "
+    [[ -n "$VIRTUAL_ENV" ]] && echo "%F{cyan}(${${VIRTUAL_ENV:t}//\%/%%})%f "
 }
 
 # Node.js version indicator (if nvm/node is available and in a node project)
