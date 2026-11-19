@@ -98,6 +98,20 @@ for func in mkcd extract gsl reload; do
     fi
 done
 
+# bin/* scripts are reachable: no alias or function shadows one
+echo ""
+echo "bin/ shadowing checks..."
+bin_names=()
+for f in "$PROJECT_ROOT"/bin/*; do
+    [[ -f $f ]] && bin_names+=("$(basename "$f")")
+done
+shadowed=$(zsh -c "$ZSH_SOURCE 2>/dev/null; for n in \"\$@\"; do whence -w \"\$n\"; done" zsh "${bin_names[@]}" 2>/dev/null | grep -E ': (alias|function)$' || true)
+if [[ -z $shadowed ]]; then
+    pass "bin/ names not shadowed (${#bin_names[@]} scripts)"
+else
+    fail "bin/ names shadowed: $shadowed"
+fi
+
 # Module keybindings survive into the final keymap
 echo ""
 echo "Keybinding checks..."

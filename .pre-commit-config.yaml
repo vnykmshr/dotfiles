@@ -72,14 +72,6 @@ repos:
         language: system
         pass_filenames: false
 
-      # Validate aliases don't conflict with system commands
-      - id: check-alias-conflicts
-        name: Check for alias conflicts with system commands
-        entry: ./bin/check-alias-conflicts
-        language: system
-        pass_filenames: false
-        files: '^config/zsh/.*aliases.*'
-
       # Check shell function naming conventions
       - id: check-function-naming
         name: Check function naming conventions
