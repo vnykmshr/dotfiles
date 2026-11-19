@@ -20,41 +20,41 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[0;34m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: ## Link configs and generate personal ones
-	@./install/setup.sh
+	@"$(REPO)/install/setup.sh"
 
 install-dry-run: ## Preview installation
-	@DRY_RUN=true ./install/setup.sh
+	@DRY_RUN=true "$(REPO)/install/setup.sh"
 
 install-force: ## Force install (overwrite existing)
-	@FORCE=true ./install/setup.sh
+	@FORCE=true "$(REPO)/install/setup.sh"
 
 test: ## Run all tests
 	$(call blue,"Running tests...")
-	@./tests/test-all.sh
+	@"$(REPO)/tests/test-all.sh"
 
 lint: ## Run pre-commit hooks on all files
 	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
-	@pre-commit run --all-files
+	@cd "$(REPO)" && pre-commit run --all-files
 
 quality: lint test ## Run all quality checks
 
 clean: ## Clean temporary files
-	@find . -name "*.backup.*" -delete 2>/dev/null || true
-	@find . -name ".DS_Store" -delete 2>/dev/null || true
+	@find "$(REPO)" -name "*.backup.*" -delete 2>/dev/null || true
+	@find "$(REPO)" -name ".DS_Store" -delete 2>/dev/null || true
 	@echo "Cleaned temporary files"
 
 dev: ## Install pre-commit hooks
 	@command -v pre-commit >/dev/null || { echo "pre-commit not found: brew install pre-commit, or pipx install pre-commit"; exit 1; }
-	@pre-commit install
+	@cd "$(REPO)" && pre-commit install
 
 packages: ## Install prerequisites and packages, set zsh as login shell
-	@./install/setup.sh --packages
+	@"$(REPO)/install/setup.sh" --packages
 
 macos-defaults: ## Apply macOS system defaults (install/defaults/macos)
-	@./install/defaults/macos
+	@"$(REPO)/install/defaults/macos"
 
 update: ## Update from git
-	@git pull origin main
+	@git -C "$(REPO)" pull origin main
 
 sync: update install ## Update and install
 
