@@ -5,7 +5,7 @@ Quick reference for testing and exploring dotfiles functionality.
 ## File Operations
 
 ```bash
-ls, ll, la, lt          # Enhanced file listing (eza)
+ls, ll, la, lt          # File listing (ll/la/lt use eza when installed)
 cat file.md             # Syntax highlighting (bat)
 fd pattern              # Fast file search (fd)
 rg "search"             # Fast code search (ripgrep)
@@ -25,7 +25,7 @@ gws                     # Git status with helpers
 ## Navigation
 
 ```bash
-z project               # Smart jump to directory (zoxide)
+z project               # Jump to a frecent directory (zoxide)
 ..                      # Up one directory
 ...                     # Up two directories
 ```

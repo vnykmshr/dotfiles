@@ -18,6 +18,3 @@ alias brewski='brew update && brew upgrade && brew cleanup'
 
 # Development
 alias gor='go run'
-
-# claude
-alias cc='claude --permission-mode acceptEdits'

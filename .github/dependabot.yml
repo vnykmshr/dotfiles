@@ -9,7 +9,7 @@ updates:
       prefix: "ci"
 
   # Pre-commit hooks
-  - package-ecosystem: "pip"
+  - package-ecosystem: "pre-commit"
     directory: "/"
     schedule:
       interval: "weekly"

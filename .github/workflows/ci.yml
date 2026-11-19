@@ -19,13 +19,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update -q
-        sudo apt-get install -y shellcheck zsh jq
-
-    - name: Ensure scripts are executable
-      run: |
-        chmod +x tests/test-all.sh tests/test-critical-path.sh
-        chmod +x tests/test-functionality.sh tests/test-templates.sh tests/lint.sh
-        chmod +x install/setup.sh
+        sudo apt-get install -y zsh jq
 
     - name: Run tests
       run: ./tests/test-all.sh
@@ -33,18 +27,19 @@ jobs:
     - name: Run linting
       run: ./tests/lint.sh
 
-    - name: Run shellcheck
-      if: runner.os == 'Linux'
-      run: |
-        find . -name "*.sh" -not -path "./.git/*" -print0 | \
-          xargs -0 shellcheck --severity=warning
-        for f in bin/*; do
-          [ -f "$f" ] && head -1 "$f" | grep -q bash && \
-            shellcheck --severity=warning "$f"
-        done
-
     - name: Test dry-run install
       run: DRY_RUN=true ./install/setup.sh
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Install pre-commit
+      run: pipx install pre-commit
+
+    - name: Run hooks
+      run: pre-commit run --all-files --show-diff-on-failure
 
   security:
     # Shared workflow: https://github.com/1mb-dev/.github/blob/main/.github/workflows/secret-scan.yml

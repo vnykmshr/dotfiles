@@ -1,9 +1,7 @@
--- Modern Neovim Configuration
--- Professional setup with LSP, Treesitter, and modern plugins
+-- Neovim Configuration
+-- LSP, Treesitter, and plugins
 
--- =============================================================================
 -- Core Settings
--- =============================================================================
 
 -- Leader key
 vim.g.mapleader = ' '
@@ -32,7 +30,7 @@ opt.swapfile = false          -- No swap files
 opt.tabstop = 4               -- Tab width
 opt.shiftwidth = 4            -- Indent width
 opt.expandtab = true          -- Use spaces instead of tabs
-opt.smartindent = true        -- Smart auto-indenting
+opt.smartindent = true        -- Syntax-aware auto-indent
 opt.autoindent = true         -- Copy indent from current line
 
 -- Search
@@ -50,9 +48,7 @@ opt.updatetime = 250          -- Faster completion
 opt.timeoutlen = 300          -- Key timeout
 opt.lazyredraw = true         -- Faster scrolling
 
--- =============================================================================
 -- Plugin Management with lazy.nvim
--- =============================================================================
 
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
@@ -68,9 +64,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
-  -- ==========================================================================
   -- UI Enhancements
-  -- ==========================================================================
 
   -- Color scheme
   {
@@ -140,9 +134,7 @@ require('lazy').setup({
     end,
   },
 
-  -- ==========================================================================
   -- LSP and Completion
-  -- ==========================================================================
 
   -- LSP Configuration
   {
@@ -167,9 +159,7 @@ require('lazy').setup({
     },
   },
 
-  -- ==========================================================================
   -- Syntax Highlighting and Parsing
-  -- ==========================================================================
 
   -- Treesitter
   {
@@ -198,9 +188,7 @@ require('lazy').setup({
     end,
   },
 
-  -- ==========================================================================
   -- Fuzzy Finder
-  -- ==========================================================================
 
   {
     'nvim-telescope/telescope.nvim',
@@ -231,9 +219,7 @@ require('lazy').setup({
     end,
   },
 
-  -- ==========================================================================
   -- Git Integration
-  -- ==========================================================================
 
   -- Git signs
   {
@@ -251,9 +237,7 @@ require('lazy').setup({
     end,
   },
 
-  -- ==========================================================================
   -- Utilities
-  -- ==========================================================================
 
   -- Comment toggling
   {
@@ -294,9 +278,7 @@ require('lazy').setup({
   },
 })
 
--- =============================================================================
 -- LSP Configuration
--- =============================================================================
 
 -- Mason setup
 require('mason').setup()
@@ -351,9 +333,7 @@ require('lspconfig').lua_ls.setup({
   },
 })
 
--- =============================================================================
 -- Auto-completion Setup
--- =============================================================================
 
 local cmp = require('cmp')
 local luasnip = require('luasnip')
@@ -396,9 +376,7 @@ cmp.setup({
   })
 })
 
--- =============================================================================
 -- Key Mappings
--- =============================================================================
 
 local keymap = vim.keymap.set
 
@@ -431,9 +409,7 @@ keymap('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = 'Delete buffer' })
 keymap('n', '<leader>t', '<cmd>terminal<CR>', { desc = 'Open terminal' })
 keymap('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- =============================================================================
 -- Auto Commands
--- =============================================================================
 
 -- Highlight on yank
 vim.api.nvim_create_autocmd('TextYankPost', {

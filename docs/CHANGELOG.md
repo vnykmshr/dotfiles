@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Homebrew `sbin` dirs on PATH when present
+- Untracked `config/git/gitconfig.local` include for per-machine git settings (from `gitconfig.local.template`)
+- Adversarial and chained-substitution fixtures for the template processor (`tests/test-templates.sh`)
+- ADR 0001: template processor hardening (`docs/decisions/`)
+
+### Changed
+
+- `bin/*` exits when a required `lib/*.sh` is missing
+- `bin/dotfiles` and `bin/workflow-helper` trimmed
+- Secret scan runs via the shared `1mb-dev/.github` workflow (SHA-pinned)
+- Example config paths use `~/` instead of `$HOME/`
+- CI runs all pre-commit hooks; shellcheck runs there, pinned and at default severity, in place of the separate step
+- `ls` is no longer eza; it gets the platform `ls -hF` alias on every machine, and `ll`, `la`, `lt` use eza when installed
+- Plaintext `git://` protocol no longer allowed in the gitconfig template
+
+### Removed
+
+- `-i` safety aliases for `rm`, `cp`, `mv`
+
+### Fixed
+
+- Template processor no longer uses `eval` or `sed`; `&`, `|` and `\1` in values are preserved, including on bash < 5.2
+- `$HOME` and `~/` prefixes normalized in `config.json` values
+- ssh `UseKeychain` no longer fatal on Linux
+- `gitconfig.local` loads last, so its values override the template's
+- `github:` and `gist:` URL shortcuts fetch over https instead of the retired `git://`
+- `/opt/homebrew` takes PATH precedence over `/usr/local` when both exist
+- Local-path clones no longer blocked by the protocol allowlist
+
+## [4.0.0] - 2026-04-04
+
+### Changed
+
+- PATH set from a single `path=()` array
+- 7 cli-tools configs merged into `config/cli-tools/init`
+- Git wrappers collapsed from 3 layers to 1
+- `intelligent-history` renamed to `history`
+- `alias test='run_tests'` renamed to `rt`
+- `gourceq`/`gourcev`/`gourcevid` replaced by `bin/gource-viz`
+- `chpwd` security hook removed; run `seccheck` explicitly
+- CI adds jq, shellcheck and zsh syntax linting; 58 tests (from 22)
+
+### Removed
+
+- `qc()`, `acp()`, `workflowutil()`, `mkproject()` functions
+- `alias-reminder`, `environment-detection` and `personal-functions` modules
+- `eval brew shellenv` at startup
+- `touch -c` alias
+
+### Fixed
+
+- Injection in `urlencode`, `urldecode` and `calc`
+
 ## [3.7.0] - 2025-10-29
 
 ### Added

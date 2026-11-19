@@ -372,9 +372,9 @@ process_template_generic() {
     while (($# >= 2)); do
         placeholder="$1"
         value="$2"
-        if (( _PATSUB_BACKREF )); then
-            escaped="${value//\\/\\\\}"   # \ -> \\
-            escaped="${escaped//&/\\&}"   # & -> \&
+        if ((_PATSUB_BACKREF)); then
+            escaped="${value//\\/\\\\}" # \ -> \\
+            escaped="${escaped//&/\\&}" # & -> \&
         else
             escaped="$value"
         fi
@@ -385,7 +385,7 @@ process_template_generic() {
     # Create output directory if needed
     mkdir -p "$(dirname "$output_file")"
 
-    printf '%s' "$content" > "$output_file"
+    printf '%s' "$content" >"$output_file"
     log_success "Generated $description"
 }
 
@@ -651,7 +651,7 @@ configure_shell() {
 setup_development_tools() {
     log_step "Setting up development tools"
 
-    # Modern CLI tools installed via main package manager (brew/apt/etc)
+    # CLI tools installed via main package manager (brew/apt/etc)
     # See install/install-packages for implementation
 
     local bin_dir="$DOTFILES_DIR/bin"
@@ -710,6 +710,6 @@ apply_os_defaults() {
 }
 
 # Run main only when executed directly (skipped when sourced for testing)
-if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
     main "$@"
 fi

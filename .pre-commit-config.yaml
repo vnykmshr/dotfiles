@@ -104,6 +104,12 @@ repos:
         pass_filenames: false
         files: '^config/git/gitconfig$'
 
+      - id: no-separator-lines
+        name: Forbid ===== separator comments
+        entry: '^\s*(#|--)\s*={10,}\s*$'
+        language: pygrep
+        types: [text]
+
       # Check for proper shebang in scripts
       - id: check-shebang-consistency
         name: Check shebang consistency
