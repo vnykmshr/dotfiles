@@ -1,16 +1,10 @@
 # Shell Functions - Organized by Category
-# All functions preserved, reorganized for clarity
 
 # FILE & DIRECTORY OPERATIONS
 
 # Create directory and cd into it
 mkcd() {
     mkdir -p "$1" && cd "$1"
-}
-
-# Backup file with timestamp
-backup() {
-    cp "$1" "$1.bak.$(date +%Y%m%d_%H%M%S)"
 }
 
 # Extract various archive formats
@@ -58,16 +52,6 @@ gclone() {
     git clone "$1" && cd "$(basename "$1" .git)"
 }
 
-# Git branch cleanup - delete merged branches
-git-cleanup() {
-    git branch --merged | grep -v "\*\|main\|master\|develop" | xargs -n 1 git branch -d
-}
-
-# Git log with graph
-gitlog() {
-    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit "$@"
-}
-
 # Git shortlog with color, totals, and optional top-N limit
 # Usage:
 #   gsl                 -> show all contributors
@@ -104,49 +88,7 @@ gsl() {
     }'
 }
 
-# DEVELOPMENT & PROCESSES
-
-# Find and kill process by name
-killp() {
-    local process="$1"
-    if [[ -z "$process" ]]; then
-        echo "Usage: killp <process-name>"
-        return 1
-    fi
-
-    local pids
-    pids=$(pgrep -f "$process")
-
-    if [[ -n "$pids" ]]; then
-        echo "Found processes:"
-        ps -p "$pids"
-        echo -n "Kill these processes? (y/N): "
-        read -r answer
-        if [[ "$answer" =~ ^[Yy]$ ]]; then
-            kill "$pids"
-            echo "Processes killed."
-        fi
-    else
-        echo "No processes found matching '$process'"
-    fi
-}
-
 # SYSTEM INFORMATION
-
-# System information
-sysinfo() {
-    echo "System Information:"
-    echo "=================="
-    echo "Hostname: $(hostname)"
-    echo "OS: $(uname -s) $(uname -r)"
-    echo "Architecture: $(uname -m)"
-    echo "Uptime: $(uptime)"
-    echo "Shell: $SHELL"
-    echo "Terminal: $TERM"
-    if command -v lsb_release >/dev/null 2>&1; then
-        echo "Distribution: $(lsb_release -d | cut -f2-)"
-    fi
-}
 
 # Disk usage in current directory
 duh() {
@@ -162,22 +104,6 @@ meminfo() {
     fi
 }
 
-# Get external IP address
-myip() {
-    curl -s https://ipinfo.io/ip
-}
-
-# Get local IP address
-localip() {
-    if command -v ip >/dev/null 2>&1; then
-        ip route get 1.1.1.1 | grep -oP 'src \K\S+'
-    elif command -v ifconfig >/dev/null 2>&1; then
-        ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1
-    else
-        echo "Unable to determine local IP"
-    fi
-}
-
 # DOCKER OPERATIONS
 
 # Docker cleanup
@@ -187,75 +113,7 @@ docker-cleanup() {
     docker volume prune -f
 }
 
-# Docker shell into container
-dsh() {
-    local container="$1"
-    if [[ -z "$container" ]]; then
-        echo "Usage: dsh <container-name-or-id>"
-        return 1
-    fi
-    docker exec -it "$container" /bin/bash
-}
-
-# KUBERNETES OPERATIONS
-
-# Kubernetes context switching
-kctx() {
-    if [[ -z "$1" ]]; then
-        kubectl config get-contexts
-    else
-        kubectl config use-context "$1"
-    fi
-}
-
-# Kubernetes namespace switching
-kns() {
-    if [[ -z "$1" ]]; then
-        kubectl get namespaces
-    else
-        kubectl config set-context --current --namespace="$1"
-    fi
-}
-
-# TMUX SESSION MANAGEMENT
-
-# Tmux session manager
-tm() {
-    local session="$1"
-    if [[ -z "$session" ]]; then
-        tmux list-sessions
-    elif tmux has-session -t "$session" 2>/dev/null; then
-        tmux attach-session -t "$session"
-    else
-        tmux new-session -s "$session"
-    fi
-}
-
 # TEXT & DATA PROCESSING
-
-# Convert to lowercase
-lower() { tr '[:upper:]' '[:lower:]' <<<"${*:-$(cat)}"; }
-
-# Convert to uppercase
-upper() { tr '[:lower:]' '[:upper:]' <<<"${*:-$(cat)}"; }
-
-# Generate random password
-genpass() {
-    local length="${1:-16}"
-    LC_ALL=C tr -dc 'A-Za-z0-9!@#$%^&*()_+=' < /dev/urandom | head -c "$length"
-    echo
-}
-
-# JSON pretty print
-json() {
-    if [[ -t 0 ]]; then
-        # Read from argument
-        echo "$1" | jq .
-    else
-        # Read from pipe
-        jq .
-    fi
-}
 
 # URL encode/decode
 urlencode() { python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1]))" "$1"; }
@@ -305,9 +163,6 @@ weather() {
     curl -s "https://wttr.in/$location?format=3"
 }
 
-# Calculator
-calc() { echo "$*" | bc -l; }
-
 # Benchmark command execution time
 timecmd() {
     time ( "$@" )
@@ -320,12 +175,4 @@ reload() {
     source "$HOME/.zshrc"
     rehash
     echo "Zsh configuration reloaded!"
-}
-
-# Status - git + system info
-status() {
-    echo "$(pwd)"
-    [[ -d .git ]] && echo "$(git branch --show-current) | $(git status --porcelain | wc -l | tr -d ' ') changes"
-    echo "$(df -h . | awk 'NR==2 {print $4}') free"
-    echo "$(uptime | cut -d, -f1)"
 }

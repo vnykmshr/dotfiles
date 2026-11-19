@@ -90,7 +90,7 @@ done
 # Key functions exist
 echo ""
 echo "Function checks..."
-for func in mkcd backup extract gitlog gsl reload status; do
+for func in mkcd extract gsl reload; do
     if zsh -c "$ZSH_SOURCE 2>/dev/null; type $func" 2>/dev/null | grep -q function; then
         pass "function: $func"
     else
