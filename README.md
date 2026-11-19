@@ -21,7 +21,7 @@ configurations.
 - **CLI Tools**: bat, eza, fd, ripgrep, delta, zoxide (with fallbacks)
 - **Git Helpers**: Extensive git aliases and workflow scripts
 - **Organized Functions**: Shell functions in logical categories
-- **Cross-Platform**: macOS and Linux, with WSL shims
+- **Cross-Platform**: macOS and Linux
 - **Quality**: Pre-commit hooks and automated tests
 
 ## Quick Start
@@ -69,6 +69,7 @@ commits of sensitive information and makes customization explicit.
 ### Modular Architecture
 
 ```text
+install/          # setup.sh: links, templates, --packages, --uninstall, --restore
 config/
 ├── zsh/          # Shell environment
 ├── git/          # Version control and aliases
@@ -101,6 +102,9 @@ make macos-defaults   # Apply macOS system preferences
 make restore          # Put back files an install replaced
 make uninstall        # Remove the links (keeps backups)
 make test             # Run the test suites
+make quality          # Lint, then test
+make update           # git pull
+make sync             # Update, then install
 
 # Git workflow helpers (config/workflow/git-helpers)
 mygh               # Repo status; `mygh help` lists pull, new, switch, clean
@@ -179,7 +183,8 @@ Don't edit `config/zsh/exports.local`: install regenerates it.
 # In config/zsh/personal.local
 export DOTFILES_TMPDIR="$HOME/tmp"     # Private TMPDIR, created 700 and excluded from Time Machine on macOS
 
-# In ~/.exports.local (read before modules load)
+# In ~/.exports.local in your home directory, read before modules load
+# (not the generated config/zsh/exports.local)
 export DOTFILES_SKIP_CROSS_PLATFORM=1  # Skip Linux/WSL shims and keybindings
 ```
 
@@ -214,8 +219,9 @@ shell-bench        # Performance impact
 ## Platform Support
 
 CI runs the tests on macOS (Apple Silicon) and Ubuntu.
-`make packages` also has package lists for Debian, Fedora/RHEL and Arch,
-and the shell has WSL shims; those paths are not covered by CI.
+`make packages` also has package lists for Debian, Fedora/RHEL and Arch;
+those paths and the WSL shims are not covered by CI, and the WSL clipboard
+and `open` shims are reported broken.
 
 ## License
 
