@@ -108,4 +108,6 @@ load_config "personal.local"
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # Private TMPDIR, opt-in: set DOTFILES_TMPDIR in personal.local
-[[ -n "$DOTFILES_TMPDIR" ]] && load_config "tmpdir-management"
+if [[ -n "$DOTFILES_TMPDIR" ]]; then
+    load_config "tmpdir-management"
+fi
