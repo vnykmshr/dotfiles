@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Homebrew `sbin` dirs on PATH when present
 - Untracked `config/git/gitconfig.local` include for per-machine git settings (from `gitconfig.local.template`)
-- `cc` alias for `claude --permission-mode acceptEdits`
 - Adversarial and chained-substitution fixtures for the template processor (`tests/test-templates.sh`)
 - ADR 0001: template processor hardening (`docs/decisions/`)
 
