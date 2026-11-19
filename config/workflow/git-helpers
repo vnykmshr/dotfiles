@@ -4,9 +4,13 @@
 
 set -euo pipefail
 
-# Source shared utilities
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/utils"
+LOGGING_LIB="$SCRIPT_DIR/../../lib/logging.sh"
+# shellcheck source=../../lib/logging.sh
+source "$LOGGING_LIB" || {
+    printf "Error: required library not found: %s\n" "$LOGGING_LIB" >&2
+    exit 1
+}
 
 # Check if we're in a git repository
 ensure_git_repo() {
