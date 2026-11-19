@@ -183,18 +183,21 @@ assert_eq "space in path: install links" "$EXPECTED_LINKS" "$(links_in "$SPACE_H
 printf 'y\n' | env HOME="$SPACE_HOME" make -s -C "$SPACE_REPO" uninstall >/dev/null 2>&1 || true
 assert_eq "space in path: uninstall removes every link" "" "$(links_in "$SPACE_HOME")"
 
-# One link that cannot be removed: the rest go, uninstall exits non-zero
-STUCK_HOME="$WORK/stuck-home"
-mkdir -p "$STUCK_HOME"
-in_home "$STUCK_HOME" "$SPACE_REPO/install/setup.sh" >/dev/null 2>&1 || true
-chmod 555 "$STUCK_HOME/.config"
-if printf 'y\n' | env HOME="$STUCK_HOME" make -s -C "$SPACE_REPO" uninstall >"$WORK/stuck.log" 2>&1; then
-    fail "stuck link: uninstall fails" "exited 0"
-else
-    pass "stuck link: uninstall fails"
+# One link that cannot be removed: the rest go, uninstall exits non-zero.
+# Root ignores the read-only dir, so the case only runs unprivileged
+if [[ $(id -u) -ne 0 ]]; then
+    STUCK_HOME="$WORK/stuck-home"
+    mkdir -p "$STUCK_HOME"
+    in_home "$STUCK_HOME" "$SPACE_REPO/install/setup.sh" >/dev/null 2>&1 || true
+    chmod 555 "$STUCK_HOME/.config"
+    if printf 'y\n' | env HOME="$STUCK_HOME" make -s -C "$SPACE_REPO" uninstall >"$WORK/stuck.log" 2>&1; then
+        fail "stuck link: uninstall fails" "exited 0"
+    else
+        pass "stuck link: uninstall fails"
+    fi
+    chmod 755 "$STUCK_HOME/.config"
+    assert_eq "stuck link: only it is left" ".config/nvim" "$(links_in "$STUCK_HOME")"
 fi
-chmod 755 "$STUCK_HOME/.config"
-assert_eq "stuck link: only it is left" ".config/nvim" "$(links_in "$STUCK_HOME")"
 
 # Forced install over real files, then restore them
 RESTORE_REPO="$WORK/restore-repo"
