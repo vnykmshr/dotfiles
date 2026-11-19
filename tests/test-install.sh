@@ -114,13 +114,17 @@ fi
 assert_eq "reinstall: link set unchanged" "$EXPECTED_LINKS" "$(links_in "$HOME_DIR")"
 assert_eq "install: no package, shell or system commands" "" "$(cat "$CALLS")"
 
-# Uninstall
+# Uninstall: removes links into this repo (a dangling legacy one included),
+# leaves a link that points elsewhere
+ln -s "$REPO/config/zsh/gone" "$HOME_DIR/.aliases"
+mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
+ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
 if printf 'y\n' | env HOME="$HOME_DIR" make -s -C "$REPO" uninstall >"$WORK/uninstall.log" 2>&1; then
     pass "uninstall exits 0"
 else
     fail "uninstall exits 0" "$(cat "$WORK/uninstall.log")"
 fi
-assert_eq "uninstall: no links left" "" "$(links_in "$HOME_DIR")"
+assert_eq "uninstall: only the foreign link left" ".config/mise/config.toml" "$(links_in "$HOME_DIR")"
 
 # Forced install over real files, then restore them
 RESTORE_REPO="$WORK/restore-repo"
@@ -199,6 +203,8 @@ else
 fi
 assert_eq "linked ~/.dotfiles: still points at the repo" "$LINKED_REPO" "$(readlink "$LINKED_HOME/.dotfiles")"
 assert_eq "linked ~/.dotfiles: no dangling links" "" "$(dangling_in "$LINKED_HOME")"
+printf 'y\n' | env HOME="$LINKED_HOME" make -s -C "$LINKED_HOME/.dotfiles" uninstall >/dev/null 2>&1 || true
+assert_eq "linked ~/.dotfiles: uninstall removes every link" "" "$(links_in "$LINKED_HOME")"
 
 # First run without config.json: creates it and stops before linking
 NOCFG_REPO="$WORK/nocfg-repo"

@@ -92,10 +92,13 @@ uninstall: ## Uninstall dotfiles
 	@echo "⚠️  This will remove installed dotfiles"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
-		if [[ -L ~/$$link ]]; then \
+	@source lib/utils.sh; repo=$$(pwd -P); \
+	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
+		if owned_link ~/$$link "$$repo"; then \
 			echo "Removing symlink: ~/$$link"; \
 			rm -f ~/$$link; \
+		elif [[ -L ~/$$link ]]; then \
+			echo "Skipping ~/$$link: points outside this repo"; \
 		fi; \
 	done
 	@echo "✅ Uninstall complete. Run 'make restore' to restore from backup"
