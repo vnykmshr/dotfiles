@@ -219,7 +219,6 @@ setup_symlinks() {
     fi
 
     # Neovim configuration
-    mkdir -p "$HOME/.config"
     link_config "config/nvim" ".config/nvim"
 
     # Tmux configuration
