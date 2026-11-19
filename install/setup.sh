@@ -13,9 +13,9 @@ BACKUP_DIR="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 DRY_RUN="${DRY_RUN:-false}"
 VERBOSE="${VERBOSE:-false}"
 FORCE="${FORCE:-false}"
-PACKAGES=false
+MODE=install
 
-# HOME link -> repo source
+# HOME link -> repo source; install and --uninstall read this
 LINKS=(
     ".zshrc:config/zsh/zshrc"
     ".zshenv:config/zsh/zshenv"
@@ -24,6 +24,11 @@ LINKS=(
     ".ssh/config:config/ssh/config"
     ".config/nvim:config/nvim"
     ".tmux.conf:config/tmux/tmux.conf"
+)
+# Linked by earlier versions; --uninstall still recognizes them
+LEGACY_LINKS=(
+    ".aliases:config/zsh/aliases"
+    ".config/mise/config.toml:config/mise/config.toml"
 )
 
 # Bash 5.2+ with patsub_replacement on (default) treats `&` in the replacement
@@ -55,6 +60,7 @@ OPTIONS:
     -v, --verbose       Enable verbose output
     -f, --force         Force overwrite existing files
     -p, --packages      Install prerequisites and packages, set zsh as login shell
+    -u, --uninstall     Remove the links install created (make uninstall)
     -h, --help          Show this help message
 
 ENVIRONMENT:
@@ -89,7 +95,11 @@ parse_args() {
                 shift
                 ;;
             -p | --packages)
-                PACKAGES=true
+                MODE=packages
+                shift
+                ;;
+            -u | --uninstall)
+                MODE=uninstall
                 shift
                 ;;
             -h | --help)
@@ -120,7 +130,12 @@ main() {
     detect_os
     log_info "Detected OS: $OS_NAME ($OS_ARCH)"
 
-    if [[ $PACKAGES == "true" ]]; then
+    if [[ $MODE == "uninstall" ]]; then
+        uninstall_links
+        return
+    fi
+
+    if [[ $MODE == "packages" ]]; then
         install_dependencies
         install_packages
         configure_shell
@@ -620,6 +635,77 @@ configure_shell() {
     else
         log_info "Shell is already zsh"
     fi
+}
+
+# Physical path of an existing file or dir
+physical_path() {
+    if [[ -d $1 ]]; then
+        (cd "$1" && pwd -P)
+    else
+        echo "$(cd "$(dirname "$1")" 2>/dev/null && pwd -P)/$(basename "$1")"
+    fi
+}
+
+# True when symlink $1 is install's link to repo source $2: it resolves to that
+# source, or it dangles and its target ends in that source path (a moved clone)
+link_owned() {
+    local target
+    [[ -L $1 ]] || return 1
+    target="$(readlink "$1")"
+    [[ $target == /* ]] || target="$(dirname "$1")/$target"
+    if [[ -e $1 ]]; then
+        [[ "$(physical_path "$target")" == "$(physical_path "$DOTFILES_DIR/$2")" ]]
+    else
+        [[ $target == */"$2" ]]
+    fi
+}
+
+# Remove install's links; a link that points elsewhere is reported and kept
+uninstall_links() {
+    log_step "Removing links"
+
+    local entry link src path target failed=0
+    local roots=$'\n'
+    for entry in "${LINKS[@]}" "${LEGACY_LINKS[@]}"; do
+        link="${entry%%:*}"
+        src="${entry#*:}"
+        path="$HOME/$link"
+        [[ -L $path ]] || continue
+        if ! link_owned "$path" "$src"; then
+            log_warn "Skipping ~/$link: points outside this repo"
+            continue
+        fi
+        if [[ ! -e $path ]]; then
+            target="$(readlink "$path")"
+            roots+="${target%/"$src"}"$'\n'
+        fi
+        if run_cmd "rm -f \"$path\""; then
+            log_info "Removed ~/$link"
+        else
+            log_error "Could not remove ~/$link"
+            failed=1
+        fi
+    done
+
+    # ~/.dotfiles: a link to this repo, or a dangling link to the clone the
+    # dangling links above came from
+    path="$HOME/.dotfiles"
+    if [[ -L $path ]]; then
+        target="$(readlink "$path")"
+        if { [[ -d $path ]] && [[ "$(physical_path "$path")" == "$(physical_path "$DOTFILES_DIR")" ]]; } ||
+            { [[ ! -e $path ]] && [[ $roots == *$'\n'"$target"$'\n'* ]]; }; then
+            if run_cmd "rm -f \"$path\""; then
+                log_info "Removed ~/.dotfiles"
+            else
+                log_error "Could not remove ~/.dotfiles"
+                failed=1
+            fi
+        else
+            log_warn "Skipping ~/.dotfiles: points outside this repo"
+        fi
+    fi
+
+    return "$failed"
 }
 
 # Run main only when executed directly (skipped when sourced for testing)

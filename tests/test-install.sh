@@ -115,19 +115,48 @@ fi
 assert_eq "reinstall: link set unchanged" "$EXPECTED_LINKS" "$(links_in "$HOME_DIR")"
 assert_eq "install: no package, shell or system commands" "" "$(cat "$CALLS")"
 
-# Uninstall: removes links into this repo (a dangling legacy one included),
-# leaves a link that points elsewhere
-ln -s "$REPO/config/zsh/gone" "$HOME_DIR/.aliases"
+# Uninstall: removes install's links; keeps foreign links, existing or dangling
+ln -s /nonexistent-volume/aliases "$HOME_DIR/.aliases"
 mkdir -p "$HOME_DIR/.config/mise" "$WORK/elsewhere"
 touch "$WORK/elsewhere/config.toml"
 ln -s "$WORK/elsewhere/config.toml" "$HOME_DIR/.config/mise/config.toml"
-# Run from another directory: the Makefile must not depend on the cwd
-if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
+links_before=$(links_in "$HOME_DIR")
+if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >/dev/null 2>&1; then
+    fail "uninstall via make -f elsewhere: fails" "exited 0"
+else
+    pass "uninstall via make -f elsewhere: fails"
+fi
+assert_eq "uninstall via make -f elsewhere: links intact" "$links_before" "$(links_in "$HOME_DIR")"
+if printf 'y\n' | env HOME="$HOME_DIR" make -s -C "$REPO" uninstall >"$WORK/uninstall.log" 2>&1; then
     pass "uninstall exits 0"
 else
     fail "uninstall exits 0" "$(cat "$WORK/uninstall.log")"
 fi
-assert_eq "uninstall: only the foreign link left" ".config/mise/config.toml" "$(links_in "$HOME_DIR")"
+assert_eq "uninstall: only the foreign links left" ".aliases
+.config/mise/config.toml" "$(links_in "$HOME_DIR")"
+
+# Clone path with a space
+SPACE_REPO="$WORK/space repo"
+SPACE_HOME="$WORK/space-home"
+copy_repo "$SPACE_REPO"
+mkdir -p "$SPACE_HOME"
+in_home "$SPACE_HOME" "$SPACE_REPO/install/setup.sh" >"$WORK/space.log" 2>&1 || cat "$WORK/space.log"
+assert_eq "space in path: install links" "$EXPECTED_LINKS" "$(links_in "$SPACE_HOME")"
+printf 'y\n' | env HOME="$SPACE_HOME" make -s -C "$SPACE_REPO" uninstall >/dev/null 2>&1 || true
+assert_eq "space in path: uninstall removes every link" "" "$(links_in "$SPACE_HOME")"
+
+# One link that cannot be removed: the rest go, uninstall exits non-zero
+STUCK_HOME="$WORK/stuck-home"
+mkdir -p "$STUCK_HOME"
+in_home "$STUCK_HOME" "$SPACE_REPO/install/setup.sh" >/dev/null 2>&1 || true
+chmod 555 "$STUCK_HOME/.config"
+if printf 'y\n' | env HOME="$STUCK_HOME" make -s -C "$SPACE_REPO" uninstall >"$WORK/stuck.log" 2>&1; then
+    fail "stuck link: uninstall fails" "exited 0"
+else
+    pass "stuck link: uninstall fails"
+fi
+chmod 755 "$STUCK_HOME/.config"
+assert_eq "stuck link: only it is left" ".config/nvim" "$(links_in "$STUCK_HOME")"
 
 # Forced install over real files, then restore them
 RESTORE_REPO="$WORK/restore-repo"
@@ -247,6 +276,7 @@ MOVED_HOME="$WORK/moved-home"
 copy_repo "$WORK/moved-a"
 mkdir -p "$MOVED_HOME"
 in_home "$MOVED_HOME" "$WORK/moved-a/install/setup.sh" >/dev/null 2>&1 || true
+assert_eq "moved clone: installed before the move" "$EXPECTED_LINKS" "$(links_in "$MOVED_HOME")"
 mv "$WORK/moved-a" "$WORK/moved-b"
 printf 'y\n' | env HOME="$MOVED_HOME" make -s -f "$WORK/moved-b/Makefile" uninstall >/dev/null 2>&1 || true
 assert_eq "moved clone: uninstall removes dangling links" "" "$(links_in "$MOVED_HOME")"

@@ -119,13 +119,5 @@ uninstall: ## Remove the links (keeps backups)
 	@echo "This removes the links install created"
 	@echo "Backups in ~/.dotfiles-backup-* will be preserved"
 	@read -p "Continue? (y/N) " confirm && [[ $$confirm == [yY] ]] || exit 1
-	@set -e; source "$(REPO)/lib/utils.sh"; repo="$(REPO)"; \
-	for link in $(INSTALL_LINKS) $(LEGACY_LINKS) .dotfiles; do \
-		if removable_link ~/$$link "$$repo"; then \
-			echo "Removing symlink: ~/$$link"; \
-			rm -f ~/$$link; \
-		elif [[ -L ~/$$link ]]; then \
-			echo "Skipping ~/$$link: points outside this repo"; \
-		fi; \
-	done
+	@./install/setup.sh --uninstall
 	@echo "Uninstall complete. Run 'make restore' to put back files install replaced"
