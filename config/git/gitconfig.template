@@ -255,10 +255,6 @@
 [includeIf "gitdir:~/personal/"]
 	path = ~/.gitconfig-personal
 
-# Machine-local settings, untracked (see gitconfig.local.template)
-[include]
-	path = ~/.dotfiles/config/git/gitconfig.local
-
 # =============================================================================
 # Modern Git Features
 # =============================================================================
@@ -285,3 +281,8 @@
 
 [protocol "ssh"]
 	allow = always
+
+# Machine-local settings, untracked (see gitconfig.local.template).
+# Keep last: later keys win, so anything below would override local values.
+[include]
+	path = ~/.dotfiles/config/git/gitconfig.local

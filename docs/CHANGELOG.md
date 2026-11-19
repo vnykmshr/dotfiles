@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Template processor no longer uses `eval` or `sed`; `&`, `|` and `\1` in values are preserved, including on bash < 5.2
 - `$HOME` and `~/` prefixes normalized in `config.json` values
 - ssh `UseKeychain` no longer fatal on Linux
+- `gitconfig.local` loads last, so its values override the template's
 
 ## [4.0.0] - 2026-04-04
 
