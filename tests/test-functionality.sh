@@ -154,7 +154,7 @@ fi
 pc_home=$(mktemp -d)
 echo "mine" >"$pc_dir/config/zsh/personal.local"
 printf 'y\n' | env -u EDITOR HOME="$pc_home" DOTFILES="$pc_dir" "$PROJECT_ROOT/bin/setup-personal-config" >/dev/null 2>&1 || true
-if [[ $(cat "$pc_home"/.dotfiles-backup-*/personal.local 2>/dev/null) == mine ]] &&
+if [[ $(cat "$pc_home"/.dotfiles-personal-backup-*/personal.local 2>/dev/null) == mine ]] &&
     [[ -z $(find "$pc_dir" -name 'personal.local.backup*') ]]; then
     pass "setup-personal-config: backup outside the repo"
 else

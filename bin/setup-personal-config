@@ -20,7 +20,7 @@ main() {
         case "${choice:-}" in
             [yY] | [yY][eE][sS])
                 local backup_dir
-                backup_dir="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+                backup_dir="$HOME/.dotfiles-personal-backup-$(date +%Y%m%d-%H%M%S)"
                 mkdir -p "$backup_dir"
                 cp "$CONFIG_FILE" "$backup_dir/personal.local"
                 echo "Backed up to $backup_dir/personal.local"
