@@ -130,7 +130,12 @@ assert_eq "make -f clean: caller's files kept" "yes" "$([[ -f $WORK/other-projec
 links_before=$(links_in "$HOME_DIR")
 in_home "$HOME_DIR" env DRY_RUN=true "$REPO/install/setup.sh" --uninstall >"$WORK/dry-uninstall.log" 2>&1 || true
 assert_eq "uninstall dry run: links intact" "$links_before" "$(links_in "$HOME_DIR")"
-assert_eq "uninstall dry run: says would remove" "0" "$(grep -c 'Removed ~' "$WORK/dry-uninstall.log" || true)"
+assert_eq "uninstall dry run: never says removed" "0" "$(grep -c 'Removed ~' "$WORK/dry-uninstall.log" || true)"
+if grep -q 'Would remove ~' "$WORK/dry-uninstall.log"; then
+    pass "uninstall dry run: says would remove"
+else
+    fail "uninstall dry run: says would remove" "no 'Would remove' line"
+fi
 
 # Run from another directory through make -f
 if (cd "$WORK" && printf 'y\n' | env HOME="$HOME_DIR" make -s -f "$REPO/Makefile" uninstall) >"$WORK/uninstall.log" 2>&1; then
