@@ -58,10 +58,10 @@ repos:
   # Local hooks for custom checks
   - repo: local
     hooks:
-      # Check for hardcoded paths
+      # User home paths in shell scripts; Homebrew prefixes are fixed, not user paths
       - id: check-hardcoded-paths
-        name: Check for hardcoded paths
-        entry: bash -c 'if grep -rn "/usr/local\|/opt/homebrew\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git --exclude-dir=tests . config/zsh/ config/cli-tools/ 2>/dev/null | grep -v "\.template:" | grep -v "\.local:"; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
+        name: Check for hardcoded user paths
+        entry: bash -c 'if grep -rn "/Users/\|/home/" --include="*.sh" --include="*.zsh" --include="*.bash" --exclude-dir=.git --exclude-dir=tests . config/zsh/ config/cli-tools/ 2>/dev/null | grep -v "\.template:" | grep -v "\.local:"; then echo "Found hardcoded paths - consider making them configurable"; exit 1; fi'
         language: system
         pass_filenames: false
 
