@@ -315,11 +315,6 @@ timecmd() {
 
 # DOTFILES & WORKFLOW MANAGEMENT
 
-# Edit dotfiles
-dotfiles-edit() {
-    cd "$DOTFILES" && "$EDITOR" .
-}
-
 # Reload zsh configuration
 reload() {
     source "$HOME/.zshrc"

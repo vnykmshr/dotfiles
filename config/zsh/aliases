@@ -222,7 +222,6 @@ fi
 
 # Dotfiles Management
 
-alias dotfiles='cd $DOTFILES'
 # reload function defined in functions file
 alias edit-zsh='$EDITOR ~/.zshrc'
 alias edit-aliases='$EDITOR $DOTFILES/config/zsh/aliases'
