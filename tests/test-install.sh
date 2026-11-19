@@ -129,6 +129,33 @@ fi
 assert_eq "uninstall: only the foreign links left" ".aliases
 .config/mise/config.toml" "$(links_in "$HOME_DIR")"
 
+# A dangling link into another clone with the same layout is not install's
+SAME_HOME="$WORK/same-home"
+mkdir -p "$SAME_HOME/.config" "$SAME_HOME/.dotfiles-backup-20250101-000000/.config/nvim"
+ln -s /nonexistent/other-dotfiles/config/nvim "$SAME_HOME/.config/nvim"
+printf 'y\n' | env HOME="$SAME_HOME" make -s -C "$REPO" uninstall >/dev/null 2>&1 || true
+assert_eq "same-layout foreign link: uninstall keeps it" ".config/nvim" "$(links_in "$SAME_HOME")"
+printf '1\n' | env HOME="$SAME_HOME" make -s -C "$REPO" restore >/dev/null 2>&1 || true
+assert_eq "same-layout foreign link: restore keeps it" "/nonexistent/other-dotfiles/config/nvim" "$(readlink "$SAME_HOME/.config/nvim")"
+
+# Installed through a ~/.dotfiles symlink, then the clone moved: all dangling
+VIA_HOME="$WORK/via-home"
+copy_repo "$WORK/via-a"
+mkdir -p "$VIA_HOME"
+ln -s "$WORK/via-a" "$VIA_HOME/.dotfiles"
+in_home "$VIA_HOME" "$VIA_HOME/.dotfiles/install/setup.sh" >/dev/null 2>&1 || true
+mv "$WORK/via-a" "$WORK/via-b"
+printf 'y\n' | env HOME="$VIA_HOME" make -s -f "$WORK/via-b/Makefile" uninstall >/dev/null 2>&1 || true
+assert_eq "via ~/.dotfiles, clone moved: uninstall removes every link" "" "$(links_in "$VIA_HOME")"
+
+# Restore puts back a moved-aside ~/.dotfiles over its dangling link
+DOT_HOME="$WORK/dot-home"
+mkdir -p "$DOT_HOME/.dotfiles-backup-20250101-000000/.dotfiles"
+echo "old clone" >"$DOT_HOME/.dotfiles-backup-20250101-000000/.dotfiles/marker"
+ln -s /nonexistent/old-clone "$DOT_HOME/.dotfiles"
+printf '1\n' | env HOME="$DOT_HOME" make -s -C "$REPO" restore >/dev/null 2>&1 || true
+assert_eq "restore: dangling ~/.dotfiles replaced" "old clone" "$(cat "$DOT_HOME/.dotfiles/marker" 2>/dev/null)"
+
 # Clone path with a space
 SPACE_REPO="$WORK/space repo"
 SPACE_HOME="$WORK/space-home"

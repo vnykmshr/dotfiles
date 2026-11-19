@@ -656,8 +656,18 @@ physical_path() {
     fi
 }
 
+# Clone roots install links from, one per line: this repo (logical and
+# physical), ~/.dotfiles, and the target of a ~/.dotfiles link
+known_roots() {
+    printf '%s\n' "$DOTFILES_DIR" "$HOME/.dotfiles"
+    physical_path "$DOTFILES_DIR"
+    if [[ -L $HOME/.dotfiles ]]; then
+        readlink "$HOME/.dotfiles"
+    fi
+}
+
 # True when symlink $1 is install's link to repo source $2: it resolves to that
-# source, or it dangles and its target ends in that source path (a moved clone)
+# source, or it dangles into $2 under a known clone root (a moved clone)
 link_owned() {
     local target
     [[ -L $1 ]] || return 1
@@ -666,7 +676,8 @@ link_owned() {
     if [[ -e $1 ]]; then
         [[ "$(physical_path "$target")" == "$(physical_path "$DOTFILES_DIR/$2")" ]]
     else
-        [[ $target == */"$2" ]]
+        [[ $target == */"$2" ]] &&
+            [[ $'\n'"$(known_roots)"$'\n' == *$'\n'"${target%/"$2"}"$'\n'* ]]
     fi
 }
 
@@ -682,7 +693,7 @@ uninstall_links() {
         path="$HOME/$link"
         [[ -L $path ]] || continue
         if ! link_owned "$path" "$src"; then
-            log_warn "Skipping ~/$link: points outside this repo"
+            log_warn "Skipping ~/$link: not install's link"
             continue
         fi
         if [[ ! -e $path ]]; then
@@ -697,13 +708,13 @@ uninstall_links() {
         fi
     done
 
-    # ~/.dotfiles: a link to this repo, or a dangling link to the clone the
-    # dangling links above came from
+    # ~/.dotfiles: a link to this repo, or a dangling link that the dangling
+    # links above went through or pointed into
     path="$HOME/.dotfiles"
     if [[ -L $path ]]; then
         target="$(readlink "$path")"
         if { [[ -d $path ]] && [[ "$(physical_path "$path")" == "$(physical_path "$DOTFILES_DIR")" ]]; } ||
-            { [[ ! -e $path ]] && [[ $roots == *$'\n'"$target"$'\n'* ]]; }; then
+            { [[ ! -e $path ]] && [[ $roots == *$'\n'"$target"$'\n'* || $roots == *$'\n'"$path"$'\n'* ]]; }; then
             if run_cmd "rm -f \"$path\""; then
                 log_info "Removed ~/.dotfiles"
             else
@@ -711,7 +722,7 @@ uninstall_links() {
                 failed=1
             fi
         else
-            log_warn "Skipping ~/.dotfiles: points outside this repo"
+            log_warn "Skipping ~/.dotfiles: not install's link"
         fi
     fi
 
@@ -759,10 +770,12 @@ restore_backup() {
         path="$HOME/$link"
         managed+="${link%%/*} "
         [[ -e $backup/$link || -L $backup/$link ]] || continue
-        if link_owned "$path" "$src"; then
+        # A backed-up .dotfiles was moved aside by install --force, which then
+        # linked ~/.dotfiles; a dangling ~/.dotfiles is that link
+        if link_owned "$path" "$src" || [[ $link == .dotfiles && -L $path && ! -e $path ]]; then
             rm -f "$path"
         elif [[ -e $path || -L $path ]]; then
-            log_warn "Skipping ~/$link: exists and is not a link into this repo"
+            log_warn "Skipping ~/$link: exists and is not install's link"
             continue
         fi
         if [[ $link == .ssh/* && ! -d $HOME/.ssh ]]; then
